@@ -763,7 +763,7 @@ export const cabinetStyles = `
   .cabinet-detail-body--music { --cabinet-type: var(--cabinet-music); }
   .cabinet-detail-body--book,
   .cabinet-detail-body--music { padding-top: clamp(1.5rem, 3vw, 3rem); }
-  .cabinet-article-body { --cabinet-type: var(--cabinet-article); }
+  .cabinet-article-body { --cabinet-type: var(--cabinet-article); padding-top: clamp(2rem, 4vw, 4rem); }
   .cabinet-quote-comment { --cabinet-type: var(--cabinet-quote); }
   .cabinet-link-detail-body { --cabinet-type: var(--cabinet-link); }
   .cabinet-detail-body > p:first-child::first-letter,
@@ -816,9 +816,9 @@ export const cabinetStyles = `
   .cabinet-detail--music .cabinet-groove { z-index: 1; right: -13%; }
   .cabinet-detail--music .cabinet-detail-title { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-weight: 760; }
 
-  .cabinet-detail--article { padding-bottom: 0; }
+  .cabinet-detail--article { min-height: 0; padding-bottom: 0; }
   .cabinet-detail--article:not(:has(.cabinet-detail-media)) {
-    min-height: 0; padding-bottom: clamp(3.5rem, 7vw, 7rem);
+    padding-bottom: 0;
   }
   .cabinet-detail--article .cabinet-detail-header { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(20rem, 0.88fr); gap: clamp(2rem, 6vw, 7rem); align-items: end; }
   .cabinet-detail--article .cabinet-detail-media { grid-column: 1; min-height: 62vh; }

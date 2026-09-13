@@ -96,6 +96,14 @@ test.beforeAll(async ({ baseURL }) => {
   for (const post of POSTS) {
     await api(apiBaseURL, ownerToken, "/api/v1/objects", post);
   }
+  const articleCover = await uploadAsset(apiBaseURL, ownerToken);
+  await api(apiBaseURL, ownerToken, "/api/v1/objects", {
+    type: "article",
+    title: "A covered article",
+    status: "published",
+    body: "The opening paragraph should follow the article header without a viewport-sized gap.",
+    metadata: { coverAssetId: articleCover.id, coverAltText: "A test article cover." },
+  });
   await api(apiBaseURL, ownerToken, "/api/v1/objects", {
     type: "link",
     title: "A link worth keeping",
@@ -288,6 +296,59 @@ test("Cards pull-to-dismiss hands backdrop opacity to the close fade", async ({ 
   await dialog.waitFor({ state: "detached" });
   await expect(card).toBeFocused();
   await expect(backdrop).toHaveCount(0);
+});
+
+test("Cards covered articles open in an overlay that can be pulled down to close", async ({ page }) => {
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
+  await page.goto(siteBaseURL + "/");
+
+  const article = page.locator('a.cards-article-feed-card[data-cards-card]').first();
+  await expect(article).toBeVisible();
+  const homeURL = page.url();
+  await article.click();
+
+  const dialog = page.locator('.cards-panel[role="dialog"]');
+  const scroller = dialog.locator(".cards-panel-scroll");
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator("h1", { hasText: "A covered article" })).toBeVisible();
+  await scroller.evaluate((element) => { element.scrollTop = 0; });
+  const draggedTransform = await scroller.evaluate((element) => {
+    const eventInit: PointerEventInit = {
+      bubbles: true,
+      button: 0,
+      buttons: 1,
+      isPrimary: true,
+      pointerId: 1,
+      pointerType: "touch",
+      clientY: 120,
+    };
+    element.dispatchEvent(new PointerEvent("pointerdown", eventInit));
+    element.dispatchEvent(new PointerEvent("pointermove", { ...eventInit, clientY: 290 }));
+    const transform = getComputedStyle(element.closest(".cards-panel")!).transform;
+    element.dispatchEvent(new PointerEvent("pointerup", { ...eventInit, buttons: 0, clientY: 290 }));
+    return transform;
+  });
+  expect(draggedTransform).not.toBe("none");
+
+  await dialog.waitFor({ state: "detached" });
+  await expect(page).toHaveURL(homeURL);
+  await expect(article).toBeFocused();
+});
+
+test("Cabinet article body follows its header without a viewport-sized gap", async ({ page }) => {
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cabinet" }, "PATCH");
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto(siteBaseURL + "/");
+
+  await page.locator('a[data-cabinet-card][data-cabinet-type="article"]').first().click();
+  const dialog = page.locator('.cabinet-panel[role="dialog"]');
+  await expect(dialog).toBeVisible();
+
+  const copyBox = await dialog.locator(".cabinet-detail-copy").boundingBox();
+  const firstParagraphBox = await dialog.locator(".cabinet-article-body > p").first().boundingBox();
+  expect(copyBox).not.toBeNull();
+  expect(firstParagraphBox).not.toBeNull();
+  expect(firstParagraphBox!.y - (copyBox!.y + copyBox!.height)).toBeLessThan(100);
 });
 
 test("deleting article and photo drafts removes their uploaded assets", async () => {

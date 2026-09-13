@@ -53,7 +53,12 @@ export function ArticleCard({
   if (theme === "cards" || theme === "prism" || theme === "ledger") {
     if (coverImageUrl) {
       return (
-        <a className="cards-item cards-article-feed-card" href={`/articles/${object.slug}`}>
+        <a
+          className="cards-item cards-article-feed-card"
+          href={`/articles/${object.slug}`}
+          data-cards-card
+          data-cards-type={object.type}
+        >
           <div className="cards-hero cards-article-feed-image">
             <img src={coverImageUrl} alt={coverAltText} loading="lazy" />
           </div>

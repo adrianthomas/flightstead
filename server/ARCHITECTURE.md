@@ -159,7 +159,11 @@ before opening, and its backdrop is a plain dim layer whose opacity is owned
 only by the script's Web Animation; it has no competing CSS transition or
 filter for iOS Safari to replay after closing. Direct navigation and failed
 enhancement still use the server-rendered detail URL; reduced-motion users
-receive a short opacity transition instead of spatial motion.
+receive a short opacity transition instead of spatial motion. Cabinet article
+headers size to their content rather than reserving a full viewport, with one
+responsive gap before the reading column. In the Cards pipeline, covered
+article tiles retain their split image-and-copy layout while using the same
+fetched detail overlay and pull-down dismissal as other cards.
 
 `Layout.tsx` also owns the refinement baseline shared by every theme: the
 system reading type scale, visible site title/tagline identity, 44pt-equivalent

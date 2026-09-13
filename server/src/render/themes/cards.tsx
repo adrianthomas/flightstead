@@ -1656,7 +1656,12 @@ export const cardsScript = `
   function openCard(link) {
     if (isLedgerTheme()) { openPushCard(link); return; }
 
-    var heroEl = link.querySelector('.cards-hero');
+    // Covered articles use a split image-and-copy feed card rather than
+    // the standard caption-over-hero structure. They still belong in the
+    // overlay flow, but the generic fetched-detail transition is the only
+    // one that preserves their dedicated article detail markup.
+    var isCoveredArticle = link.classList.contains('cards-article-feed-card');
+    var heroEl = isCoveredArticle ? null : link.querySelector('.cards-hero');
     // Photos, covered books, and any other cover-image card get their own
     // shared-element transitions (see openPhotoCard/openBookCard/
     // openHeroCard) instead of this generic whole-panel FLIP — the whole
@@ -1680,7 +1685,7 @@ export const cardsScript = `
 
     var rect = link.getBoundingClientRect();
     var radius = parseFloat(getComputedStyle(link).borderRadius) || 0;
-    var textEl = link.querySelector('.cards-text-card, .cards-quote-card');
+    var textEl = isCoveredArticle ? link : link.querySelector('.cards-text-card, .cards-quote-card');
 
     lockPageScroll();
 
@@ -1698,7 +1703,19 @@ export const cardsScript = `
     // frame. Pinned to the top/sides but not the bottom, so it keeps its
     // own natural (content-sized) height while growing rather than being
     // stretched to fill the panel.
-    var clone = textEl ? textEl.cloneNode(true) : document.createElement('div');
+    var clone;
+    if (isCoveredArticle) {
+      // Preserve the complete split-card visual during the opening FLIP,
+      // but do not clone its interactive <a> wrapper into the dialog. The
+      // dismiss recognizer intentionally ignores gestures beginning on a
+      // link or button, so an anchor-shaped visual clone would cover the
+      // panel and swallow the very pull gesture this overlay is adding.
+      clone = document.createElement('div');
+      clone.className = textEl.className;
+      clone.innerHTML = textEl.innerHTML;
+    } else {
+      clone = textEl ? textEl.cloneNode(true) : document.createElement('div');
+    }
     if (textEl) {
       clone.style.position = 'absolute';
       clone.style.top = '0'; clone.style.left = '0'; clone.style.right = '0';
