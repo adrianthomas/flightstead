@@ -200,6 +200,11 @@ for old links but are no longer linked from a person's About page and are
 Article `metadata.coverAssetId` is the card/detail header image, with
 `metadata.coverAltText` as its alt text. Inline markdown images in the article
 body are separate body images and render below the title/excerpt/date content.
+The WebKit suite exercises covered-article open/return behavior across every
+theme: ordinary history navigation for Classic, Washi, Aqua, and Think; Cards
+overlays for Cards, Prism, and Ledger; and the Cabinet overlay. Separate tests
+retain gesture-level pull-down coverage for Cards and Cabinet plus the
+specialized photo, book, and music animation paths.
 
 Body formatting (`render/format.ts`) — three tiers, a deliberate per-field
 choice, not a default:

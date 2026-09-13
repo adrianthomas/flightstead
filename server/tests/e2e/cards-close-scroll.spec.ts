@@ -351,6 +351,47 @@ test("Cabinet article body follows its header without a viewport-sized gap", asy
   expect(firstParagraphBox!.y - (copyBox!.y + copyBox!.height)).toBeLessThan(100);
 });
 
+test("every theme can open and leave a covered article", async ({ page }) => {
+  const themes = [
+    { id: "classic", interaction: "navigation" },
+    { id: "washi", interaction: "navigation" },
+    { id: "aqua", interaction: "navigation" },
+    { id: "think", interaction: "navigation" },
+    { id: "cards", interaction: "cards-overlay" },
+    { id: "prism", interaction: "cards-overlay" },
+    { id: "ledger", interaction: "cards-overlay" },
+    { id: "cabinet", interaction: "cabinet-overlay" },
+  ] as const;
+
+  for (const theme of themes) {
+    await test.step(theme.id, async () => {
+      await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: theme.id }, "PATCH");
+      await page.goto(siteBaseURL + "/");
+      const article = page.locator('a[href="/articles/a-covered-article"]').first();
+      await expect(article).toBeVisible();
+      const homeURL = page.url();
+      await article.click();
+
+      await expect(page).toHaveURL(siteBaseURL + "/articles/a-covered-article");
+      if (theme.interaction === "navigation") {
+        await expect(page.locator("main h1", { hasText: "A covered article" })).toBeVisible();
+        await page.goBack();
+      } else {
+        const dialogSelector = theme.interaction === "cabinet-overlay" ? ".cabinet-panel" : ".cards-panel";
+        const closeSelector = theme.interaction === "cabinet-overlay" ? ".cabinet-close" : ".cards-close";
+        const dialog = page.locator(`${dialogSelector}[role="dialog"]`);
+        await expect(dialog).toBeVisible();
+        await expect(dialog.locator("h1", { hasText: "A covered article" })).toBeVisible();
+        await dialog.locator(closeSelector).click();
+        await dialog.waitFor({ state: "detached" });
+      }
+
+      await expect(page).toHaveURL(homeURL);
+      await expect(article).toBeVisible();
+    });
+  }
+});
+
 test("deleting article and photo drafts removes their uploaded assets", async () => {
   const articleAsset = await uploadAsset(apiBaseURL, ownerToken);
   const { object: article } = await api(apiBaseURL, ownerToken, "/api/v1/objects", {
