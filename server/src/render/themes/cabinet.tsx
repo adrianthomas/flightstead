@@ -671,7 +671,9 @@ export const cabinetStyles = `
   .cabinet-detail--quote .cabinet-detail-title p { margin: 0; }
   .cabinet-artifact--quote cite,
   .cabinet-detail--quote cite { font-style: normal; }
-  .cabinet-artifact--quote .cabinet-subtitle { margin-left: auto; max-width: 24ch; text-align: right; }
+  .cabinet-artifact--quote .cabinet-subtitle {
+    margin-left: auto; max-width: 24ch; text-align: right; letter-spacing: 0;
+  }
 
   /* Links expose the outbound destination and make the saved note a clear,
      secondary route instead of hiding two destinations beneath one card. */
@@ -834,7 +836,9 @@ export const cabinetStyles = `
   }
   .cabinet-detail--quote .cabinet-detail-header { width: min(100%, 1040px); position: relative; }
   .cabinet-detail--quote .cabinet-detail-title { max-width: 18ch; font-weight: 400; line-height: 1; }
-  .cabinet-detail--quote .cabinet-detail-subtitle { margin-left: auto; text-align: right; }
+  .cabinet-detail--quote .cabinet-detail-subtitle {
+    margin-left: auto; text-align: right; letter-spacing: 0;
+  }
 
   .cabinet-detail--link { display: grid; align-items: center; background: color-mix(in srgb, var(--cabinet-link) 5%, var(--bg)); }
   .cabinet-detail--link .cabinet-detail-header { width: min(100%, 1060px); }

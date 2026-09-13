@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { CabinetNavigation } from "../src/render/themes/cabinet.js";
+import { CabinetNavigation, cabinetStyles } from "../src/render/themes/cabinet.js";
 
 test("Cabinet navigation exposes the current section through its compact index trigger", () => {
   const html = renderToStaticMarkup(
@@ -19,4 +19,15 @@ test("Cabinet navigation exposes the current section through its compact index t
   assert.match(html, /<span aria-hidden="true">02<\/span><span>Articles<\/span>/);
   assert.equal((html.match(/href="\/articles" aria-current="page"/g) ?? []).length, 2);
   assert.doesNotMatch(html, /href="\/posts"/);
+});
+
+test("Cabinet quote attributions do not inherit the title's tight tracking", () => {
+  assert.match(
+    cabinetStyles,
+    /\.cabinet-artifact--quote \.cabinet-subtitle \{[^}]*letter-spacing: 0;/,
+  );
+  assert.match(
+    cabinetStyles,
+    /\.cabinet-detail--quote \.cabinet-detail-subtitle \{[^}]*letter-spacing: 0;/,
+  );
 });
