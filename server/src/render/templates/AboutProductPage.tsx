@@ -9,7 +9,7 @@ const FAQS: Faq[] = [
   {
     question: "Do I need to run my own server?",
     answer:
-      "Yes — Shareblog is self-hosted software, not a hosted service you sign up for. You run it on your own infrastructure, and it serves your site at your own domain.",
+      "Yes — Flightstead is self-hosted software, not a hosted service you sign up for. You run it on your own infrastructure, and it serves your site at your own domain.",
   },
   {
     question: "Is my content actually mine?",
@@ -26,21 +26,21 @@ const FAQS: Faq[] = [
       <ul>
         <li>
           <strong>WordPress</strong> is a general-purpose CMS — enormously flexible, but that flexibility comes from
-          plugins and configuration. Shareblog has no plugins: a handful of content types are built in, each with
+          plugins and configuration. Flightstead has no plugins: a handful of content types are built in, each with
           real structure, and there's very little to configure in the first place.
         </li>
         <li>
           <strong>Micro.blog</strong> is the closest comparison — own-domain, mobile-first microblogging with some
-          structured content, like books. Shareblog leans further into that idea: books, music, and photos are
+          structured content, like books. Flightstead leans further into that idea: books, music, and photos are
           first-class types with their own metadata and layout, not blog-post variants.
         </li>
         <li>
           <strong>omg.lol</strong> is a lightweight personal-web toolkit — a domain plus a grab-bag of small,
-          independent tools. Shareblog is narrower and deeper: one publishing flow for structured content, not a
+          independent tools. Flightstead is narrower and deeper: one publishing flow for structured content, not a
           collection of separate tools.
         </li>
         <li>
-          <strong>Tumblr</strong> is a hosted social network built around a public feed and reblogs. Shareblog has
+          <strong>Tumblr</strong> is a hosted social network built around a public feed and reblogs. Flightstead has
           no feed to scroll and no algorithm — it's your own site, self-hosted, with nothing running on it but what
           you published.
         </li>
@@ -59,7 +59,7 @@ export function AboutProductPage() {
   return (
     <div className="about-product">
       <p>
-        Shareblog turns anything you'd share from your phone into a proper page on your own website — a photo, a
+        Flightstead turns anything you'd share from your phone into a proper page on your own website — a photo, a
         quote, a book you're reading, a song you can't stop playing, a quick thought, a full article. There's no CMS
         to log into and no post editor to open: you share, it gets structured automatically, and it's published at
         your own domain.
@@ -69,7 +69,7 @@ export function AboutProductPage() {
       <ol>
         <li>Share something from any app — a photo from your camera roll, a link to a book or album, or just type a quick thought.</li>
         <li>
-          Shareblog looks at what you shared and enriches it automatically — a book gets its cover, author, and
+          Flightstead looks at what you shared and enriches it automatically — a book gets its cover, author, and
           retailer links; a photo keeps its camera details; a song gets locally served Apple artwork and an Apple Music
           listening link.
         </li>

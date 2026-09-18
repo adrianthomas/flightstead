@@ -3,6 +3,10 @@ import React from "react";
 const APP_STORE_PLACEHOLDER = "https://apps.apple.com/app/id0000000000";
 const REPOSITORY_URL = "https://github.com/adrianthomas/shareblog";
 
+function FlightsteadMark() {
+  return <img className="brand-mark" src="/static/landing/flightstead-icon.png" alt="" width="40" height="40" />;
+}
+
 // Shown at the bare BASE_DOMAIN, before any site has been created there.
 // It deliberately remains a dependency-free static document: no Site row,
 // client bundle, hydration, cookies, or third-party runtime requests.
@@ -12,16 +16,16 @@ export function LandingPage() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#243027" />
+        <meta name="theme-color" content="#203d4b" />
         <link
           rel="icon"
-          href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%23243027'/%3E%3Ctext x='32' y='43' fill='%23f1ead9' font-family='Georgia,serif' font-size='34' text-anchor='middle'%3EN%3C/text%3E%3C/svg%3E"
+          href="/static/landing/flightstead-icon.png"
         />
         <meta
           name="description"
-          content="Notehangar is a friendly, self-hosted publishing app for iPhone. Keep your notes and photos on your server, publish on your domain, and join the Fediverse."
+          content="Flightstead is a friendly, self-hosted publishing app for iPhone. Keep your notes and photos on your server, publish on your domain, and join the Fediverse."
         />
-        <title>Notehangar — your notes, on your runway</title>
+        <title>Flightstead — Your own place to publish</title>
         <style
           dangerouslySetInnerHTML={{
             __html: `
@@ -134,7 +138,7 @@ export function LandingPage() {
                 align-items: center;
                 gap: 0.75rem;
                 text-decoration: none;
-                font-family: "Hangar Type", ui-monospace, monospace;
+                font-family: "Hangar Serif", Georgia, serif;
                 font-size: 1.2rem;
                 letter-spacing: 0.02em;
               }
@@ -142,11 +146,9 @@ export function LandingPage() {
                 display: grid;
                 place-items: center;
                 width: 2.5rem;
-                height: 2.1rem;
-                border: 1px solid currentColor;
-                border-radius: 0.15rem 0.15rem 0.4rem 0.4rem;
-                font: 400 0.72rem/1 "Hangar Type", ui-monospace, monospace;
-                letter-spacing: 0.08em;
+                height: 2.5rem;
+                flex-shrink: 0;
+                border-radius: 0.58rem;
               }
               .nav-links { display: flex; align-items: center; gap: clamp(1rem, 2.5vw, 2rem); }
               .nav-links a {
@@ -477,9 +479,9 @@ export function LandingPage() {
 
         <header className="site-header">
           <div className="shell header-inner">
-            <a className="brand" href="#top" aria-label="Notehangar home">
-              <span className="brand-mark" aria-hidden="true">NH</span>
-              <span>notehangar</span>
+            <a className="brand" href="#top" aria-label="Flightstead home">
+              <FlightsteadMark />
+              <span>Flightstead</span>
             </a>
             <nav className="nav-links" aria-label="Main navigation">
               <a href="#features">Features</a>
@@ -496,10 +498,10 @@ export function LandingPage() {
             <div className="shell">
               <div className="hero-copy">
                 <p className="kicker">A home airfield for the independent web</p>
-                <h1 id="hero-title">Your notes. Your server. Your runway.</h1>
-                <p className="hero-lede">Notehangar turns anything you share from your iPhone into a thoughtful page on your own website—without handing your writing, photos, or audience to a platform.</p>
+                <h1 id="hero-title">Your own place to publish.</h1>
+                <p className="hero-lede">Flightstead turns anything you share from your iPhone into a thoughtful page on your own website—without handing your writing, photos, or audience to a platform.</p>
                 <div className="actions">
-                  <a className="button" href={APP_STORE_PLACEHOLDER} rel="nofollow" aria-label="Notehangar for iOS, coming soon">Get the iOS app <span aria-hidden="true">↗</span></a>
+                  <a className="button" href={APP_STORE_PLACEHOLDER} rel="nofollow" aria-label="Flightstead for iOS, coming soon">Get the iOS app <span aria-hidden="true">↗</span></a>
                   <a className="button secondary" href="#setup">Set up your server</a>
                 </div>
                 <p className="hero-note">iOS app coming soon · Server available now under the MIT license</p>
@@ -520,14 +522,14 @@ export function LandingPage() {
             <div className="shell">
               <p className="section-kicker">Flight manifest 01 · What it carries</p>
               <h2 id="features-title">Made for the things worth keeping.</h2>
-              <p className="section-intro">Share from the apps you already use. Notehangar recognizes what arrived, gives it the right shape, and publishes it without turning everything into the same generic post.</p>
+              <p className="section-intro">Share from the apps you already use. Flightstead recognizes what arrived, gives it the right shape, and publishes it without turning everything into the same generic post.</p>
               <div className="feature-grid">
-                <article className="feature"><span className="feature-number">NH · 01</span><h3>One-tap dispatch</h3><p>Send a thought, link, photograph, book, song, quote, or article directly from the iOS share sheet.</p></article>
-                <article className="feature"><span className="feature-number">NH · 02</span><h3>Proper pages</h3><p>Each kind of post gets useful structure, considered typography, and a stable address on your domain.</p></article>
-                <article className="feature"><span className="feature-number">NH · 03</span><h3>Your own identity</h3><p>Choose a theme, title, profile, and custom domain. The result looks like your site—not an account inside ours.</p></article>
-                <article className="feature"><span className="feature-number">NH · 04</span><h3>A useful archive</h3><p>Browse by type or date, search everything, and keep ordinary URLs that remain useful beyond any app.</p></article>
-                <article className="feature"><span className="feature-number">NH · 05</span><h3>Feeds built in</h3><p>Every site includes RSS, sitemaps, social metadata, and a Fediverse identity—no plugin assembly required.</p></article>
-                <article className="feature"><span className="feature-number">NH · 06</span><h3>Quiet by design</h3><p>No visitor accounts, engagement traps, advertising network, or third-party scripts on your public pages.</p></article>
+                <article className="feature"><span className="feature-number">FS · 01</span><h3>One-tap dispatch</h3><p>Send a thought, link, photograph, book, song, quote, or article directly from the iOS share sheet.</p></article>
+                <article className="feature"><span className="feature-number">FS · 02</span><h3>Proper pages</h3><p>Each kind of post gets useful structure, considered typography, and a stable address on your domain.</p></article>
+                <article className="feature"><span className="feature-number">FS · 03</span><h3>Your own identity</h3><p>Choose a theme, title, profile, and custom domain. The result looks like your site—not an account inside ours.</p></article>
+                <article className="feature"><span className="feature-number">FS · 04</span><h3>A useful archive</h3><p>Browse by type or date, search everything, and keep ordinary URLs that remain useful beyond any app.</p></article>
+                <article className="feature"><span className="feature-number">FS · 05</span><h3>Feeds built in</h3><p>Every site includes RSS, sitemaps, social metadata, and a Fediverse identity—no plugin assembly required.</p></article>
+                <article className="feature"><span className="feature-number">FS · 06</span><h3>Quiet by design</h3><p>No visitor accounts, engagement traps, advertising network, or third-party scripts on your public pages.</p></article>
               </div>
             </div>
           </section>
@@ -537,7 +539,7 @@ export function LandingPage() {
               <div>
                 <p className="section-kicker">Ground control · Data sovereignty</p>
                 <h2 id="ownership-title">Keep the keys to the hangar.</h2>
-                <p className="section-intro">Notehangar is software you operate, not a hosted social account. Your domain, database, uploads, and backups stay under your control.</p>
+                <p className="section-intro">Flightstead is software you operate, not a hosted social account. Your domain, database, uploads, and backups stay under your control.</p>
               </div>
               <ul className="principles">
                 <li><div><strong>Your database is a file</strong><span>SQLite keeps the whole archive portable, understandable, and easy to back up.</span></div></li>
@@ -546,7 +548,7 @@ export function LandingPage() {
                 <li><div><strong>Your exit is always open</strong><span>The server is MIT-licensed. Keep running it, fork it, or move it to another host whenever you choose.</span></div></li>
               </ul>
             </div>
-            <div className="shell route" aria-label="How a Notehangar post travels">
+            <div className="shell route" aria-label="How a Flightstead post travels">
               <div className="route-stop"><span className="route-code">DEPARTURE</span><strong>Your iPhone</strong><span>Share what caught your attention.</span></div>
               <div className="route-stop"><span className="route-code">HOME FIELD</span><strong>Your server</strong><span>Store and enrich it locally.</span></div>
               <div className="route-stop"><span className="route-code">PUBLIC GATE</span><strong>Your domain</strong><span>Publish a durable web page.</span></div>
@@ -567,7 +569,7 @@ export function LandingPage() {
             <div className="shell">
               <p className="section-kicker">Pre-flight checklist · About twenty minutes</p>
               <h2 id="setup-title">A small server, not a second career.</h2>
-              <p className="section-intro">Notehangar is one Node process backed by SQLite. Run it on inexpensive shared hosting, a Linux VPS, or a machine you already manage.</p>
+              <p className="section-intro">Flightstead is one Node process backed by SQLite. Run it on inexpensive shared hosting, a Linux VPS, or a machine you already manage.</p>
               <div className="setup-grid">
                 <article className="setup-step"><h3>Choose a home field</h3><p>Bring a domain and any always-on Linux host with SSH access. Uberspace is the friendliest documented route.</p></article>
                 <article className="setup-step"><h3>Install and configure</h3><p>Clone the server, run <code>npm install</code>, copy the example environment file, and add your domain.</p></article>
@@ -584,9 +586,9 @@ export function LandingPage() {
                 <div>
                   <p className="section-kicker">Mobile companion · Coming soon</p>
                   <h3 id="app-title">The shortest route from “save this” to published.</h3>
-                  <p>The Notehangar app and share extension connect directly to your server. The App Store destination is a placeholder while the new listing is prepared.</p>
+                  <p>The Flightstead app and share extension connect directly to your server. The App Store destination is a placeholder while the new listing is prepared.</p>
                 </div>
-                <a className="button" href={APP_STORE_PLACEHOLDER} rel="nofollow" aria-label="Notehangar on the App Store, coming soon">App Store placeholder ↗</a>
+                <a className="button" href={APP_STORE_PLACEHOLDER} rel="nofollow" aria-label="Flightstead on the App Store, coming soon">App Store placeholder ↗</a>
               </aside>
             </div>
           </section>
@@ -595,7 +597,7 @@ export function LandingPage() {
         <footer>
           <div className="shell footer-inner">
             <div>
-              <a className="brand" href="#top" aria-label="Back to Notehangar home"><span className="brand-mark" aria-hidden="true">NH</span><span>notehangar</span></a>
+              <a className="brand" href="#top" aria-label="Back to Flightstead home"><FlightsteadMark /><span>Flightstead</span></a>
               <p className="footer-copy">A friendly, self-hosted home for notes, photographs, links, and the people who would like to follow along.</p>
               <p className="byline">A <a href="https://navigationstack.com">Navigationstack.com</a> app.</p>
             </div>

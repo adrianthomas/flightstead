@@ -1,6 +1,6 @@
-# Shareblog agent guide
+# Flightstead agent guide
 
-This repository is the public, self-hosted Shareblog server and public-site
+This repository is the public, self-hosted Flightstead server and public-site
 renderer. The application lives in `server/`; repository-root files cover
 deployment, importing, and project-wide guidance.
 

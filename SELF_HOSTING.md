@@ -1,6 +1,6 @@
-# Self-hosting Shareblog
+# Self-hosting Flightstead
 
-Shareblog runs as a single Node process (Fastify) backed by a SQLite file —
+Flightstead runs as a single Node process (Fastify) backed by a SQLite file —
 no separate database server to install or manage. There's no hosted
 service, and none is planned — self-hosting on your own domain is the only
 way to run it, by design. This doc covers a generic Linux server; adapt
@@ -62,7 +62,7 @@ SMTP_HOST=<your SMTP host>
 SMTP_PORT=587
 SMTP_USER=<smtp username>
 SMTP_PASS=<smtp password>
-SMTP_FROM=Shareblog <noreply@yourdomain.com>
+SMTP_FROM=Flightstead <noreply@yourdomain.com>
 ALLOWED_SIGNUP_EMAILS=you@yourdomain.com
 ```
 
@@ -120,7 +120,7 @@ A basic systemd unit at `/etc/systemd/system/shareblog.service`:
 
 ```ini
 [Unit]
-Description=Shareblog server
+Description=Flightstead server
 After=network.target
 
 [Service]

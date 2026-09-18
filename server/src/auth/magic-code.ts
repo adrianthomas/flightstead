@@ -40,14 +40,14 @@ export async function requestAuthCode(email: string, context: "web" | "mobile") 
   if (context === "mobile") {
     await sendEmail({
       to: email,
-      subject: "Your Shareblog sign-in code",
+      subject: "Your Flightstead sign-in code",
       text: `Your sign-in code is ${secret}. It expires in ${CODE_TTL_MINUTES} minutes.`,
     });
   } else {
     const link = `${process.env.API_BASE_URL}/api/v1/auth/magic/${secret}`;
     await sendEmail({
       to: email,
-      subject: "Your Shareblog sign-in link",
+      subject: "Your Flightstead sign-in link",
       text: `Sign in: ${link}\n\nThis link expires in ${CODE_TTL_MINUTES} minutes.`,
     });
   }

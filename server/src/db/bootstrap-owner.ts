@@ -89,7 +89,7 @@ async function main() {
   const pairingPayload = `shareblog://pair?api=${encodeURIComponent(apiBaseURL)}&code=${code}`;
   const qr = await QRCode.toString(pairingPayload, { type: "terminal", small: true });
 
-  console.log("\nScan this in the Shareblog app to connect and sign in:\n");
+  console.log("\nScan this in the Flightstead app to connect and sign in:\n");
   console.log(qr);
   console.log(`Can't scan? Enter this code by hand: ${code}`);
   console.log(`Expires in ${CLAIM_CODE_TTL_MINUTES} minutes, single use — re-run this command any time to get a new one.\n`);

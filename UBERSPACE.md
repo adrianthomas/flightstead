@@ -1,4 +1,4 @@
-# Running Shareblog on Uberspace
+# Running Flightstead on Uberspace
 
 Uberspace-specific walkthrough for [SELF_HOSTING.md](SELF_HOSTING.md): shared
 hosting, no root/sudo, no systemd, no Docker. The database is a single
@@ -34,7 +34,7 @@ uberspace tools version use node 22
 ```
 
 Uberspace 7 tops out at Node 22 (its GCC is too old to build anything
-newer) — that's exactly what Shareblog targets, so nothing to reconcile.
+newer) — that's exactly what Flightstead targets, so nothing to reconcile.
 
 ```bash
 npm install
@@ -62,7 +62,7 @@ SMTP_HOST=<your account's hostname, e.g. stardust.uberspace.de — see below>
 SMTP_PORT=587
 SMTP_USER=noreply@yourdomain.com
 SMTP_PASS=<password you set in the mailbox step below>
-SMTP_FROM=Shareblog <noreply@yourdomain.com>
+SMTP_FROM=Flightstead <noreply@yourdomain.com>
 ALLOWED_SIGNUP_EMAILS=you@yourdomain.com
 ```
 
@@ -135,7 +135,7 @@ set it to the same address you bootstrap with.
 
 Uberspace has no systemd or sudo; long-running processes are supervised by
 `supervisord` instead, via one `.ini` file per service in
-`~/etc/services.d/`. Shareblog already loads `.env` itself on boot (see
+`~/etc/services.d/`. Flightstead already loads `.env` itself on boot (see
 `import "dotenv/config"` in `server.ts`), so the service file doesn't need
 to pass environment variables through — it just needs the right working
 directory.
@@ -170,7 +170,7 @@ supervisorctl status shareblog
 
 ## 7. Domains and routing
 
-One Shareblog process serves everything, split by the `Host` header (see
+One Flightstead process serves everything, split by the `Host` header (see
 [tenant.ts](server/src/middleware/tenant.ts)): the apex/API host, plus one
 hostname per site you create. Each one needs both a domain added and a
 backend pointed at the app's port:

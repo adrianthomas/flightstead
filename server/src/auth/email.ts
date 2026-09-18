@@ -43,7 +43,7 @@ export async function sendEmail(input: SendEmailInput): Promise<void> {
   }
 
   await getTransporter().sendMail({
-    from: process.env.SMTP_FROM ?? "Shareblog <noreply@localhost>",
+    from: process.env.SMTP_FROM ?? "Flightstead <noreply@localhost>",
     to: input.to,
     subject: input.subject,
     text: input.text,

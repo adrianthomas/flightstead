@@ -10,7 +10,7 @@ function escapeXml(value: string): string {
 }
 
 export function renderFavicon(site: Site): string {
-  const identity = site.profileName?.trim() || site.title.trim() || "Shareblog";
+  const identity = site.profileName?.trim() || site.title.trim() || "Flightstead";
   const initial = escapeXml(Array.from(identity)[0]?.toLocaleUpperCase(site.locale) ?? "S");
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <style>

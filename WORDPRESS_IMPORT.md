@@ -1,6 +1,6 @@
 # Importing a WordPress site
 
-Shareblog imports a reviewable Markdown-and-images archive rather than
+Flightstead imports a reviewable Markdown-and-images archive rather than
 depending on a live WordPress API during the migration.
 
 ## 1. Export WordPress
@@ -29,7 +29,7 @@ npx wordpress-export-to-markdown \
 Do not delete the XML after conversion. Review the generated folder and keep
 both artifacts until the public migration has been verified.
 
-## 3. Dry-run the Shareblog import
+## 3. Dry-run the Flightstead import
 
 Run this from `server/` with the target instance's normal `.env` loaded:
 
@@ -58,7 +58,7 @@ npm run import:markdown -- \
 
 The importer:
 
-- maps WordPress posts to Shareblog Articles;
+- maps WordPress posts to Flightstead Articles;
 - preserves title, slug, publication date, excerpt, categories, and tags;
 - uploads and rewrites every local inline/cover image;
 - uses the optional WXR/XML manifest to restore gallery attachment IDs, exact

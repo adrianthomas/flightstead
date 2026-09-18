@@ -47,7 +47,7 @@ const SUPPORTED_MARKDOWN_EXTENSIONS = new Set([".md", ".markdown"]);
 
 function usage(): string {
   return [
-    "Import a Markdown folder into the configured Shareblog database.",
+    "Import a Markdown folder into the configured Flightstead database.",
     "",
     "Usage:",
     "  npm run import:markdown -- --input <folder> [options]",
