@@ -179,7 +179,12 @@
     @media (max-width: 850px) {
       .hero-panel { grid-template-columns: 1fr; }
       .hero-panel { min-height: auto; }
-      .hero-art { justify-self: center; }
+      .hero-art { width: 100%; max-width: none; justify-self: stretch; }
+      .hero-art img {
+        height: clamp(9rem, 28vw, 13rem);
+        aspect-ratio: auto;
+        object-position: center 58%;
+      }
       .feature-grid, .setup-grid { grid-template-columns: 1fr; }
       .app-callout { grid-template-columns: auto 1fr; }
       .app-callout .button { grid-column: 1 / -1; }
@@ -189,6 +194,7 @@
       nav a:not(.nav-cta) { display: none; }
       h1 { font-size: clamp(3rem, 17vw, 4.8rem); }
       .hero-panel { padding: 1.25rem; border-radius: 1.6rem; }
+      .hero-art img { height: clamp(8.5rem, 34vw, 10.5rem); }
       .feature { min-height: auto; }
       .feature-code { margin-bottom: 1.8rem; }
       .footer-inner { align-items: flex-start; flex-direction: column; }
