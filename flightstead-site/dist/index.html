@@ -77,15 +77,15 @@
       text-decoration: none;
     }
     nav a:hover { text-decoration: underline; text-underline-offset: 0.3rem; }
-    .hero { padding: clamp(1.5rem, 4vw, 3.5rem) 0 2rem; }
+    .hero { padding: clamp(1.25rem, 3vw, 2.5rem) 0; }
     .hero-panel {
-      min-height: 40rem;
+      min-height: 31rem;
       display: grid;
-      grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+      grid-template-columns: minmax(0, 1.2fr) minmax(19rem, 0.8fr);
       align-items: center;
-      gap: clamp(2rem, 6vw, 5rem);
+      gap: clamp(2rem, 4vw, 3.5rem);
       overflow: hidden;
-      padding: clamp(1.5rem, 5vw, 4.5rem);
+      padding: clamp(1.5rem, 4vw, 3.5rem);
       border-radius: clamp(1.6rem, 4vw, 3rem);
       background: var(--sky);
       box-shadow: inset 0 0 0 1px var(--line);
@@ -94,9 +94,9 @@
     .eyebrow::before { content: ""; width: 1.25rem; height: 0.22rem; border-radius: 999px; background: var(--yellow); }
     h1, h2, h3 { margin-top: 0; text-wrap: balance; }
     h1 {
-      max-width: 10ch;
+      max-width: 12ch;
       margin-bottom: 1.25rem;
-      font-size: clamp(3.3rem, 7.8vw, 6.6rem);
+      font-size: clamp(3.1rem, 6.2vw, 5.4rem);
       font-weight: 790;
       line-height: 0.95;
       letter-spacing: -0.055em;
@@ -121,61 +121,33 @@
     .button:hover { transform: translateY(-2px); box-shadow: 0 0.8rem 1.5rem rgba(32, 61, 75, 0.15); }
     .button.secondary { background: var(--surface); color: var(--ink); border-color: var(--line); }
     .hero-art {
-      padding: clamp(0.65rem, 2vw, 1.1rem);
-      border-radius: 2rem;
+      width: min(100%, 27rem);
+      justify-self: end;
+      padding: 0.65rem;
+      border-radius: 1.5rem;
       background: var(--surface);
-      transform: rotate(1.1deg);
       box-shadow: var(--shadow);
     }
-    .hero-art img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 1.4rem; }
+    .hero-art img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 1rem; }
     .hero-note { margin: 1rem 0 0; color: var(--muted); font-size: 0.88rem; }
-    .manifest { padding: 1rem 0 4.5rem; }
-    .manifest-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.8rem; }
-    .manifest-item { padding: 1rem; border-radius: 1rem; background: var(--surface); border: 1px solid var(--line); }
-    .manifest-item strong { display: block; font-size: 0.98rem; }
-    .manifest-item span { color: var(--muted); font-size: 0.82rem; }
-    section.content { padding: clamp(4rem, 8vw, 7rem) 0; }
+    section.content { padding: clamp(3.25rem, 6vw, 5rem) 0; }
     .section-heading { max-width: 46rem; margin-bottom: 2.25rem; }
     h2 { margin-bottom: 1rem; font-size: clamp(2.35rem, 5vw, 4.35rem); line-height: 1; letter-spacing: -0.045em; }
     .section-intro { margin: 0; max-width: 42rem; color: var(--muted); font-size: 1.1rem; }
     .feature-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
     .feature {
-      min-height: 15rem;
+      min-height: 12rem;
       padding: 1.5rem;
       border: 1px solid var(--line);
       border-radius: 1.35rem;
       background: var(--surface);
     }
-    .feature:nth-child(2), .feature:nth-child(5) { background: var(--sky); }
+    .feature:nth-child(2) { background: var(--sky); }
     .feature:nth-child(3) { background: var(--yellow-soft); }
-    .feature-code { display: block; margin-bottom: 3rem; color: var(--blue); font: 650 0.72rem/1 ui-monospace, monospace; letter-spacing: 0.12em; }
+    .feature-code { display: block; margin-bottom: 2rem; color: var(--blue); font: 650 0.72rem/1 ui-monospace, monospace; letter-spacing: 0.12em; }
     .feature h3 { margin-bottom: 0.55rem; font-size: 1.28rem; }
     .feature p { margin: 0; color: var(--muted); }
-    .ownership { padding: clamp(2rem, 5vw, 4rem) 0; }
-    .ownership-panel {
-      display: grid;
-      grid-template-columns: 0.9fr 1.1fr;
-      gap: clamp(2rem, 6vw, 5rem);
-      padding: clamp(2rem, 6vw, 5rem);
-      border-radius: clamp(1.6rem, 4vw, 3rem);
-      background: #203d4b;
-      color: #f2f6f5;
-    }
-    .ownership-panel .eyebrow { color: #a9d8e7; }
-    .ownership-panel .section-intro { color: #c7d2d5; }
-    .principles { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
-    .principles li { display: grid; grid-template-columns: 2.4rem 1fr; gap: 0.75rem; padding: 1.2rem 0; border-bottom: 1px solid rgba(242, 246, 245, 0.18); }
-    .principles li:last-child { border-bottom: 0; }
-    .principles b { color: var(--yellow); font: 650 0.76rem/1.6 ui-monospace, monospace; }
-    .principles strong { display: block; margin-bottom: 0.22rem; }
-    .principles span { display: block; color: #c7d2d5; font-size: 0.92rem; }
-    .route { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; margin-top: 1.25rem; }
-    .route-stop { position: relative; padding: 1.25rem; border-radius: 1.2rem; background: var(--surface); border: 1px solid var(--line); }
-    .route-stop:not(:last-child)::after { content: "→"; position: absolute; top: 1rem; right: -0.72rem; z-index: 2; color: var(--red); font-weight: 800; }
-    .route-code { display: block; margin-bottom: 1.5rem; color: var(--red); font: 650 0.68rem/1 ui-monospace, monospace; letter-spacing: 0.1em; }
-    .route-stop strong, .route-stop span { display: block; }
-    .route-stop span:last-child { margin-top: 0.3rem; color: var(--muted); font-size: 0.85rem; }
-    .setup-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; counter-reset: setup; }
+    .setup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; counter-reset: setup; }
     .setup-step { counter-increment: setup; position: relative; padding: 1.5rem 1.5rem 1.5rem 4.5rem; border-radius: 1.25rem; background: var(--surface); border: 1px solid var(--line); }
     .setup-step::before { content: "0" counter(setup); position: absolute; left: 1.4rem; top: 1.5rem; color: var(--blue); font: 700 0.78rem/1 ui-monospace, monospace; }
     .setup-step h3 { margin-bottom: 0.4rem; font-size: 1.1rem; }
@@ -187,7 +159,7 @@
       grid-template-columns: auto 1fr auto;
       align-items: center;
       gap: 1.25rem;
-      margin-top: 3.5rem;
+      margin-top: 2.5rem;
       padding: 1.3rem;
       border-radius: 1.5rem;
       background: var(--sky);
@@ -205,12 +177,10 @@
     .footer-links { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 0.75rem 1.2rem; }
     .footer-links a { color: var(--blue); font-size: 0.86rem; font-weight: 700; }
     @media (max-width: 850px) {
-      .hero-panel, .ownership-panel { grid-template-columns: 1fr; }
+      .hero-panel { grid-template-columns: 1fr; }
       .hero-panel { min-height: auto; }
-      .hero-art { transform: none; }
-      .manifest-grid, .route { grid-template-columns: repeat(2, 1fr); }
-      .feature-grid { grid-template-columns: repeat(2, 1fr); }
-      .route-stop:nth-child(2)::after { display: none; }
+      .hero-art { justify-self: center; }
+      .feature-grid, .setup-grid { grid-template-columns: 1fr; }
       .app-callout { grid-template-columns: auto 1fr; }
       .app-callout .button { grid-column: 1 / -1; }
     }
@@ -219,8 +189,6 @@
       nav a:not(.nav-cta) { display: none; }
       h1 { font-size: clamp(3rem, 17vw, 4.8rem); }
       .hero-panel { padding: 1.25rem; border-radius: 1.6rem; }
-      .manifest-grid, .feature-grid, .route, .setup-grid { grid-template-columns: 1fr; }
-      .route-stop:not(:last-child)::after { content: "↓"; top: auto; right: 50%; bottom: -0.8rem; transform: translateX(50%); }
       .feature { min-height: auto; }
       .feature-code { margin-bottom: 1.8rem; }
       .footer-inner { align-items: flex-start; flex-direction: column; }
@@ -237,73 +205,39 @@
   <header>
     <div class="shell header-inner">
       <a class="brand" href="#top" aria-label="Flightstead home"><img src="assets/flightstead-icon.png" alt=""><span>Flightstead</span></a>
-      <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#ownership">Ownership</a><a href="#setup">Setup</a><a class="nav-cta" href="#app">iOS app</a></nav>
+      <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#setup">Setup</a><a class="nav-cta" href="#app">iOS app</a></nav>
     </div>
   </header>
   <main id="main">
     <section class="hero" id="top" aria-labelledby="hero-title">
       <div class="shell hero-panel">
         <div>
-          <p class="eyebrow">A home airfield for the independent web</p>
-          <h1 id="hero-title">A little home. A wide-open web.</h1>
-          <p class="hero-copy">Flightstead turns the things you share from your iPhone into thoughtful pages on your own website—without handing your words, photographs, or audience to a platform.</p>
-          <div class="actions"><a class="button" href="#app">iOS app coming soon <span aria-hidden="true">↗</span></a><a class="button secondary" href="#setup">Set up your server</a></div>
-          <p class="hero-note">Your domain · Your server · Fediverse-ready</p>
+          <p class="eyebrow">Independent publishing for iPhone</p>
+          <h1 id="hero-title">Your own place to publish.</h1>
+          <p class="hero-copy">Share words, photographs, links, books, and music from your iPhone to a site on your domain, running on your server.</p>
+          <div class="actions"><a class="button" href="#setup">Explore self-hosting</a><a class="button secondary" href="#app">iOS app coming soon</a></div>
+          <p class="hero-note">Self-hosted · Open source · Fediverse-ready</p>
         </div>
         <figure class="hero-art"><img src="assets/airfield.webp" alt="A sunny yellow aeroplane beside an open green hangar and a windsock" width="1536" height="1024"></figure>
       </div>
     </section>
-    <div class="manifest" aria-label="Product highlights">
-      <div class="shell manifest-grid">
-        <div class="manifest-item"><strong>Self-hosted</strong><span>Your machine, your account</span></div>
-        <div class="manifest-item"><strong>SQLite</strong><span>One portable database file</span></div>
-        <div class="manifest-item"><strong>Fediverse-ready</strong><span>Followable from Mastodon</span></div>
-        <div class="manifest-item"><strong>Open source</strong><span>Inspect, adapt, keep forever</span></div>
-      </div>
-    </div>
     <section class="content" id="features" aria-labelledby="features-title">
       <div class="shell">
-        <div class="section-heading"><p class="eyebrow">Ready for departure</p><h2 id="features-title">Made for the things worth keeping.</h2><p class="section-intro">Share from the apps you already use. Flightstead recognises what arrived, gives it the right shape, and publishes it without flattening everything into the same generic post.</p></div>
+        <div class="section-heading"><p class="eyebrow">What it does</p><h2 id="features-title">Publish simply. Keep control.</h2><p class="section-intro">The convenience of a share extension, with the permanence and ownership of your own website.</p></div>
         <div class="feature-grid">
-          <article class="feature"><span class="feature-code">FS · 01</span><h3>One-tap dispatch</h3><p>Send a thought, link, photograph, book, song, quote, or article from the iOS share sheet.</p></article>
-          <article class="feature"><span class="feature-code">FS · 02</span><h3>Proper pages</h3><p>Each kind of post gets useful structure, considered typography, and a stable address.</p></article>
-          <article class="feature"><span class="feature-code">FS · 03</span><h3>Your own identity</h3><p>Choose a theme, title, profile, and custom domain. The result looks like your site.</p></article>
-          <article class="feature"><span class="feature-code">FS · 04</span><h3>A useful archive</h3><p>Browse by type or date, search everything, and keep ordinary URLs that stay useful.</p></article>
-          <article class="feature"><span class="feature-code">FS · 05</span><h3>Feeds built in</h3><p>RSS, sitemaps, social metadata, and a Fediverse identity arrive without plugin assembly.</p></article>
-          <article class="feature"><span class="feature-code">FS · 06</span><h3>Quiet by design</h3><p>No visitor accounts, engagement traps, advertising network, or third-party scripts.</p></article>
-        </div>
-      </div>
-    </section>
-    <section class="ownership" id="ownership" aria-labelledby="ownership-title">
-      <div class="shell ownership-panel">
-        <div><p class="eyebrow">Your home field</p><h2 id="ownership-title">Keep the keys to the hangar.</h2><p class="section-intro">Flightstead is software you operate, not another social account. Your domain, database, uploads, and backups stay under your control.</p></div>
-        <ol class="principles">
-          <li><b>01</b><div><strong>Your database is a file</strong><span>SQLite keeps the archive portable, understandable, and easy to back up.</span></div></li>
-          <li><b>02</b><div><strong>Your media stays local</strong><span>Originals and generated variants live in storage attached to your server.</span></div></li>
-          <li><b>03</b><div><strong>Your domain is the address</strong><span>Readers, feeds, and federation all meet at your public home.</span></div></li>
-          <li><b>04</b><div><strong>Your exit remains open</strong><span>The server is MIT-licensed. Keep it running, fork it, or move it.</span></div></li>
-        </ol>
-      </div>
-    </section>
-    <section class="content" aria-labelledby="route-title">
-      <div class="shell">
-        <div class="section-heading"><p class="eyebrow">Open skies</p><h2 id="route-title">A small site can still travel far.</h2><p class="section-intro">People can follow your site from Mastodon and compatible Fediverse apps. New posts travel outward while the original remains on your domain, in your design, under your control.</p></div>
-        <div class="route" aria-label="How a Flightstead post travels">
-          <div class="route-stop"><span class="route-code">DEPARTURE</span><strong>Your iPhone</strong><span>Share what caught your attention.</span></div>
-          <div class="route-stop"><span class="route-code">HOME FIELD</span><strong>Your server</strong><span>Store and enrich it locally.</span></div>
-          <div class="route-stop"><span class="route-code">PUBLIC GATE</span><strong>Your domain</strong><span>Publish a durable web page.</span></div>
-          <div class="route-stop"><span class="route-code">OPEN SKIES</span><strong>The Fediverse</strong><span>Deliver it to people who follow.</span></div>
+          <article class="feature"><span class="feature-code">01</span><h3>Publish from your iPhone</h3><p>Send a thought, link, photograph, book, song, quote, or article from the standard share sheet.</p></article>
+          <article class="feature"><span class="feature-code">02</span><h3>Own the whole thing</h3><p>Your domain, SQLite database, media, and backups stay on infrastructure you control.</p></article>
+          <article class="feature"><span class="feature-code">03</span><h3>Part of the open web</h3><p>Every post gets a durable URL, with RSS, search, and optional Fediverse delivery built in.</p></article>
         </div>
       </div>
     </section>
     <section class="content" id="setup" aria-labelledby="setup-title">
       <div class="shell">
-        <div class="section-heading"><p class="eyebrow">Pre-flight checklist</p><h2 id="setup-title">A small server, not a second career.</h2><p class="section-intro">Flightstead is one Node process backed by SQLite. Run it on inexpensive shared hosting, a Linux server, or a machine you already manage.</p></div>
+        <div class="section-heading"><p class="eyebrow">Setup</p><h2 id="setup-title">Set up once. Publish from your phone.</h2><p class="section-intro">Flightstead is one Node process backed by SQLite. Run it on shared hosting, a Linux server, or a machine you already manage.</p></div>
         <div class="setup-grid">
-          <article class="setup-step"><h3>Choose a home field</h3><p>Bring a domain and an always-on host with SSH access.</p></article>
-          <article class="setup-step"><h3>Install and configure</h3><p>Clone the server, install it, and add your domain and email settings.</p></article>
-          <article class="setup-step"><h3>Prepare the logbook</h3><p>One migration command creates the SQLite database.</p></article>
-          <article class="setup-step"><h3>Pair the app</h3><p>Scan the short-lived QR code to connect Flightstead and sign in.</p></article>
+          <article class="setup-step"><h3>Install the server</h3><p>Bring a domain and an always-on host, then add your email settings.</p></article>
+          <article class="setup-step"><h3>Pair your iPhone</h3><p>Scan a short-lived QR code to connect the app securely.</p></article>
+          <article class="setup-step"><h3>Start publishing</h3><p>Share from another app or create a post directly in Flightstead.</p></article>
         </div>
         <div class="setup-actions"><a class="button" href="https://github.com/adrianthomas/shareblog/blob/main/SELF_HOSTING.md">Read the self-hosting guide</a><a class="text-link" href="https://github.com/adrianthomas/shareblog/blob/main/UBERSPACE.md">Uberspace walkthrough →</a><a class="text-link" href="https://github.com/adrianthomas/shareblog">Browse the source →</a></div>
         <aside class="app-callout" id="app" aria-labelledby="app-title">
@@ -316,8 +250,8 @@
   </main>
   <footer>
     <div class="shell footer-inner">
-      <div><a class="brand" href="#top" aria-label="Back to Flightstead home"><img src="assets/flightstead-icon.png" alt=""><span>Flightstead</span></a><p class="footer-copy">A friendly, self-hosted home for words, photographs, links, and the people who would like to follow along.</p><p class="byline">A <a href="https://navigationstack.com">Navigationstack.com</a> app.</p></div>
-      <nav class="footer-links" aria-label="Footer navigation"><a href="#features">Features</a><a href="#ownership">Ownership</a><a href="#setup">Setup</a><a href="https://github.com/adrianthomas/shareblog">GitHub</a><a href="#app">iOS app</a></nav>
+      <div><a class="brand" href="#top" aria-label="Back to Flightstead home"><img src="assets/flightstead-icon.png" alt=""><span>Flightstead</span></a><p class="footer-copy">Self-hosted publishing for iPhone and the open web.</p><p class="byline">A <a href="https://navigationstack.com">Navigationstack.com</a> app.</p></div>
+      <nav class="footer-links" aria-label="Footer navigation"><a href="#features">Features</a><a href="#setup">Setup</a><a href="https://github.com/adrianthomas/shareblog">GitHub</a><a href="#app">iOS app</a></nav>
     </div>
   </footer>
 </body>
