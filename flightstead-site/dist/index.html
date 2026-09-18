@@ -1,44 +1,14 @@
-import React from "react";
-
-const APP_STORE_PLACEHOLDER = "https://apps.apple.com/app/id0000000000";
-const REPOSITORY_URL = "https://github.com/adrianthomas/shareblog";
-
-function FlightsteadMark() {
-  return <img className="brand-mark" src="/static/landing/flightstead-icon.png" alt="" width="40" height="40" />;
-}
-
-// Shown at the bare BASE_DOMAIN, before any site has been created there.
-// It deliberately remains a dependency-free static document: no Site row,
-// client bundle, hydration, cookies, or third-party runtime requests.
-export function LandingPage() {
-  return (
-    <html lang="en">
-      <head>
-        <meta charSet="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="theme-color" content="#203d4b" />
-        <link
-          rel="icon"
-          href="/static/landing/flightstead-icon.png"
-        />
-        <meta
-          name="description"
-          content="Flightstead is a friendly, self-hosted publishing app for iPhone. Keep your notes and photos on your server, publish on your domain, and join the Fediverse."
-        />
-        <title>Flightstead — Your own place to publish</title>
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
+<!doctype html><html lang="en"><head><meta charSet="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/><meta name="theme-color" content="#203d4b"/><link rel="icon" href="assets/flightstead-icon.png"/><meta name="description" content="Flightstead is a friendly, self-hosted publishing app for iPhone. Keep your notes and photos on your server, publish on your domain, and join the Fediverse."/><title>Flightstead — Your own place to publish</title><style>
               @font-face {
                 font-family: "Hangar Serif";
-                src: url("/static/fonts/shippori-mincho-latin-600.woff2") format("woff2");
+                src: url("assets/fonts/shippori-mincho-latin-600.woff2") format("woff2");
                 font-weight: 600;
                 font-style: normal;
                 font-display: swap;
               }
               @font-face {
                 font-family: "Hangar Type";
-                src: url("/static/fonts/special-elite-latin.woff2") format("woff2");
+                src: url("assets/fonts/special-elite-latin.woff2") format("woff2");
                 font-weight: 400;
                 font-style: normal;
                 font-display: swap;
@@ -470,143 +440,4 @@ export function LandingPage() {
                 .footer-links { grid-template-columns: 1fr 1fr; gap: 0 1rem; }
               }
               @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-            `,
-          }}
-        />
-      </head>
-      <body>
-        <a className="skip-link" href="#main">Skip to main content</a>
-
-        <header className="site-header">
-          <div className="shell header-inner">
-            <a className="brand" href="#top" aria-label="Flightstead home">
-              <FlightsteadMark />
-              <span>Flightstead</span>
-            </a>
-            <nav className="nav-links" aria-label="Main navigation">
-              <a href="#features">Features</a>
-              <a href="#ownership">Ownership</a>
-              <a href="#setup">Setup</a>
-              <a className="nav-cta" href={APP_STORE_PLACEHOLDER} rel="nofollow">iOS app</a>
-            </nav>
-          </div>
-        </header>
-
-        <main id="main">
-          <section className="hero" id="top" aria-labelledby="hero-title">
-            <img className="hero-image" src="/static/landing/notehangar-hero.webp" alt="A small vintage aeroplane beside a writing desk in a sunlit civilian hangar" width="1536" height="1024" />
-            <div className="shell">
-              <div className="hero-copy">
-                <p className="kicker">A home airfield for the independent web</p>
-                <h1 id="hero-title">Your own place to publish.</h1>
-                <p className="hero-lede">Flightstead turns anything you share from your iPhone into a thoughtful page on your own website—without handing your writing, photos, or audience to a platform.</p>
-                <div className="actions">
-                  <a className="button" href={APP_STORE_PLACEHOLDER} rel="nofollow" aria-label="Flightstead for iOS, coming soon">Get the iOS app <span aria-hidden="true">↗</span></a>
-                  <a className="button secondary" href="#setup">Set up your server</a>
-                </div>
-                <p className="hero-note">iOS app coming soon · Server available now under the MIT license</p>
-              </div>
-            </div>
-          </section>
-
-          <div className="manifest" aria-label="Product highlights">
-            <div className="shell manifest-inner">
-              <div className="manifest-item"><strong>Self-hosted</strong><span>Your machine, your account</span></div>
-              <div className="manifest-item"><strong>SQLite</strong><span>One portable database file</span></div>
-              <div className="manifest-item"><strong>Fediverse-ready</strong><span>Followable from Mastodon</span></div>
-              <div className="manifest-item"><strong>Open source</strong><span>Inspect, adapt, keep forever</span></div>
-            </div>
-          </div>
-
-          <section className="content-section" id="features" aria-labelledby="features-title">
-            <div className="shell">
-              <p className="section-kicker">Flight manifest 01 · What it carries</p>
-              <h2 id="features-title">Made for the things worth keeping.</h2>
-              <p className="section-intro">Share from the apps you already use. Flightstead recognizes what arrived, gives it the right shape, and publishes it without turning everything into the same generic post.</p>
-              <div className="feature-grid">
-                <article className="feature"><span className="feature-number">FS · 01</span><h3>One-tap dispatch</h3><p>Send a thought, link, photograph, book, song, quote, or article directly from the iOS share sheet.</p></article>
-                <article className="feature"><span className="feature-number">FS · 02</span><h3>Proper pages</h3><p>Each kind of post gets useful structure, considered typography, and a stable address on your domain.</p></article>
-                <article className="feature"><span className="feature-number">FS · 03</span><h3>Your own identity</h3><p>Choose a theme, title, profile, and custom domain. The result looks like your site—not an account inside ours.</p></article>
-                <article className="feature"><span className="feature-number">FS · 04</span><h3>A useful archive</h3><p>Browse by type or date, search everything, and keep ordinary URLs that remain useful beyond any app.</p></article>
-                <article className="feature"><span className="feature-number">FS · 05</span><h3>Feeds built in</h3><p>Every site includes RSS, sitemaps, social metadata, and a Fediverse identity—no plugin assembly required.</p></article>
-                <article className="feature"><span className="feature-number">FS · 06</span><h3>Quiet by design</h3><p>No visitor accounts, engagement traps, advertising network, or third-party scripts on your public pages.</p></article>
-              </div>
-            </div>
-          </section>
-
-          <section className="content-section sovereignty" id="ownership" aria-labelledby="ownership-title">
-            <div className="shell split">
-              <div>
-                <p className="section-kicker">Ground control · Data sovereignty</p>
-                <h2 id="ownership-title">Keep the keys to the hangar.</h2>
-                <p className="section-intro">Flightstead is software you operate, not a hosted social account. Your domain, database, uploads, and backups stay under your control.</p>
-              </div>
-              <ul className="principles">
-                <li><div><strong>Your database is a file</strong><span>SQLite keeps the whole archive portable, understandable, and easy to back up.</span></div></li>
-                <li><div><strong>Your media stays local</strong><span>Uploaded originals and generated variants live in storage attached to your server.</span></div></li>
-                <li><div><strong>Your domain is the address</strong><span>Readers visit you directly. Canonical links, feeds, and federation all use the same public origin.</span></div></li>
-                <li><div><strong>Your exit is always open</strong><span>The server is MIT-licensed. Keep running it, fork it, or move it to another host whenever you choose.</span></div></li>
-              </ul>
-            </div>
-            <div className="shell route" aria-label="How a Flightstead post travels">
-              <div className="route-stop"><span className="route-code">DEPARTURE</span><strong>Your iPhone</strong><span>Share what caught your attention.</span></div>
-              <div className="route-stop"><span className="route-code">HOME FIELD</span><strong>Your server</strong><span>Store and enrich it locally.</span></div>
-              <div className="route-stop"><span className="route-code">PUBLIC GATE</span><strong>Your domain</strong><span>Publish a durable web page.</span></div>
-              <div className="route-stop"><span className="route-code">OPEN SKIES</span><strong>The Fediverse</strong><span>Deliver it to people who follow.</span></div>
-            </div>
-          </section>
-
-          <section className="federation" aria-labelledby="federation-title">
-            <img src="/static/landing/notehangar-federation.webp" alt="A silver flying boat leaving a quiet coastal aerodrome at dawn" width="1536" height="1024" loading="lazy" />
-            <div className="shell federation-copy">
-              <p className="kicker">Open skies · Federation</p>
-              <h2 id="federation-title">A small site can still travel far.</h2>
-              <p>People can follow your site from Mastodon and compatible Fediverse apps. New posts arrive where they already read—while the original remains on your domain, in your design, under your control. Prefer a quieter flight plan? Outbound federation can be switched off.</p>
-            </div>
-          </section>
-
-          <section className="content-section" id="setup" aria-labelledby="setup-title">
-            <div className="shell">
-              <p className="section-kicker">Pre-flight checklist · About twenty minutes</p>
-              <h2 id="setup-title">A small server, not a second career.</h2>
-              <p className="section-intro">Flightstead is one Node process backed by SQLite. Run it on inexpensive shared hosting, a Linux VPS, or a machine you already manage.</p>
-              <div className="setup-grid">
-                <article className="setup-step"><h3>Choose a home field</h3><p>Bring a domain and any always-on Linux host with SSH access. Uberspace is the friendliest documented route.</p></article>
-                <article className="setup-step"><h3>Install and configure</h3><p>Clone the server, run <code>npm install</code>, copy the example environment file, and add your domain.</p></article>
-                <article className="setup-step"><h3>Prepare the logbook</h3><p><code>npm run db:migrate</code> creates the database. No separate database service or container stack is required.</p></article>
-                <article className="setup-step"><h3>Pair the app</h3><p><code>npm run bootstrap-owner</code> prints a short-lived QR code. Scan it in the app to connect and sign in.</p></article>
-              </div>
-              <div className="setup-actions">
-                <a className="button" href="https://github.com/adrianthomas/shareblog/blob/main/SELF_HOSTING.md">Read the self-hosting guide</a>
-                <a className="text-link" href="https://github.com/adrianthomas/shareblog/blob/main/UBERSPACE.md">Uberspace walkthrough →</a>
-                <a className="text-link" href={REPOSITORY_URL}>Browse the source →</a>
-              </div>
-
-              <aside className="app-callout" aria-labelledby="app-title">
-                <div>
-                  <p className="section-kicker">Mobile companion · Coming soon</p>
-                  <h3 id="app-title">The shortest route from “save this” to published.</h3>
-                  <p>The Flightstead app and share extension connect directly to your server. The App Store destination is a placeholder while the new listing is prepared.</p>
-                </div>
-                <a className="button" href={APP_STORE_PLACEHOLDER} rel="nofollow" aria-label="Flightstead on the App Store, coming soon">App Store placeholder ↗</a>
-              </aside>
-            </div>
-          </section>
-        </main>
-
-        <footer>
-          <div className="shell footer-inner">
-            <div>
-              <a className="brand" href="#top" aria-label="Back to Flightstead home"><FlightsteadMark /><span>Flightstead</span></a>
-              <p className="footer-copy">A friendly, self-hosted home for notes, photographs, links, and the people who would like to follow along.</p>
-              <p className="byline">A <a href="https://navigationstack.com">Navigationstack.com</a> app.</p>
-            </div>
-            <nav className="footer-links" aria-label="Footer navigation">
-              <a href="#features">Features</a><a href="#ownership">Ownership</a><a href="#setup">Setup</a><a href={REPOSITORY_URL}>GitHub</a><a href={APP_STORE_PLACEHOLDER} rel="nofollow">iOS app</a><a href="https://github.com/adrianthomas/shareblog/blob/main/LICENSE">MIT license</a>
-            </nav>
-          </div>
-        </footer>
-      </body>
-    </html>
-  );
-}
+            </style></head><body><a class="skip-link" href="#main">Skip to main content</a><header class="site-header"><div class="shell header-inner"><a class="brand" href="#top" aria-label="Flightstead home"><img class="brand-mark" src="assets/flightstead-icon.png" alt="" width="40" height="40"/><span>Flightstead</span></a><nav class="nav-links" aria-label="Main navigation"><a href="#features">Features</a><a href="#ownership">Ownership</a><a href="#setup">Setup</a><a class="nav-cta" href="https://apps.apple.com/app/id0000000000" rel="nofollow">iOS app</a></nav></div></header><main id="main"><section class="hero" id="top" aria-labelledby="hero-title"><img class="hero-image" src="assets/airfield-workshop.webp" alt="A small vintage aeroplane beside a writing desk in a sunlit civilian hangar" width="1536" height="1024"/><div class="shell"><div class="hero-copy"><p class="kicker">A home airfield for the independent web</p><h1 id="hero-title">Your own place to publish.</h1><p class="hero-lede">Flightstead turns anything you share from your iPhone into a thoughtful page on your own website—without handing your writing, photos, or audience to a platform.</p><div class="actions"><a class="button" href="https://apps.apple.com/app/id0000000000" rel="nofollow" aria-label="Flightstead for iOS, coming soon">Get the iOS app <span aria-hidden="true">↗</span></a><a class="button secondary" href="#setup">Set up your server</a></div><p class="hero-note">iOS app coming soon · Server available now under the MIT license</p></div></div></section><div class="manifest" aria-label="Product highlights"><div class="shell manifest-inner"><div class="manifest-item"><strong>Self-hosted</strong><span>Your machine, your account</span></div><div class="manifest-item"><strong>SQLite</strong><span>One portable database file</span></div><div class="manifest-item"><strong>Fediverse-ready</strong><span>Followable from Mastodon</span></div><div class="manifest-item"><strong>Open source</strong><span>Inspect, adapt, keep forever</span></div></div></div><section class="content-section" id="features" aria-labelledby="features-title"><div class="shell"><p class="section-kicker">Flight manifest 01 · What it carries</p><h2 id="features-title">Made for the things worth keeping.</h2><p class="section-intro">Share from the apps you already use. Flightstead recognizes what arrived, gives it the right shape, and publishes it without turning everything into the same generic post.</p><div class="feature-grid"><article class="feature"><span class="feature-number">FS · 01</span><h3>One-tap dispatch</h3><p>Send a thought, link, photograph, book, song, quote, or article directly from the iOS share sheet.</p></article><article class="feature"><span class="feature-number">FS · 02</span><h3>Proper pages</h3><p>Each kind of post gets useful structure, considered typography, and a stable address on your domain.</p></article><article class="feature"><span class="feature-number">FS · 03</span><h3>Your own identity</h3><p>Choose a theme, title, profile, and custom domain. The result looks like your site—not an account inside ours.</p></article><article class="feature"><span class="feature-number">FS · 04</span><h3>A useful archive</h3><p>Browse by type or date, search everything, and keep ordinary URLs that remain useful beyond any app.</p></article><article class="feature"><span class="feature-number">FS · 05</span><h3>Feeds built in</h3><p>Every site includes RSS, sitemaps, social metadata, and a Fediverse identity—no plugin assembly required.</p></article><article class="feature"><span class="feature-number">FS · 06</span><h3>Quiet by design</h3><p>No visitor accounts, engagement traps, advertising network, or third-party scripts on your public pages.</p></article></div></div></section><section class="content-section sovereignty" id="ownership" aria-labelledby="ownership-title"><div class="shell split"><div><p class="section-kicker">Ground control · Data sovereignty</p><h2 id="ownership-title">Keep the keys to the hangar.</h2><p class="section-intro">Flightstead is software you operate, not a hosted social account. Your domain, database, uploads, and backups stay under your control.</p></div><ul class="principles"><li><div><strong>Your database is a file</strong><span>SQLite keeps the whole archive portable, understandable, and easy to back up.</span></div></li><li><div><strong>Your media stays local</strong><span>Uploaded originals and generated variants live in storage attached to your server.</span></div></li><li><div><strong>Your domain is the address</strong><span>Readers visit you directly. Canonical links, feeds, and federation all use the same public origin.</span></div></li><li><div><strong>Your exit is always open</strong><span>The server is MIT-licensed. Keep running it, fork it, or move it to another host whenever you choose.</span></div></li></ul></div><div class="shell route" aria-label="How a Flightstead post travels"><div class="route-stop"><span class="route-code">DEPARTURE</span><strong>Your iPhone</strong><span>Share what caught your attention.</span></div><div class="route-stop"><span class="route-code">HOME FIELD</span><strong>Your server</strong><span>Store and enrich it locally.</span></div><div class="route-stop"><span class="route-code">PUBLIC GATE</span><strong>Your domain</strong><span>Publish a durable web page.</span></div><div class="route-stop"><span class="route-code">OPEN SKIES</span><strong>The Fediverse</strong><span>Deliver it to people who follow.</span></div></div></section><section class="federation" aria-labelledby="federation-title"><img src="assets/flying-boat.webp" alt="A silver flying boat leaving a quiet coastal aerodrome at dawn" width="1536" height="1024" loading="lazy"/><div class="shell federation-copy"><p class="kicker">Open skies · Federation</p><h2 id="federation-title">A small site can still travel far.</h2><p>People can follow your site from Mastodon and compatible Fediverse apps. New posts arrive where they already read—while the original remains on your domain, in your design, under your control. Prefer a quieter flight plan? Outbound federation can be switched off.</p></div></section><section class="content-section" id="setup" aria-labelledby="setup-title"><div class="shell"><p class="section-kicker">Pre-flight checklist · About twenty minutes</p><h2 id="setup-title">A small server, not a second career.</h2><p class="section-intro">Flightstead is one Node process backed by SQLite. Run it on inexpensive shared hosting, a Linux VPS, or a machine you already manage.</p><div class="setup-grid"><article class="setup-step"><h3>Choose a home field</h3><p>Bring a domain and any always-on Linux host with SSH access. Uberspace is the friendliest documented route.</p></article><article class="setup-step"><h3>Install and configure</h3><p>Clone the server, run <code>npm install</code>, copy the example environment file, and add your domain.</p></article><article class="setup-step"><h3>Prepare the logbook</h3><p><code>npm run db:migrate</code> creates the database. No separate database service or container stack is required.</p></article><article class="setup-step"><h3>Pair the app</h3><p><code>npm run bootstrap-owner</code> prints a short-lived QR code. Scan it in the app to connect and sign in.</p></article></div><div class="setup-actions"><a class="button" href="https://github.com/adrianthomas/shareblog/blob/main/SELF_HOSTING.md">Read the self-hosting guide</a><a class="text-link" href="https://github.com/adrianthomas/shareblog/blob/main/UBERSPACE.md">Uberspace walkthrough →</a><a class="text-link" href="https://github.com/adrianthomas/shareblog">Browse the source →</a></div><aside class="app-callout" aria-labelledby="app-title"><div><p class="section-kicker">Mobile companion · Coming soon</p><h3 id="app-title">The shortest route from “save this” to published.</h3><p>The Flightstead app and share extension connect directly to your server. The App Store destination is a placeholder while the new listing is prepared.</p></div><a class="button" href="https://apps.apple.com/app/id0000000000" rel="nofollow" aria-label="Flightstead on the App Store, coming soon">App Store placeholder ↗</a></aside></div></section></main><footer><div class="shell footer-inner"><div><a class="brand" href="#top" aria-label="Back to Flightstead home"><img class="brand-mark" src="assets/flightstead-icon.png" alt="" width="40" height="40"/><span>Flightstead</span></a><p class="footer-copy">A friendly, self-hosted home for notes, photographs, links, and the people who would like to follow along.</p><p class="byline">A <a href="https://navigationstack.com">Navigationstack.com</a> app.</p></div><nav class="footer-links" aria-label="Footer navigation"><a href="#features">Features</a><a href="#ownership">Ownership</a><a href="#setup">Setup</a><a href="https://github.com/adrianthomas/shareblog">GitHub</a><a href="https://apps.apple.com/app/id0000000000" rel="nofollow">iOS app</a><a href="https://github.com/adrianthomas/shareblog/blob/main/LICENSE">MIT license</a></nav></div></footer></body></html>

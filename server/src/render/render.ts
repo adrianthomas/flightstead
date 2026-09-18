@@ -5,7 +5,6 @@ import { db } from "../db/client.js";
 import { assets, type AssetExif } from "../db/schema.js";
 import { storage } from "../storage/index.js";
 import { Layout, type PageMetadata } from "./templates/Layout.js";
-import { LandingPage } from "./templates/LandingPage.js";
 import { ThoughtPost } from "./templates/ThoughtPost.js";
 import { PhotoPost, formatExif } from "./templates/PhotoPost.js";
 import { BookCard, flattenLinks } from "./templates/BookCard.js";
@@ -165,10 +164,6 @@ async function renderDetail(object: ContentObject, locale: string, theme: Site["
     case "quote":
       return React.createElement(QuotePost, { object, linked: false, locale, ...detailProps });
   }
-}
-
-export function renderLandingPage(): string {
-  return "<!doctype html>" + renderToStaticMarkup(React.createElement(LandingPage));
 }
 
 export async function renderList(

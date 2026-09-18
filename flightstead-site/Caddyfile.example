@@ -1,0 +1,8 @@
+flightstead.com, www.flightstead.com {
+    root * /srv/flightstead-site/dist
+    encode zstd gzip
+    file_server
+
+    @immutable path /assets/*
+    header @immutable Cache-Control "public, max-age=604800"
+}

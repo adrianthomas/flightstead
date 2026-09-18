@@ -9,7 +9,6 @@ import {
   renderList,
   renderObjectPage,
   renderFeed,
-  renderLandingPage,
   renderAboutPage,
   renderWorkPage,
   renderContactPage,
@@ -163,10 +162,6 @@ export async function sitePageRoutes(app: FastifyInstance) {
   });
 
   app.get("/", async (request, reply) => {
-    if (request.headers.host === process.env.BASE_DOMAIN) {
-      const apexSite = await siteForHost(request.headers.host);
-      if (!apexSite) return sendHtml(reply, renderLandingPage());
-    }
     await resolveTenant(request, reply);
     if (reply.sent) return;
     const site = request.site!;

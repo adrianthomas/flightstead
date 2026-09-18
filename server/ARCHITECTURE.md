@@ -1,5 +1,16 @@
 # Server architecture map
 
+## Product identity
+
+The customer-facing product is **Flightstead**, a Navigationstack.com app:
+"Your own place to publish." Documentation, email subjects, pairing instructions,
+and product pages use that name. The standalone product website lives in
+`flightstead-site/` and is deployed independently; this server never renders it.
+The GitHub repository,
+deployment service names, `shareblog://pair` payload, `X-Shareblog-*` headers,
+legacy product route and iOS bundle/storage identifiers stay unchanged for
+compatibility.
+
 A fast-orientation reference for `server/`: route tables, schema tables, and
 the checklist for cross-cutting changes (like adding a content type) that touch
 many files at once. Keep it in sync with the implementation.
@@ -47,7 +58,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 
 | Path | Renders |
 |---|---|
-| `/` | Home — all types mixed, paginated 20 at a time (`renderList`). On a bare `BASE_DOMAIN` with no apex tenant, renders the static Notehangar product landing page instead; its bundled imagery and fonts are served locally through `/static/*`. |
+| `/` | Home — all types mixed, paginated 20 at a time (`renderList`). An unknown bare `BASE_DOMAIN` has no product-page fallback and returns the ordinary unknown-tenant 404. |
 | `/posts`, `/articles`, `/links`, `/books`, `/music`, `/photos`, `/quotes` | Per-type listings (`LISTING_TYPES`), paginated 20 at a time |
 | `/<listing>/feed.xml`, `/feed.xml` | RSS (`renderFeed`) |
 | `/<prefix>/:slug` (`DETAIL_TYPES`) | Detail page (`renderObjectPage`) — 404s if not published |
@@ -61,7 +72,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 
 After all explicit routes, imported `metadata.import.legacyPath` values provide
 permanent redirects from historical root-level WordPress permalinks to the
-matching typed Shareblog detail route.
+matching typed Flightstead detail route.
 
 `PATH_PREFIX` (exported from `render.ts`) is the single source of truth
 mapping a `ContentType` to its URL segment (`photo` → `/photos`) — reused by
@@ -94,12 +105,12 @@ bots/previews, prefetches, and requests carrying DNT or Global Privacy Control
 are not counted. Referrers are reduced in memory to `direct`, `internal`, a
 small set of recognizable search/social services, or `other`; the URL and host
 are never written to the database. These are page views, not unique visitors:
-Shareblog intentionally does not mint a cookie or retain an identifier merely
+Flightstead intentionally does not mint a cookie or retain an identifier merely
 to deduplicate people. Internal navigation contributes to visit totals but is
 omitted from the referring-sources list. Fastify request logging redacts the
 remote address and port; the request IP is used transiently only by rate
 limiting. Operators remain responsible for the retention settings of any
-reverse-proxy or hosting-provider access logs outside Shareblog.
+reverse-proxy or hosting-provider access logs outside Flightstead.
 `sites.statsEnabled` is the per-site master switch and defaults on. Setting it
 to false through `PATCH /sites` atomically deletes every aggregate row for the
 site and stops new counting; `GET /stats` then returns `stats_disabled` until
