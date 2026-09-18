@@ -18,6 +18,14 @@ to `dist/`, and reload Caddy.
 Copy the server block from `nginx.conf.example`, replace the domain and root,
 then test and reload Nginx.
 
+## Uberspace
+
+The live Uberspace account uses Apache's shared document root. Upload `dist/`
+to `~/html/flightstead.com/`, install `uberspace.htaccess` as `~/html/.htaccess`,
+and map both `flightstead.com` and `www.flightstead.com` to the Apache backend.
+The rewrite is host-specific and leaves the account's other static sites and
+Flightstead's Node backend untouched.
+
 ## Updating
 
 Upload the directory atomically when possible—for example, copy it to a new

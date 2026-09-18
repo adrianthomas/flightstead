@@ -1,0 +1,9 @@
+RewriteEngine On
+
+# Keep Uberspace certificate validation outside the product-site rewrite.
+RewriteCond %{REQUEST_URI} !^/\.well-known/acme-challenge/ [NC]
+
+# Apache is shared by the account's static domains. Route only Flightstead.
+RewriteCond %{HTTP_HOST} ^(www\.)?flightstead\.com$ [NC]
+RewriteCond %{REQUEST_URI} !^/flightstead\.com/ [NC]
+RewriteRule ^(.*)$ /flightstead.com/$1 [L]
