@@ -46,6 +46,11 @@ SMTP_FROM=Flightstead <you@example.com>
 Keep `DATABASE_URL` and `LOCAL_STORAGE_DIR` at their supplied `/app/data/...`
 paths. `synology.env` contains secrets and is intentionally ignored by Git.
 
+Also create an empty `data` folder inside the project directory now, using File
+Station. Unlike plain Linux Docker, Synology's Container Manager does not
+auto-create a bind mount's host directory — starting the project before this
+folder exists fails with `Bind mount failed: '.../data' does not exist`.
+
 ## 2. Create the Container Manager project
 
 In **Container Manager → Project**, choose **Create**. Use `shareblog` as the
