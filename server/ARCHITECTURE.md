@@ -4,8 +4,9 @@
 
 The customer-facing product is **Flightstead**, a Navigationstack.com app:
 "Your own place to publish." Documentation, email subjects, pairing instructions,
-and product pages use that name. The standalone product website lives in
-`flightstead-site/` and is deployed independently; this server never renders it.
+and product pages use that name. The standalone product website lives in the
+separate `flightstead-marketing` repo and is deployed independently; this
+server never renders it.
 The GitHub repository,
 deployment service names, `shareblog://pair` payload, `X-Shareblog-*` headers,
 legacy product route and iOS bundle/storage identifiers stay unchanged for
