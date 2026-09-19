@@ -6,6 +6,7 @@ import { CardsFeedItem, CardsDetailHeader } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetThoughtFeedItem } from "../themes/cabinet.js";
 import { formatRichText, stripBasicFormatting } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
+import { BackLink } from "./BackLink.js";
 
 export function ThoughtPost({
   object,
@@ -96,21 +97,26 @@ export function ThoughtPost({
   }
 
   return (
-    <article className="card">
-      <div className="body-content" dangerouslySetInnerHTML={{ __html: formatRichText(object.body ?? "") }} />
-      <div className="meta">
-        {linked ? (
-          <a className="title-link" href={`/posts/${object.slug}`}>
-            {formatDate(object.publishedAt, locale)}
-          </a>
-        ) : (
-          <>
-            {formatDate(object.publishedAt, locale)}
-            <CopyLinkButton locale={locale} />
-          </>
-        )}
-      </div>
-    </article>
+    <>
+      {!linked && (theme === "classic" || theme === "washi") ? (
+        <BackLink href={backHref!} label={backLabel!} />
+      ) : null}
+      <article className="card">
+        <div className="body-content" dangerouslySetInnerHTML={{ __html: formatRichText(object.body ?? "") }} />
+        <div className="meta">
+          {linked ? (
+            <a className="title-link" href={`/posts/${object.slug}`}>
+              {formatDate(object.publishedAt, locale)}
+            </a>
+          ) : (
+            <>
+              {formatDate(object.publishedAt, locale)}
+              <CopyLinkButton locale={locale} />
+            </>
+          )}
+        </div>
+      </article>
+    </>
   );
 }
 

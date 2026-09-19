@@ -6,6 +6,7 @@ import { t } from "../i18n.js";
 import { CardsFeedItem, CardsDetailHeader, type CardsExifRow } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
 import { CopyLinkButton } from "./CopyButton.js";
+import { BackLink } from "./BackLink.js";
 
 // Fractional shutter speeds are the camera-standard notation for anything
 // faster than 1s ("1/250s", not "0.004s") — everything at or above 1s reads
@@ -143,23 +144,28 @@ export function PhotoPost({
   const exifRows = formatExif(exif, locale);
 
   return (
-    <article className="card">
-      {linked ? <a href={`/photos/${object.slug}`}>{image}</a> : image}
-      {metadata.caption ? <p>{metadata.caption}</p> : null}
-      <div className="meta">
-        {formatDate(object.publishedAt, locale)}
-        {!linked ? <CopyLinkButton locale={locale} /> : null}
-      </div>
-      {!linked && exifRows ? (
-        <dl className="exif">
-          {exifRows.map((row) => (
-            <div className="exif-row" key={row.label}>
-              <dt>{row.label}</dt>
-              <dd>{row.value}</dd>
-            </div>
-          ))}
-        </dl>
+    <>
+      {!linked && (theme === "classic" || theme === "washi") ? (
+        <BackLink href={backHref!} label={backLabel!} />
       ) : null}
-    </article>
+      <article className="card">
+        {linked ? <a href={`/photos/${object.slug}`}>{image}</a> : image}
+        {metadata.caption ? <p>{metadata.caption}</p> : null}
+        <div className="meta">
+          {formatDate(object.publishedAt, locale)}
+          {!linked ? <CopyLinkButton locale={locale} /> : null}
+        </div>
+        {!linked && exifRows ? (
+          <dl className="exif">
+            {exifRows.map((row) => (
+              <div className="exif-row" key={row.label}>
+                <dt>{row.label}</dt>
+                <dd>{row.value}</dd>
+              </div>
+            ))}
+          </dl>
+        ) : null}
+      </article>
+    </>
   );
 }

@@ -504,6 +504,12 @@ export function Layout({
               .quote-text cite { font-style: normal; }
               a.title-link { text-decoration: none; color: inherit; }
               a.title-link:hover { text-decoration: underline; }
+              .back-link {
+                display: inline-flex; align-items: center; gap: 0.35rem;
+                margin-bottom: 1.25rem; color: var(--muted); font-size: 0.9rem; font-weight: 600;
+                text-decoration: none;
+              }
+              .back-link:hover, .back-link:focus-visible { color: var(--focus); text-decoration: underline; }
               /* Icon buttons next to a post's date (copy link) or a quote's
                  date line (copy quote) — see CopyButton.tsx. color: inherit
                  rather than a fixed token so it automatically matches

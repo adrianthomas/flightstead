@@ -7,6 +7,7 @@ import { CardsFeedItem, CardsDetailHeader, CardsMusicDetailHeader } from "../the
 import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
 import { formatBasicText } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
+import { BackLink } from "./BackLink.js";
 import { musicLinksFor } from "../../lib/music-links.js";
 
 function Note({ body }: { body: string | null }) {
@@ -202,34 +203,39 @@ export function MusicCard({
   }
 
   return (
-    <article className={variant === "card" ? "card music" : "music"}>
-      {artworkUrl ? (
-        <img className="artwork" src={artworkUrl} alt={`Artwork for ${metadata.releaseTitle}`} />
+    <>
+      {variant === "page" && (theme === "classic" || theme === "washi") ? (
+        <BackLink href={backHref!} label={backLabel!} />
       ) : null}
-      <div>
-        <h2>
-          {variant === "card" ? (
-            <a className="title-link" href={`/music/${object.slug}`}>
-              {metadata.releaseTitle}
-            </a>
-          ) : (
-            metadata.releaseTitle
-          )}
-        </h2>
-        <p className="meta">{metadata.artist}</p>
-        <Note body={object.body} />
-        {visibleLinks.length > 0 ? (
-          <p className="music-links">
-            {visibleLinks.map(([platform, url]) => (
-              <MusicLink key={platform} platform={platform} url={url} locale={locale} />
-            ))}
-          </p>
+      <article className={variant === "card" ? "card music" : "music"}>
+        {artworkUrl ? (
+          <img className="artwork" src={artworkUrl} alt={`Artwork for ${metadata.releaseTitle}`} />
         ) : null}
-        <p className="meta">
-          {formatDate(object.publishedAt, locale)}
-          {variant === "page" ? <CopyLinkButton locale={locale} /> : null}
-        </p>
-      </div>
-    </article>
+        <div>
+          <h2>
+            {variant === "card" ? (
+              <a className="title-link" href={`/music/${object.slug}`}>
+                {metadata.releaseTitle}
+              </a>
+            ) : (
+              metadata.releaseTitle
+            )}
+          </h2>
+          <p className="meta">{metadata.artist}</p>
+          <Note body={object.body} />
+          {visibleLinks.length > 0 ? (
+            <p className="music-links">
+              {visibleLinks.map(([platform, url]) => (
+                <MusicLink key={platform} platform={platform} url={url} locale={locale} />
+              ))}
+            </p>
+          ) : null}
+          <p className="meta">
+            {formatDate(object.publishedAt, locale)}
+            {variant === "page" ? <CopyLinkButton locale={locale} /> : null}
+          </p>
+        </div>
+      </article>
+    </>
   );
 }

@@ -7,6 +7,7 @@ import { formatBasicText } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
 import { CloseButton } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetLinkFeedItem } from "../themes/cabinet.js";
+import { BackLink } from "./BackLink.js";
 
 function externalUrl(object: ContentObject): string {
   return object.sourceUrl ?? `/links/${object.slug}`;
@@ -128,21 +129,26 @@ export function LinkPost({
   }
 
   return (
-    <article className="card link-card">
-      <div className="link-topline">
-        <p className="meta">{t(locale, "links")}</p>
-        {host ? <p className="link-host">{host}</p> : null}
-      </div>
-      <h2>
-        <ExternalTitle object={object} />
-      </h2>
-      {metadata.excerpt ? <p className="link-excerpt">{metadata.excerpt}</p> : null}
-      {bodyHtml ? <div className="body-content link-comment" dangerouslySetInnerHTML={{ __html: bodyHtml }} /> : null}
-      <p className="meta">{formatDate(object.publishedAt, locale)}</p>
-      <p className="link-actions">
-        <OpenLinkButton object={object} locale={locale} />
-        {!linked ? <CopyLinkButton locale={locale} /> : null}
-      </p>
-    </article>
+    <>
+      {!linked && (theme === "classic" || theme === "washi") ? (
+        <BackLink href={backHref!} label={backLabel!} />
+      ) : null}
+      <article className="card link-card">
+        <div className="link-topline">
+          <p className="meta">{t(locale, "links")}</p>
+          {host ? <p className="link-host">{host}</p> : null}
+        </div>
+        <h2>
+          <ExternalTitle object={object} />
+        </h2>
+        {metadata.excerpt ? <p className="link-excerpt">{metadata.excerpt}</p> : null}
+        {bodyHtml ? <div className="body-content link-comment" dangerouslySetInnerHTML={{ __html: bodyHtml }} /> : null}
+        <p className="meta">{formatDate(object.publishedAt, locale)}</p>
+        <p className="link-actions">
+          <OpenLinkButton object={object} locale={locale} />
+          {!linked ? <CopyLinkButton locale={locale} /> : null}
+        </p>
+      </article>
+    </>
   );
 }

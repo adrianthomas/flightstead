@@ -7,6 +7,7 @@ import { CardsFeedItem, CardsDetailHeader } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
 import { CopyLinkButton, CopyQuoteButton } from "./CopyButton.js";
 import { formatBasicText } from "../format.js";
+import { BackLink } from "./BackLink.js";
 
 function Comment({ text }: { text: string | undefined }) {
   if (!text) return null;
@@ -123,27 +124,32 @@ export function QuotePost({
   }
 
   return (
-    <article className="card quote">
-      <blockquote className="quote-text">
-        <p>{quoted}</p>
-        <footer>
-          — <cite>{metadata.author}</cite>
-        </footer>
-      </blockquote>
-      <Comment text={metadata.comment} />
-      <div className="meta">
-        {linked ? (
-          <a className="title-link" href={`/quotes/${object.slug}`}>
-            {formatDate(object.publishedAt, locale)}
-          </a>
-        ) : (
-          <>
-            <CopyQuoteButton text={quoteCopyText} locale={locale} className="copy-btn--leading" />
-            {formatDate(object.publishedAt, locale)}
-            <CopyLinkButton locale={locale} />
-          </>
-        )}
-      </div>
-    </article>
+    <>
+      {!linked && (theme === "classic" || theme === "washi") ? (
+        <BackLink href={backHref!} label={backLabel!} />
+      ) : null}
+      <article className="card quote">
+        <blockquote className="quote-text">
+          <p>{quoted}</p>
+          <footer>
+            — <cite>{metadata.author}</cite>
+          </footer>
+        </blockquote>
+        <Comment text={metadata.comment} />
+        <div className="meta">
+          {linked ? (
+            <a className="title-link" href={`/quotes/${object.slug}`}>
+              {formatDate(object.publishedAt, locale)}
+            </a>
+          ) : (
+            <>
+              <CopyQuoteButton text={quoteCopyText} locale={locale} className="copy-btn--leading" />
+              {formatDate(object.publishedAt, locale)}
+              <CopyLinkButton locale={locale} />
+            </>
+          )}
+        </div>
+      </article>
+    </>
   );
 }

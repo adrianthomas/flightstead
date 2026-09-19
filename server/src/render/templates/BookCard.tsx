@@ -7,6 +7,7 @@ import { CardsFeedItem, CardsDetailHeader, CardsBookDetailHeader } from "../them
 import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
 import { formatBasicText } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
+import { BackLink } from "./BackLink.js";
 import { bookRetailerLinksFor } from "../../lib/book-links.js";
 
 function Note({ body }: { body: string | null }) {
@@ -248,34 +249,39 @@ export function BookCard({
   }
 
   return (
-    <article className={variant === "card" ? "card book" : "book"}>
-      {coverUrl ? (
-        <img src={coverUrl} alt={object.title ? `Cover of ${object.title}` : ""} />
+    <>
+      {variant === "page" && (theme === "classic" || theme === "washi") ? (
+        <BackLink href={backHref!} label={backLabel!} />
       ) : null}
-      <div>
-        <h2>
-          {variant === "card" ? (
-            <a className="title-link" href={`/books/${object.slug}`}>
-              {object.title}
-            </a>
-          ) : (
-            object.title
-          )}
-        </h2>
-        <p className="meta">{metadata.author}</p>
-        {stars ? (
-          <p>
-            <span aria-hidden="true">{stars}</span>
-            <span className="sr-only">{t(locale, "ratingLabel", { rating: metadata.rating! })}</span>
-          </p>
+      <article className={variant === "card" ? "card book" : "book"}>
+        {coverUrl ? (
+          <img src={coverUrl} alt={object.title ? `Cover of ${object.title}` : ""} />
         ) : null}
-        <Note body={object.body} />
-        {variant === "page" ? <BookLinks links={links} /> : null}
-        <p className="meta">
-          {formatDate(object.publishedAt, locale)}
-          {variant === "page" ? <CopyLinkButton locale={locale} /> : null}
-        </p>
-      </div>
-    </article>
+        <div>
+          <h2>
+            {variant === "card" ? (
+              <a className="title-link" href={`/books/${object.slug}`}>
+                {object.title}
+              </a>
+            ) : (
+              object.title
+            )}
+          </h2>
+          <p className="meta">{metadata.author}</p>
+          {stars ? (
+            <p>
+              <span aria-hidden="true">{stars}</span>
+              <span className="sr-only">{t(locale, "ratingLabel", { rating: metadata.rating! })}</span>
+            </p>
+          ) : null}
+          <Note body={object.body} />
+          {variant === "page" ? <BookLinks links={links} /> : null}
+          <p className="meta">
+            {formatDate(object.publishedAt, locale)}
+            {variant === "page" ? <CopyLinkButton locale={locale} /> : null}
+          </p>
+        </div>
+      </article>
+    </>
   );
 }

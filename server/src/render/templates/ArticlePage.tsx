@@ -7,6 +7,7 @@ import { CardsFeedItem, CloseButton } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
 import { formatRichText, stripBasicFormatting } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
+import { BackLink } from "./BackLink.js";
 
 function articleExcerpt(object: ContentObject, metadata: ArticleMetadata): string | undefined {
   const excerpt = metadata.excerpt?.trim();
@@ -209,15 +210,18 @@ export function ArticlePage({
   }
 
   return (
-    <article className="article-detail">
-      {coverImageUrl ? <img className="article-detail-cover" src={coverImageUrl} alt={coverAltText} /> : null}
-      <h1>{object.title}</h1>
-      {metadataExcerpt ? <p className="article-excerpt">{metadataExcerpt}</p> : null}
-      <p className="meta">
-        {formatDate(object.publishedAt, locale)}
-        <CopyLinkButton locale={locale} />
-      </p>
-      <div className="body-content" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
-    </article>
+    <>
+      {theme === "classic" || theme === "washi" ? <BackLink href={backHref!} label={backLabel!} /> : null}
+      <article className="article-detail">
+        {coverImageUrl ? <img className="article-detail-cover" src={coverImageUrl} alt={coverAltText} /> : null}
+        <h1>{object.title}</h1>
+        {metadataExcerpt ? <p className="article-excerpt">{metadataExcerpt}</p> : null}
+        <p className="meta">
+          {formatDate(object.publishedAt, locale)}
+          <CopyLinkButton locale={locale} />
+        </p>
+        <div className="body-content" dangerouslySetInnerHTML={{ __html: bodyHtml }} />
+      </article>
+    </>
   );
 }
