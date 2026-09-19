@@ -51,11 +51,27 @@ const TINY_JPEG_BASE64 =
 const PORTRAIT_COVER_DATA_URI = `data:image/svg+xml;base64,${Buffer.from(
   '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="124" viewBox="0 0 80 124"><rect width="80" height="124" fill="#83512e"/><rect x="9" y="12" width="62" height="100" rx="2" fill="#f7ead7"/><text x="40" y="43" text-anchor="middle" font-size="12" font-family="serif" fill="#2f2217">Test</text><text x="40" y="60" text-anchor="middle" font-size="12" font-family="serif" fill="#2f2217">Book</text></svg>',
 ).toString("base64")}`;
+const LANDSCAPE_COVER_SVG = Buffer.from(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="96" viewBox="0 0 240 96"><rect width="240" height="96" fill="#78bce8"/><rect y="58" width="240" height="38" fill="#64884b"/></svg>',
+);
 
 async function uploadAsset(baseURL: string, token: string): Promise<{ id: string; url: string }> {
   const bytes = Buffer.from(TINY_JPEG_BASE64, "base64");
   const form = new FormData();
   form.append("file", new Blob([bytes], { type: "image/jpeg" }), "test.jpg");
+  const res = await fetch(`${baseURL.replace("localhost", "api.localhost")}/api/v1/assets`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: form,
+  });
+  if (!res.ok) throw new Error(`asset upload -> ${res.status}: ${await res.text()}`);
+  const { asset } = await res.json();
+  return { id: asset.id as string, url: asset.url as string };
+}
+
+async function uploadLandscapeAsset(baseURL: string, token: string): Promise<{ id: string; url: string }> {
+  const form = new FormData();
+  form.append("file", new Blob([LANDSCAPE_COVER_SVG], { type: "image/svg+xml" }), "article-cover.svg");
   const res = await fetch(`${baseURL.replace("localhost", "api.localhost")}/api/v1/assets`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -96,7 +112,7 @@ test.beforeAll(async ({ baseURL }) => {
   for (const post of POSTS) {
     await api(apiBaseURL, ownerToken, "/api/v1/objects", post);
   }
-  const articleCover = await uploadAsset(apiBaseURL, ownerToken);
+  const articleCover = await uploadLandscapeAsset(apiBaseURL, ownerToken);
   await api(apiBaseURL, ownerToken, "/api/v1/objects", {
     type: "article",
     title: "A covered article",
@@ -337,18 +353,32 @@ test("Cards covered articles open in an overlay that can be pulled down to close
 
 test("Cabinet article body follows its header without a viewport-sized gap", async ({ page }) => {
   await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cabinet" }, "PATCH");
-  await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto(siteBaseURL + "/");
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1440, height: 900 },
+  ]) {
+    await test.step(`${viewport.width}px`, async () => {
+      await page.setViewportSize(viewport);
+      await page.goto(siteBaseURL + "/");
 
-  await page.locator('a[data-cabinet-card][data-cabinet-type="article"]').first().click();
-  const dialog = page.locator('.cabinet-panel[role="dialog"]');
-  await expect(dialog).toBeVisible();
+      await page.locator('a[data-cabinet-card][data-cabinet-type="article"]').first().click();
+      const dialog = page.locator('.cabinet-panel[role="dialog"]');
+      await expect(dialog).toBeVisible();
 
-  const copyBox = await dialog.locator(".cabinet-detail-copy").boundingBox();
-  const firstParagraphBox = await dialog.locator(".cabinet-article-body > p").first().boundingBox();
-  expect(copyBox).not.toBeNull();
-  expect(firstParagraphBox).not.toBeNull();
-  expect(firstParagraphBox!.y - (copyBox!.y + copyBox!.height)).toBeLessThan(100);
+      const copyBox = await dialog.locator(".cabinet-detail-copy").boundingBox();
+      const imageBox = await dialog.locator(".cabinet-detail-media > img").boundingBox();
+      const firstParagraphBox = await dialog.locator(".cabinet-article-body > p").first().boundingBox();
+      expect(copyBox).not.toBeNull();
+      expect(imageBox).not.toBeNull();
+      expect(firstParagraphBox).not.toBeNull();
+      if (viewport.width >= 1100) expect(imageBox!.height).toBeLessThan(viewport.height * 0.5);
+      const visibleHeaderBottom = Math.max(
+        copyBox!.y + copyBox!.height,
+        imageBox!.y + imageBox!.height,
+      );
+      expect(firstParagraphBox!.y - visibleHeaderBottom).toBeLessThan(100);
+    });
+  }
 });
 
 test("every theme can open and leave a covered article", async ({ page }) => {

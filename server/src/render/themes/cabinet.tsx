@@ -823,8 +823,8 @@ export const cabinetStyles = `
     padding-bottom: 0;
   }
   .cabinet-detail--article .cabinet-detail-header { display: grid; grid-template-columns: minmax(0, 1.12fr) minmax(20rem, 0.88fr); gap: clamp(2rem, 6vw, 7rem); align-items: end; }
-  .cabinet-detail--article .cabinet-detail-media { grid-column: 1; min-height: 62vh; }
-  .cabinet-detail--article .cabinet-detail-media > img { width: 100%; height: 62vh; object-fit: cover; }
+  .cabinet-detail--article .cabinet-detail-media { grid-column: 1; }
+  .cabinet-detail--article .cabinet-detail-media > img { width: 100%; height: auto; object-fit: cover; }
   .cabinet-detail--article .cabinet-detail-copy { grid-column: 2; padding-bottom: 1.5rem; }
   .cabinet-detail--article:not(:has(.cabinet-detail-media)) .cabinet-detail-header { display: block; width: min(100%, 980px); }
   .cabinet-detail--article .cabinet-detail-title { font-size: clamp(2.4rem, 5.25vw, 5.5rem); }
