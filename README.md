@@ -28,8 +28,8 @@ live.
   categories are built in. Flightstead does not retain visitor IP addresses,
   user agents, session identifiers, full referrer URLs, or individual request
   logs for analytics.
-- **Eight built-in themes.** Choose from Classic, Cards, Washi, Prism, Ledger,
-  Cabinet, Aqua, and Think, with light/dark and responsive layouts.
+- **Six selectable themes.** Choose from Basic, Cards, Washi, Prism, Ledger,
+  and Cabinet, with light/dark and responsive layouts.
 - **Useful publishing features out of the box.** Search, archives, RSS,
   sitemaps, social metadata, custom domains, and optional Fediverse publishing
   are included.

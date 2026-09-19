@@ -10,7 +10,7 @@ interface ThemeOption {
 const themeOptions = [
   {
     id: "classic",
-    name: "Classic",
+    name: "Basic",
     description: "A simple chronological site with clean typography and article-style posts.",
   },
   {
@@ -55,8 +55,14 @@ if (missingThemeMetadata.length > 0) {
   throw new Error(`Missing theme metadata for: ${missingThemeMetadata.join(", ")}`);
 }
 
+// Aqua and Think remain valid persisted values so existing sites keep
+// rendering unchanged, but they are intentionally absent from the catalog
+// while those designs are held back from new selection.
+const selectableThemeIds = new Set<Theme>(["classic", "cards", "washi", "prism", "ledger", "cabinet"]);
+const selectableThemeOptions = themeOptions.filter((option) => selectableThemeIds.has(option.id));
+
 export async function themeRoutes(app: FastifyInstance) {
   app.get("/themes", async (_request, reply) => {
-    return reply.send({ themes: themeOptions });
+    return reply.send({ themes: selectableThemeOptions });
   });
 }

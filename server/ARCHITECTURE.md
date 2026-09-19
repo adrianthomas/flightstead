@@ -48,7 +48,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 |---|---|---|
 | `routes/auth.ts` | `POST /auth/request-code`, `POST /auth/verify-code`, `POST /auth/claim-owner`, `GET /auth/magic/:token`, `POST /auth/logout`, `GET /me` | Magic-code email auth (mobile gets a bearer token, web gets a session cookie), plus `claim-owner` — redeems a short-lived pairing code minted by an interactive `npm run bootstrap-owner` run (`db/bootstrap-owner.ts` + `auth/owner-claim.ts`), the QR/manual-code alternative to email for first sign-in (see the `ownerClaims` table below). Logout revokes *every* token for the account. |
 | `routes/sites.ts` | site CRUD (create; update identity/domain/theme/about/federation) | One site per user today (`sites.ownerUserId` is `.unique()`). New identity fields are additive for older clients. |
-| `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of selectable site themes (`id`/`name`/`description`) used by iOS Settings. Keep this additive so newer servers can expose themes without requiring an iOS app update. |
+| `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of selectable site themes (`id`/`name`/`description`) used by iOS Settings. The stable `classic` id is presented as Basic. Aqua and Think remain valid renderable values for existing sites but are intentionally omitted from this catalog. |
 | `routes/objects.ts` | `POST/GET/PATCH/DELETE /objects`, `GET /objects/:id` | Owns slug generation (`uniqueSlug`, `slugSourceText`), asset-ownership checks and deletion (including URL-only inline Article/Thought images and cached music artwork), cache invalidation, and ActivityPub Create/Delete delivery on publish, unpublish, and deletion. It also normalizes legacy iOS article posts that arrived as `thought` with a leading Markdown H1 into real `article` rows. `GET /objects` hides `link` rows unless the client sends `X-Shareblog-Features: link-content-type`, because old iOS apps decode `ContentType` as a closed enum. |
 | `routes/assets.ts` | asset upload | Feeds `image/worker.ts` for variants + EXIF extraction. |
 | `routes/resolve.ts` | book/music/article metadata lookup | Thin wrapper over `resolvers/*.ts`; used by the iOS compose screens before publish, not stored server-side until the object is created. Music accepts any source URL but translates it to a sufficiently strong Apple catalog match; unmatched sources retain editable title/artist only. |
@@ -145,10 +145,10 @@ high-contrast surfaces, and saturated blue/pink accents. Ledger is also
 cards-derived, but presents the feed as a single-column professional index with
 separators and compact type labels; its branch in `cardsScript` uses an
 iOS-style right-to-left push detail panel instead of the expanding-card motion.
-Aqua keeps the classic semantic templates and adds a responsive two-column feed,
+Aqua (currently hidden from the selectable catalog) keeps the Basic semantic templates and adds a responsive two-column feed,
 pinstriped desktop chrome, translucent blue controls, and polished content
 panels with no additional script or third-party runtime assets.
-Think also keeps the classic semantic templates but follows Apple's early-2000s
+Think (also currently hidden) keeps the Basic semantic templates but follows Apple's early-2000s
 web language rather than its desktop UI: graphite global navigation, a dominant
 lead story, and compact three-up promotional modules on an airy white canvas.
 
@@ -212,7 +212,7 @@ Article `metadata.coverAssetId` is the card/detail header image, with
 `metadata.coverAltText` as its alt text. Inline markdown images in the article
 body are separate body images and render below the title/excerpt/date content.
 The WebKit suite exercises covered-article open/return behavior across every
-theme: ordinary history navigation for Classic, Washi, Aqua, and Think; Cards
+theme: ordinary history navigation for Basic, Washi, Aqua, and Think; Cards
 overlays for Cards, Prism, and Ledger; and the Cabinet overlay. Separate tests
 retain gesture-level pull-down coverage for Cards and Cabinet plus the
 specialized photo, book, and music animation paths.
