@@ -88,6 +88,6 @@ export const RELEASE_HISTORY: ReleaseEntry[] = [
   },
   {
     date: "2026-08-19",
-    changes: ["First release: the Shareblog server, iOS app, and share extension, with self-hosting support."],
+    changes: ["First release: the Flightstead server, iOS app, and share extension, with self-hosting support."],
   },
 ];
