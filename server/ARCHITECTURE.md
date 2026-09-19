@@ -291,6 +291,22 @@ It is dry-run by default; `npm run import:markdown -- ... --commit` is the only
 write mode. Inline image URLs remain compatible with existing clients while
 `metadata.inlineAssetIds` preserves ownership/lifecycle information.
 
+## Container deployment
+
+`server/Dockerfile` builds a multi-architecture-compatible Node 22 production
+image. Its entrypoint fixes ownership of the persistent `/app/data` bind mount,
+drops to the unprivileged `node` user, applies the ordered SQLite migrations,
+and then starts the server. The repository-root `compose.synology.yml` maps
+that directory to the project-local `data/` folder and publishes port 3000 only
+on the NAS loopback interface for DSM's reverse proxy. Compose also rotates the
+container's JSON logs at three 10 MB files. Keep the migrations, `public/`
+assets, and the dependency postinstall scripts in the image when changing the
+build layout. `scripts/test-synology-container.sh` builds the image, starts it
+with a temporary data mount, waits for its health check, and verifies that
+migrations created the SQLite database; CI runs that smoke test for amd64 and
+arm64. The operator workflow and hostname-preserving DSM proxy setup live in
+`SYNOLOGY.md`.
+
 ## Adding a new content type — checklist
 
 1. `db/schema.ts` — add to `contentTypeValues`; run `npm run db:generate` +

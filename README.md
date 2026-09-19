@@ -40,6 +40,8 @@ live.
 
 Choose the guide that matches where you want to host it:
 
+- **[Synology NAS](SYNOLOGY.md)** — a Container Manager project with persistent
+  storage, automatic migrations, DSM HTTPS, and Hyper Backup guidance.
 - **[Generic Linux server](SELF_HOSTING.md)** — Node.js, systemd, and a reverse
   proxy such as Caddy.
 - **[Uberspace](UBERSPACE.md)** — a walkthrough tailored to Uberspace accounts.
@@ -58,7 +60,8 @@ from the iOS share sheet.
 The SQLite database and uploaded media are the only irreplaceable server data.
 Keep both together in the configured data directory and back that directory up
 regularly. Each hosting guide includes the appropriate update and backup steps.
-Database migrations are ordered and safe to apply during an upgrade.
+Database migrations are ordered and safe to apply during an upgrade; the
+Synology container applies them automatically at startup.
 
 ## Import an existing blog
 
@@ -84,8 +87,10 @@ npm run dev
 
 Local development serves the API at `api.localhost:3000` and public sites at
 `<subdomain>.localhost:3000`. Useful checks are `npm test`, `npm run build`, and
-`npm run test:e2e`. The implementation and maintenance map is in
-[server/ARCHITECTURE.md](server/ARCHITECTURE.md).
+`npm run test:e2e`. With Docker installed, run
+`./scripts/test-synology-container.sh` from the repository root to build and
+smoke-test the production container. The implementation and maintenance map is
+in [server/ARCHITECTURE.md](server/ARCHITECTURE.md).
 
 ## License
 

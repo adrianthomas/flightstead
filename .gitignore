@@ -10,11 +10,13 @@ dist/
 .env
 .env.local
 deploy.env
+synology.env
 
 # Local migration source archives can contain private drafts and large media.
 imports/
 
 # Server data
+/data/
 server/data/uploads/*
 !server/data/uploads/.gitkeep
 server/data/*.db*

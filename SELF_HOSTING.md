@@ -10,6 +10,10 @@ wildcard domains — see the note at the end). On Uberspace specifically, skip
 straight to [UBERSPACE.md](UBERSPACE.md) for a full walkthrough using its
 actual commands instead of adapting these on the fly.
 
+Running this on a Synology NAS? Use [SYNOLOGY.md](SYNOLOGY.md) for the supplied
+Container Manager project, persistent data mount, DSM reverse proxy, backups,
+and upgrade flow.
+
 ## What you need
 
 - A Linux server (VPS or similar) you can SSH into and run long-lived

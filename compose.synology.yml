@@ -1,0 +1,23 @@
+services:
+  shareblog:
+    build:
+      context: ./server
+    container_name: shareblog
+    restart: unless-stopped
+    env_file:
+      - synology.env
+    ports:
+      # DSM's reverse proxy reaches this port locally; it is not exposed to
+      # the LAN or internet directly.
+      - "127.0.0.1:3100:3000"
+    volumes:
+      # A bind mount keeps the database and uploads visible to Hyper Backup.
+      - ./data:/app/data
+    init: true
+    stop_grace_period: 30s
+    logging:
+      driver: json-file
+      options:
+        # Keep a noisy or repeatedly restarting container from filling the NAS.
+        max-size: "10m"
+        max-file: "3"

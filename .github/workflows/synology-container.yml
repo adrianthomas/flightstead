@@ -1,0 +1,57 @@
+name: Synology container
+
+on:
+  push:
+    paths:
+      - ".github/workflows/synology-container.yml"
+      - "compose.synology.yml"
+      - "synology.env.example"
+      - "scripts/test-synology-container.sh"
+      - "server/Dockerfile"
+      - "server/.dockerignore"
+      - "server/docker-entrypoint.sh"
+      - "server/package.json"
+      - "server/package-lock.json"
+      - "server/tsconfig.json"
+      - "server/public/**"
+      - "server/scripts/**"
+      - "server/src/**"
+  pull_request:
+    paths:
+      - ".github/workflows/synology-container.yml"
+      - "compose.synology.yml"
+      - "synology.env.example"
+      - "scripts/test-synology-container.sh"
+      - "server/Dockerfile"
+      - "server/.dockerignore"
+      - "server/docker-entrypoint.sh"
+      - "server/package.json"
+      - "server/package-lock.json"
+      - "server/tsconfig.json"
+      - "server/public/**"
+      - "server/scripts/**"
+      - "server/src/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke-test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - linux/amd64
+          - linux/arm64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - name: Validate Synology Compose project
+        run: |
+          cp synology.env.example synology.env
+          docker compose -f compose.synology.yml config --quiet
+      - name: Build and start ${{ matrix.platform }} image
+        run: ./scripts/test-synology-container.sh "${{ matrix.platform }}"
