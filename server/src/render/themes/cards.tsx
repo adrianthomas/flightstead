@@ -566,15 +566,19 @@ export const cardsStyles = `
   body.theme-cards[data-cards-detail="true"] header.site-header,
   body.theme-cards[data-cards-detail="true"] .cards-category-filter { display: none; }
 
-  /* align-items: start (rather than the grid default of stretch) lets a
-     short text card size to its own content instead of being stretched to
-     match a taller photo card sharing its row — a compact card for a short
-     thought reads as intentional, a short thought stretched to fill 400px
-     of near-empty card reads as broken. */
-  .cards-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.3rem; align-items: start; }
+  /* align-items: stretch (the grid default) so every card in a row shares
+     the row's full height — a mismatched row of card heights read as
+     ragged rather than a grid. A short text card doesn't get visibly
+     stretched by this: .cards-item centers it instead of growing it (see
+     below), so the extra row height becomes even padding around content
+     that's still sized to itself, not a near-empty card. A photo/hero
+     card opts back into actually growing (.cards-hero's flex: 1 1 auto)
+     since it can absorb the extra height as a deeper crop instead. */
+  .cards-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.3rem; align-items: stretch; }
 
   .cards-item {
-    position: relative; display: block; border-radius: 18px; overflow: hidden;
+    position: relative; display: flex; flex-direction: column; justify-content: center;
+    border-radius: 18px; overflow: hidden;
     text-decoration: none; color: inherit; background: var(--bg);
     border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
     box-shadow: 0 1px 2px rgba(0,0,0,0.08), 0 10px 26px rgba(0,0,0,0.1);
@@ -601,6 +605,11 @@ export const cardsStyles = `
 
   .cards-hero {
     position: relative; aspect-ratio: 4 / 3; background-size: cover; background-position: center;
+    /* Lets a hero absorb a taller row (see .cards-feed's align-items note
+       above) by growing past its 4:3 basis instead of leaving blank card
+       background below it — object-fit: cover on the img just crops
+       deeper, which reads as a taller photo, not a stretched one. */
+    flex: 1 1 auto;
   }
   .cards-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
   .cards-scrim { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.78) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0) 75%); }

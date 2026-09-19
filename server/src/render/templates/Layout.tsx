@@ -814,10 +814,25 @@ export function Layout({
                   display: grid;
                   grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
                   gap: 1.35rem;
-                  align-items: start;
+                  /* stretch (the grid default) so every tile in a row shares
+                     the row's full height instead of leaving a ragged gap
+                     below the shorter ones — see .washi-feed-item's
+                     justify-content and the image :has() rule below for how
+                     that extra height gets absorbed without stretching text
+                     or distorting a photo. */
+                  align-items: stretch;
                 }
                 html[data-theme="washi"] .washi-feed-item {
                   position: relative;
+                  display: flex;
+                  flex-direction: column;
+                  /* Centers a text-only card's natural-height content within
+                     the taller, stretched tile instead of pinning it to the
+                     top with dead space below — an image-led card opts back
+                     into filling that space instead (see the :has() rule
+                     below), since a deeper photo crop reads as intentional
+                     where a stretched paragraph wouldn't. */
+                  justify-content: center;
                   margin: 0;
                   padding: 1.3rem;
                   border: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
@@ -838,6 +853,18 @@ export function Layout({
                   background: transparent;
                   box-shadow: none;
                   overflow: visible;
+                  width: 100%;
+                }
+                /* A card whose bled hero image leads it (see the image rule
+                   further below) becomes a flex column of its own so that
+                   image can grow to fill whatever extra height the row
+                   gives it — book/music stay excluded since their artwork
+                   is a fixed-size side element, not a bled full-width hero. */
+                html[data-theme="washi"] .washi-feed-item > .card:not(.book):not(.music):has(> a:first-child img),
+                html[data-theme="washi"] .washi-feed-item > .card:not(.book):not(.music):has(> img:first-child) {
+                  display: flex;
+                  flex-direction: column;
+                  flex: 1 1 auto;
                 }
                 html[data-theme="washi"] .washi-feed-item::before {
                   content: "";
@@ -979,7 +1006,40 @@ export function Layout({
                   outline-offset: -1px;
                   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.12), 0 10px 24px rgba(45, 31, 13, 0.14);
                 }
-                html[data-theme="washi"] .washi-feed-item > .card:not(.book):not(.music) > a:first-child img,
+                /* The feed's cards always link the hero image (see e.g.
+                   PhotoPost's \`linked ? <a>{image}</a> : image\`), so the
+                   <a> — not the <img> — is .card's actual flex child; it
+                   carries the aspect-ratio/bleed/crop that used to live on
+                   the <img> directly, with the <img> now just filling it
+                   via inset: 0 the same way .cards-hero/.cards-hero img
+                   split that work in the cards theme. flex: 1 1 auto lets
+                   it grow past its 4:3 basis to fill the card's share of a
+                   taller row (see .card's flex: 1 1 auto above); object-fit:
+                   cover just crops deeper, so this reads as a taller photo
+                   rather than a stretched one. */
+                html[data-theme="washi"] .washi-feed-item > .card:not(.book):not(.music) > a:first-child:has(> img) {
+                  position: relative;
+                  display: block;
+                  width: calc(100% + 2.6rem);
+                  margin: -1.3rem -1.3rem 1.05rem;
+                  aspect-ratio: 4 / 3;
+                  flex: 1 1 auto;
+                  overflow: hidden;
+                  border-radius: 9px 5px 0 0;
+                }
+                html[data-theme="washi"] .washi-feed-item > .card:not(.book):not(.music) > a:first-child:has(> img) > img {
+                  position: absolute; inset: 0;
+                  display: block;
+                  width: 100%; height: 100%;
+                  margin: 0;
+                  object-fit: cover;
+                  border-radius: inherit;
+                  outline: 0;
+                  box-shadow: none;
+                }
+                /* Rare fallback for an unlinked leading image, should this
+                   markup ever reach the feed grid — same bleed/crop, but
+                   sized off itself since there's no wrapping <a> to carry it. */
                 html[data-theme="washi"] .washi-feed-item > .card:not(.book):not(.music) > img:first-child {
                   display: block;
                   width: calc(100% + 2.6rem);
@@ -990,6 +1050,7 @@ export function Layout({
                   border-radius: 9px 5px 0 0;
                   outline: 0;
                   box-shadow: none;
+                  flex: 1 1 auto;
                 }
                 html[data-theme="washi"] .exif {
                   border-top-style: dashed;
