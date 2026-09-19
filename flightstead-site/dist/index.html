@@ -122,13 +122,21 @@
     .button.secondary { background: var(--surface); color: var(--ink); border-color: var(--line); }
     .hero-art {
       width: min(100%, 27rem);
+      margin: 0;
+      align-self: center;
       justify-self: end;
       padding: 0.65rem;
       border-radius: 1.5rem;
       background: var(--surface);
       box-shadow: var(--shadow);
     }
-    .hero-art img { width: 100%; aspect-ratio: 3 / 2; object-fit: cover; border-radius: 1rem; }
+    .hero-art img {
+      width: 100%;
+      height: clamp(13rem, 20vw, 18rem);
+      object-fit: cover;
+      object-position: center 58%;
+      border-radius: 1rem;
+    }
     .hero-note { margin: 1rem 0 0; color: var(--muted); font-size: 0.88rem; }
     section.content { padding: clamp(3.25rem, 6vw, 5rem) 0; }
     .section-heading { max-width: 46rem; margin-bottom: 2.25rem; }
@@ -182,8 +190,6 @@
       .hero-art { width: 100%; max-width: none; justify-self: stretch; }
       .hero-art img {
         height: clamp(9rem, 28vw, 13rem);
-        aspect-ratio: auto;
-        object-position: center 58%;
       }
       .feature-grid, .setup-grid { grid-template-columns: 1fr; }
       .app-callout { grid-template-columns: auto 1fr; }
