@@ -17,8 +17,8 @@ attached/scraped images saved:
 
 ```bash
 npx wordpress-export-to-markdown \
-  --input=adrianthomas-export.xml \
-  --output=adrianthomas-markdown \
+  --input=yoursite-export.xml \
+  --output=yoursite-markdown \
   --post-folders=true \
   --save-images=all \
   --include-time=true \
@@ -35,10 +35,10 @@ Run this from `server/` with the target instance's normal `.env` loaded:
 
 ```bash
 npm run import:markdown -- \
-  --input /path/to/adrianthomas-markdown \
-  --source wordpress:adrianthomas.com \
-  --source-base-url https://adrianthomas.com \
-  --wordpress-export /path/to/adrianthomas-export.xml
+  --input /path/to/yoursite-markdown \
+  --source wordpress:yourdomain.com \
+  --source-base-url https://yourdomain.com \
+  --wordpress-export /path/to/yoursite-export.xml
 ```
 
 The report lists discovered/importable files, pages deliberately skipped,
@@ -49,10 +49,10 @@ Nothing is written without `--commit`.
 
 ```bash
 npm run import:markdown -- \
-  --input /path/to/adrianthomas-markdown \
-  --source wordpress:adrianthomas.com \
-  --source-base-url https://adrianthomas.com \
-  --wordpress-export /path/to/adrianthomas-export.xml \
+  --input /path/to/yoursite-markdown \
+  --source wordpress:yourdomain.com \
+  --source-base-url https://yourdomain.com \
+  --wordpress-export /path/to/yoursite-export.xml \
   --commit
 ```
 
