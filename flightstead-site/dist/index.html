@@ -155,6 +155,56 @@
     .feature-code { display: block; margin-bottom: 2rem; color: var(--blue); font: 650 0.72rem/1 ui-monospace, monospace; letter-spacing: 0.12em; }
     .feature h3 { margin-bottom: 0.55rem; font-size: 1.28rem; }
     .feature p { margin: 0; color: var(--muted); }
+    .themes { padding-top: 0 !important; }
+    .themes-heading { display: flex; align-items: end; justify-content: space-between; gap: 2rem; max-width: none; }
+    .themes-heading h2 { margin: 0; font-size: clamp(2rem, 4vw, 3.25rem); }
+    .themes-heading .section-intro { max-width: 26rem; text-align: right; }
+    .theme-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.7rem; }
+    .theme-card {
+      margin: 0;
+      padding: 0.5rem;
+      border: 1px solid var(--line);
+      border-radius: 1rem;
+      background: var(--surface);
+    }
+    .theme-card figcaption { padding: 0.55rem 0.2rem 0.1rem; font-size: 0.86rem; font-weight: 740; }
+    .theme-shot { position: relative; height: 7rem; overflow: hidden; border-radius: 0.68rem; }
+    .theme-shot span { display: block; }
+    .shot-bar { height: 0.8rem; }
+    .shot-title { width: 52%; height: 0.34rem; margin: 0.8rem 0 0.38rem; border-radius: 999px; }
+    .shot-line { width: 72%; height: 0.2rem; margin-top: 0.24rem; border-radius: 999px; opacity: 0.62; }
+    .shot-line.short { width: 46%; }
+    .shot-card { position: absolute; border-radius: 0.3rem; }
+    .theme-basic { padding: 0 0.72rem; background: #f7f5f0; color: #263643; }
+    .theme-basic .shot-bar { margin-inline: -0.72rem; background: #263643; }
+    .theme-basic .shot-title, .theme-basic .shot-line { background: currentColor; }
+    .theme-basic .shot-card { left: 0.72rem; right: 0.72rem; bottom: 0.62rem; height: 2.1rem; border: 1px solid #d7d1c6; background: #fff; }
+    .theme-cards { background: #172936; }
+    .theme-cards .shot-card:nth-child(1) { inset: 0.55rem 0.55rem auto; height: 3.55rem; background: linear-gradient(135deg, #eebc50, #7093a3); }
+    .theme-cards .shot-card:nth-child(2) { left: 0.55rem; right: 45%; bottom: 0.55rem; height: 1.55rem; background: #f4f0e7; }
+    .theme-cards .shot-card:nth-child(3) { left: 58%; right: 0.55rem; bottom: 0.55rem; height: 1.55rem; background: #b8d6df; }
+    .theme-washi { padding: 0.65rem; background: #e7ddc8; background-image: linear-gradient(90deg, rgba(92, 67, 38, 0.05) 1px, transparent 1px); background-size: 6px 6px; }
+    .theme-washi .shot-title { width: 66%; margin-top: 0.15rem; background: #493a2d; }
+    .theme-washi .shot-card { left: 0.65rem; right: 0.65rem; bottom: 0.65rem; height: 3.95rem; border: 1px solid #b9a98d; background: #f8f2e5; box-shadow: 0 0.2rem 0.5rem rgba(73, 58, 45, 0.13); }
+    .theme-washi .shot-line { position: relative; z-index: 1; margin-left: 0.55rem; background: #6e5a47; }
+    .theme-prism { background: #edf3ff; }
+    .theme-prism .shot-bar { background: #2256dd; }
+    .theme-prism .shot-card:nth-child(2) { left: 0.55rem; right: 35%; top: 1.35rem; height: 2.2rem; background: #ff4c9a; }
+    .theme-prism .shot-card:nth-child(3) { left: 0.55rem; right: 0.55rem; bottom: 0.55rem; height: 2.45rem; border: 2px solid #2256dd; background: #fff; }
+    .theme-prism::after { content: ""; position: absolute; right: 0.85rem; top: 1.75rem; width: 1.25rem; height: 1.25rem; border-radius: 50%; background: #ffd73f; }
+    .theme-ledger { padding: 0.65rem; background: #ececf0; }
+    .theme-ledger .shot-bar { height: 0.6rem; margin: -0.65rem -0.65rem 0.65rem; background: #fff; border-bottom: 1px solid #cfd0d5; }
+    .theme-ledger .shot-card { left: 0.65rem; right: 0.65rem; height: 1.35rem; border-bottom: 1px solid #d8d8dd; border-radius: 0; background: #fff; }
+    .theme-ledger .shot-card:nth-child(2) { top: 1.45rem; }
+    .theme-ledger .shot-card:nth-child(3) { top: 2.82rem; }
+    .theme-ledger .shot-card:nth-child(4) { top: 4.19rem; }
+    .theme-ledger .shot-card::before { content: ""; position: absolute; left: 0.45rem; top: 0.42rem; width: 33%; height: 0.22rem; border-radius: 999px; background: #303640; }
+    .theme-cabinet { background: #22201d; }
+    .theme-cabinet .shot-bar { height: 1rem; background: #d8cbb6; }
+    .theme-cabinet .shot-card { border-radius: 0; }
+    .theme-cabinet .shot-card:nth-child(2) { left: 0.55rem; top: 1.55rem; width: 48%; height: 2.25rem; background: #c26946; }
+    .theme-cabinet .shot-card:nth-child(3) { right: 0.55rem; top: 1.55rem; width: 35%; height: 3.6rem; background: #7e9aa0; }
+    .theme-cabinet .shot-card:nth-child(4) { left: 0.55rem; bottom: 0.55rem; width: 48%; height: 2.2rem; background: #e0d2b8; }
     .setup-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; counter-reset: setup; }
     .setup-step { counter-increment: setup; position: relative; padding: 1.5rem 1.5rem 1.5rem 4.5rem; border-radius: 1.25rem; background: var(--surface); border: 1px solid var(--line); }
     .setup-step::before { content: "0" counter(setup); position: absolute; left: 1.4rem; top: 1.5rem; color: var(--blue); font: 700 0.78rem/1 ui-monospace, monospace; }
@@ -191,6 +241,9 @@
       .hero-art img {
         height: clamp(9rem, 28vw, 13rem);
       }
+      .themes-heading { align-items: flex-start; flex-direction: column; gap: 0.7rem; }
+      .themes-heading .section-intro { text-align: left; }
+      .theme-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
       .feature-grid, .setup-grid { grid-template-columns: 1fr; }
       .app-callout { grid-template-columns: auto 1fr; }
       .app-callout .button { grid-column: 1 / -1; }
@@ -201,6 +254,7 @@
       h1 { font-size: clamp(3rem, 17vw, 4.8rem); }
       .hero-panel { padding: 1.25rem; border-radius: 1.6rem; }
       .hero-art img { height: clamp(8.5rem, 34vw, 10.5rem); }
+      .theme-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
       .feature { min-height: auto; }
       .feature-code { margin-bottom: 1.8rem; }
       .footer-inner { align-items: flex-start; flex-direction: column; }
@@ -217,7 +271,7 @@
   <header>
     <div class="shell header-inner">
       <a class="brand" href="#top" aria-label="Flightstead home"><img src="assets/flightstead-icon.png" alt=""><span>Flightstead</span></a>
-      <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#setup">Setup</a><a class="nav-cta" href="#app">iOS app</a></nav>
+      <nav aria-label="Main navigation"><a href="#features">Features</a><a href="#themes">Themes</a><a href="#setup">Setup</a><a class="nav-cta" href="#app">iOS app</a></nav>
     </div>
   </header>
   <main id="main">
@@ -243,6 +297,19 @@
         </div>
       </div>
     </section>
+    <section class="content themes" id="themes" aria-labelledby="themes-title">
+      <div class="shell">
+        <div class="section-heading themes-heading"><div><p class="eyebrow">Make it yours</p><h2 id="themes-title">6 themes built in.</h2></div><p class="section-intro">Change the whole character of your site without changing your content.</p></div>
+        <div class="theme-grid">
+          <figure class="theme-card"><div class="theme-shot theme-basic" aria-hidden="true"><span class="shot-bar"></span><span class="shot-title"></span><span class="shot-line"></span><span class="shot-line short"></span><span class="shot-card"></span></div><figcaption>Basic</figcaption></figure>
+          <figure class="theme-card"><div class="theme-shot theme-cards" aria-hidden="true"><span class="shot-card"></span><span class="shot-card"></span><span class="shot-card"></span></div><figcaption>Cards</figcaption></figure>
+          <figure class="theme-card"><div class="theme-shot theme-washi" aria-hidden="true"><span class="shot-title"></span><span class="shot-card"></span><span class="shot-line"></span><span class="shot-line short"></span></div><figcaption>Washi</figcaption></figure>
+          <figure class="theme-card"><div class="theme-shot theme-prism" aria-hidden="true"><span class="shot-bar"></span><span class="shot-card"></span><span class="shot-card"></span></div><figcaption>Prism</figcaption></figure>
+          <figure class="theme-card"><div class="theme-shot theme-ledger" aria-hidden="true"><span class="shot-bar"></span><span class="shot-card"></span><span class="shot-card"></span><span class="shot-card"></span></div><figcaption>Ledger</figcaption></figure>
+          <figure class="theme-card"><div class="theme-shot theme-cabinet" aria-hidden="true"><span class="shot-bar"></span><span class="shot-card"></span><span class="shot-card"></span><span class="shot-card"></span></div><figcaption>Cabinet</figcaption></figure>
+        </div>
+      </div>
+    </section>
     <section class="content" id="setup" aria-labelledby="setup-title">
       <div class="shell">
         <div class="section-heading"><p class="eyebrow">Setup</p><h2 id="setup-title">Set up once. Publish from your phone.</h2><p class="section-intro">Flightstead is one Node process backed by SQLite. Run it on shared hosting, a Linux server, or a machine you already manage.</p></div>
@@ -263,7 +330,7 @@
   <footer>
     <div class="shell footer-inner">
       <div><a class="brand" href="#top" aria-label="Back to Flightstead home"><img src="assets/flightstead-icon.png" alt=""><span>Flightstead</span></a><p class="footer-copy">Self-hosted publishing for iPhone and the open web.</p><p class="byline">A <a href="https://navigationstack.com">Navigationstack.com</a> app.</p></div>
-      <nav class="footer-links" aria-label="Footer navigation"><a href="#features">Features</a><a href="#setup">Setup</a><a href="https://github.com/adrianthomas/shareblog">GitHub</a><a href="#app">iOS app</a></nav>
+      <nav class="footer-links" aria-label="Footer navigation"><a href="#features">Features</a><a href="#themes">Themes</a><a href="#setup">Setup</a><a href="https://github.com/adrianthomas/shareblog">GitHub</a><a href="#app">iOS app</a></nav>
     </div>
   </footer>
 </body>
