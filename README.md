@@ -90,7 +90,9 @@ Local development serves the API at `api.localhost:3000` and public sites at
 `npm run test:e2e`. With Docker installed, run
 `./scripts/test-synology-container.sh` from the repository root to build and
 smoke-test the production container. The implementation and maintenance map is
-in [server/ARCHITECTURE.md](server/ARCHITECTURE.md).
+in [server/ARCHITECTURE.md](server/ARCHITECTURE.md). Shared product colors,
+illustration rules, and brand usage are defined in
+[DESIGN_LANGUAGE.md](DESIGN_LANGUAGE.md).
 
 ## License
 
