@@ -40,6 +40,10 @@ tracked files or command output.
 
 ## Local workflow
 
+Develop, build, test, and deploy locally. GitHub is only a backup and the
+public home of the self-hosted server source; do not add GitHub Actions or
+other paid hosted build and deployment services.
+
 Run application commands from `server/`:
 
 ```bash
