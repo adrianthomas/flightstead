@@ -908,6 +908,10 @@ export const cardsStyles = `
     content: ""; position: absolute; inset: 0 auto 0 0; width: 4px;
     background: var(--cards-accent);
   }
+  .cards-link-preview-image {
+    display: block; width: calc(100% + 2.5rem); max-height: 24rem; object-fit: cover;
+    margin: -1.2rem -1.25rem 1rem;
+  }
   .cards-link-card--full {
     max-width: 680px; margin: max(4.5rem, calc(env(safe-area-inset-top) + 3.5rem)) auto 0;
   }

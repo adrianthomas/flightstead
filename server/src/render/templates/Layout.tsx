@@ -451,6 +451,10 @@ export function Layout({
                   linear-gradient(90deg, color-mix(in srgb, var(--focus) 10%, transparent), transparent 35%),
                   color-mix(in srgb, var(--bg) 96%, var(--fg));
               }
+              .link-preview-image {
+                display: block; width: calc(100% + 2.3rem); max-height: 24rem; object-fit: cover;
+                margin: -1.05rem -1.15rem 1rem; border-radius: 11px 11px 0 0;
+              }
               .link-topline {
                 display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem;
                 margin-bottom: 0.4rem;

@@ -123,6 +123,7 @@ export function CabinetLinkFeedItem({
   host,
   eyebrow,
   excerpt,
+  previewImageUrl,
   commentHtml,
   dateLabel,
   detailLabel,
@@ -134,6 +135,7 @@ export function CabinetLinkFeedItem({
   host?: React.ReactNode;
   eyebrow: React.ReactNode;
   excerpt?: React.ReactNode;
+  previewImageUrl?: string;
   commentHtml?: string;
   dateLabel: React.ReactNode;
   detailLabel: string;
@@ -143,6 +145,7 @@ export function CabinetLinkFeedItem({
     <article className="cabinet-item cabinet-item--link" data-cabinet-type="link">
       <CabinetRail dateLabel={dateLabel} />
       <div className="cabinet-artifact cabinet-artifact--link">
+        {previewImageUrl ? <img className="cabinet-link-preview-image" src={previewImageUrl} alt="" loading="lazy" /> : null}
         <div className="cabinet-artifact-copy">
           <div className="cabinet-link-port">
             <p className="cabinet-kind">{eyebrow}</p>
@@ -678,6 +681,8 @@ export const cabinetStyles = `
   /* Links expose the outbound destination and make the saved note a clear,
      secondary route instead of hiding two destinations beneath one card. */
   .cabinet-item--link .cabinet-artifact { width: min(100%, 820px); background: color-mix(in srgb, var(--cabinet-link) 5%, var(--cabinet-paper)); }
+  .cabinet-link-preview-image { display: block; width: 100%; max-height: 24rem; object-fit: cover; }
+  .cabinet-link-detail-preview-image { display: block; width: 100%; max-height: 28rem; object-fit: cover; margin-bottom: 1.25rem; }
   .cabinet-link-permalink {
     position: relative; z-index: 3; display: inline-flex; align-items: center; gap: 0.65rem; min-height: 44px; margin-top: 1.15rem;
     color: var(--cabinet-ink); font-family: ui-monospace, "SFMono-Regular", Menlo, monospace;

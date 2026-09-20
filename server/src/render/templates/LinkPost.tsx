@@ -1,5 +1,5 @@
 import React from "react";
-import type { ContentObject, LinkMetadata } from "./types.js";
+import { publicLinkPreviewImageUrl, type ContentObject, type LinkMetadata } from "./types.js";
 import type { Theme } from "../../db/schema.js";
 import { formatDate } from "./ThoughtPost.js";
 import { t } from "../i18n.js";
@@ -57,7 +57,8 @@ export function LinkPost({
 }) {
   const metadata = object.metadata as LinkMetadata;
   const bodyHtml = formatBasicText(object.body ?? "");
-  const host = linkHost(object);
+  const host = metadata.siteName || linkHost(object);
+  const previewImageUrl = publicLinkPreviewImageUrl(metadata);
 
   if (theme === "cabinet") {
     const title = object.title || host || object.sourceUrl || t(locale, "links");
@@ -70,6 +71,7 @@ export function LinkPost({
           host={host}
           eyebrow={t(locale, "links")}
           excerpt={metadata.excerpt}
+          previewImageUrl={previewImageUrl}
           commentHtml={bodyHtml}
           dateLabel={formatDate(object.publishedAt, locale)}
           detailLabel={`${t(locale, "readMore")}: ${title}`}
@@ -94,8 +96,9 @@ export function LinkPost({
           backHref={backHref!}
           backLabel={backLabel!}
         />
-        {bodyHtml || metadata.excerpt ? (
+        {bodyHtml || metadata.excerpt || previewImageUrl ? (
           <div className="cabinet-detail-body cabinet-link-detail-body">
+            {previewImageUrl ? <img className="cabinet-link-detail-preview-image" src={previewImageUrl} alt="" /> : null}
             {metadata.excerpt ? <p className="cabinet-link-detail-excerpt">{metadata.excerpt}</p> : null}
             {bodyHtml ? <div className="body-content" dangerouslySetInnerHTML={{ __html: bodyHtml }} /> : null}
           </div>
@@ -109,6 +112,7 @@ export function LinkPost({
       <>
         {!linked ? <CloseButton backHref={backHref!} backLabel={backLabel!} /> : null}
         <article className={`cards-link-card${linked ? "" : " cards-link-card--full"}`}>
+          {previewImageUrl ? <img className="cards-link-preview-image" src={previewImageUrl} alt="" loading="lazy" /> : null}
           <div className="cards-link-topline">
             <p className="cards-link-eyebrow">{t(locale, "links")}</p>
             {host ? <p className="cards-link-host">{host}</p> : null}
@@ -134,6 +138,7 @@ export function LinkPost({
         <BackLink href={backHref!} label={backLabel!} />
       ) : null}
       <article className="card link-card">
+        {previewImageUrl ? <img className="link-preview-image" src={previewImageUrl} alt="" loading="lazy" /> : null}
         <div className="link-topline">
           <p className="meta">{t(locale, "links")}</p>
           {host ? <p className="link-host">{host}</p> : null}

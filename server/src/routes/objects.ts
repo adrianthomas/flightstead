@@ -10,6 +10,7 @@ import { invalidateSitePages } from "../render/page-cache.js";
 import { storage } from "../storage/index.js";
 import { deliverCreateActivity, deliverDeleteActivity } from "../activitypub/federation.js";
 import { materializeAppleMusicMetadata } from "../lib/apple-music.js";
+import { materializeLinkPreviewMetadata } from "../lib/link-preview.js";
 
 // Structured image references live in metadata, while inline Article and
 // Thought images are stored only as rendered /files/... URLs in the body.
@@ -21,7 +22,7 @@ function metadataAssetIds(metadata: unknown): string[] {
   const inlineAssetIds = Array.isArray(record.inlineAssetIds)
     ? record.inlineAssetIds.filter((value): value is string => typeof value === "string")
     : [];
-  return [record.assetId, record.coverAssetId, record.artworkAssetId, ...inlineAssetIds]
+  return [record.assetId, record.coverAssetId, record.artworkAssetId, record.previewAssetId, ...inlineAssetIds]
     .filter((value): value is string => typeof value === "string");
 }
 
@@ -136,6 +137,9 @@ export async function objectRoutes(app: FastifyInstance) {
       const normalized = await materializeAppleMusicMetadata(site.id, body.metadata, body.sourceUrl, request.log);
       body = { ...body, metadata: normalized.metadata, sourceUrl: normalized.sourceUrl };
     }
+    if (body.type === "link") {
+      body = { ...body, metadata: await materializeLinkPreviewMetadata(site.id, body.metadata, request.log) };
+    }
     await assertOwnedAssets(site.id, body.metadata);
     const slugSource = slugSourceText(body);
     const baseSlug = body.title ? slugify(slugSource) : slugFromBody(slugSource);
@@ -229,6 +233,9 @@ export async function objectRoutes(app: FastifyInstance) {
     if (existing.type === "music" && body.metadata !== undefined) {
       const normalized = await materializeAppleMusicMetadata(site.id, body.metadata, existing.sourceUrl ?? undefined, request.log);
       body = { ...body, metadata: normalized.metadata };
+    }
+    if (existing.type === "link" && body.metadata !== undefined) {
+      body = { ...body, metadata: await materializeLinkPreviewMetadata(site.id, body.metadata, request.log) };
     }
     if (body.metadata !== undefined) {
       await assertOwnedAssets(site.id, body.metadata);

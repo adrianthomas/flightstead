@@ -29,7 +29,7 @@ import type {
   QuoteMetadata,
   Site,
 } from "./templates/types.js";
-import { publicBookCoverUrl, publicMusicArtworkUrl } from "./templates/types.js";
+import { publicBookCoverUrl, publicLinkPreviewImageUrl, publicMusicArtworkUrl } from "./templates/types.js";
 import { t, resolveLocale, type MessageKey } from "./i18n.js";
 import { formatBasicText, formatRichText, stripBasicFormatting } from "./format.js";
 import { siteOrigin } from "./site-url.js";
@@ -269,6 +269,8 @@ export async function renderObjectPage(
           ? publicBookCoverUrl(object.metadata as BookMetadata)
           : object.type === "music"
             ? publicMusicArtworkUrl(object.metadata as MusicMetadata)
+            : object.type === "link"
+              ? publicLinkPreviewImageUrl(object.metadata as LinkMetadata)
             : undefined;
   return wrap(site, detailTitle, detail, {
     currentPath: currentPath ?? `/${PATH_PREFIX[object.type]}/${object.slug}`,

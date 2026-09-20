@@ -18,9 +18,14 @@ export async function resolveRoutes(app: FastifyInstance) {
   });
 
   app.post("/resolve/music", { preHandler: authGuard }, async (request, reply) => {
-    const { url } = z.object({ url: z.string().url() }).parse(request.body);
+    // `url` remains accepted for installed clients. New clients send the
+    // broader `query`, which may be either a URL or an artist/title search.
+    const { query, url } = z.object({
+      query: z.string().min(1).optional(),
+      url: z.string().url().optional(),
+    }).refine((value) => value.query || value.url).parse(request.body);
     try {
-      const result = await resolveMusic(url);
+      const result = await resolveMusic(query ?? url!);
       return reply.send(result);
     } catch (err) {
       request.log.error(err, "music resolver failed");

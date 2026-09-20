@@ -73,6 +73,15 @@ export interface ArticleMetadata {
 
 export interface LinkMetadata {
   excerpt?: string;
+  siteName?: string;
+  previewAssetId?: string;
+  previewImageUrl?: string;
+  /** Absent means visible for compatibility with clients that first added previews. */
+  showPreview?: boolean;
+}
+
+export function publicLinkPreviewImageUrl(metadata: LinkMetadata): string | undefined {
+  return metadata.showPreview === false ? undefined : metadata.previewImageUrl;
 }
 
 export interface QuoteMetadata {

@@ -51,6 +51,11 @@ export const articleMetadataSchema = z.object({
 
 export const linkMetadataSchema = z.object({
   excerpt: z.string().optional(),
+  siteName: z.string().optional(),
+  imageUrl: z.string().url().optional(),
+  previewAssetId: z.string().uuid().optional(),
+  previewImageUrl: z.string().url().optional(),
+  showPreview: z.boolean().optional(),
 });
 
 export const musicMetadataSchema = z.object({

@@ -123,7 +123,7 @@ async function sourceFor(url: URL): Promise<SourceMetadata> {
   return sourceMetadata(article.title, host.includes("bandcamp.com") ? article.siteName ?? "" : "");
 }
 
-async function searchApple(source: SourceMetadata): Promise<ITunesResult | undefined> {
+async function searchApple(source: SourceMetadata, requireStrongMatch = true): Promise<ITunesResult | undefined> {
   const term = `${source.releaseTitle} ${source.artist}`.trim();
   const response = await got("https://itunes.apple.com/search", {
     searchParams: { term, media: "music", entity: "song", limit: 10 },
@@ -134,12 +134,26 @@ async function searchApple(source: SourceMetadata): Promise<ITunesResult | undef
     .map((candidate) => ({ candidate, score: appleMatchScore(source, candidate) }))
     .sort((left, right) => right.score - left.score);
   const best = ranked[0];
+  if (!requireStrongMatch) return best?.candidate;
   const threshold = source.artist ? 0.68 : 0.9;
   return best && best.score >= threshold ? best.candidate : undefined;
 }
 
-export async function resolveMusic(rawUrl: string): Promise<ResolvedMusic> {
-  const url = new URL(rawUrl);
+export async function resolveMusic(input: string): Promise<ResolvedMusic> {
+  let url: URL | undefined;
+  try {
+    const candidate = new URL(input);
+    if (candidate.protocol === "http:" || candidate.protocol === "https:") url = candidate;
+  } catch {
+    // Plain text is a catalog search, not a malformed URL.
+  }
+
+  if (!url) {
+    const source = sourceMetadata(input);
+    const match = await searchApple(source, false);
+    if (!match) throw new Error("Apple Music catalog item was not found.");
+    return resolvedAppleResult(match);
+  }
   if (url.hostname.toLowerCase() === "music.apple.com") return resolveAppleMusic(url);
 
   const source = await sourceFor(url);

@@ -52,7 +52,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 | `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of selectable site themes (`id`/`name`/`description`) used by iOS Settings. The stable `classic` id is presented as Basic. Aqua and Think remain valid renderable values for existing sites but are intentionally omitted from this catalog. |
 | `routes/objects.ts` | `POST/GET/PATCH/DELETE /objects`, `GET /objects/:id` | Owns slug generation (`uniqueSlug`, `slugSourceText`), asset-ownership checks and deletion (including URL-only inline Article/Thought images and cached music artwork), cache invalidation, and ActivityPub Create/Delete delivery on publish, unpublish, and deletion. It also normalizes legacy iOS article posts that arrived as `thought` with a leading Markdown H1 into real `article` rows. `GET /objects` hides `link` rows unless the client sends `X-Shareblog-Features: link-content-type`, because old iOS apps decode `ContentType` as a closed enum. |
 | `routes/assets.ts` | asset upload | Feeds `image/worker.ts` for variants + EXIF extraction. |
-| `routes/resolve.ts` | book/music/article metadata lookup | Thin wrapper over `resolvers/*.ts`; used by the iOS compose screens before publish, not stored server-side until the object is created. Music accepts any source URL but translates it to a sufficiently strong Apple catalog match; unmatched sources retain editable title/artist only. |
+| `routes/resolve.ts` | book/music/article metadata lookup | Thin wrapper over `resolvers/*.ts`; used by the iOS compose screens before publish, not stored server-side until the object is created. Books accept titles, author/title text, ISBNs, or links. Music accepts title/artist text or any source URL and translates it to an Apple catalog match; unmatched source links retain editable title/artist only. |
 | `routes/stats.ts` | `GET /stats` | Authenticated aggregate-only public page-view totals for today/week/month/year/all time, per-article totals, and coarse referring-source categories. Period boundaries use UTC. |
 
 **Public site (auth: `resolveTenant`, Host header)** — `routes/site-pages.ts`
@@ -96,7 +96,7 @@ called on every object/site mutation.
 | `ownerClaims` | Short-lived (20 min), single-use pairing codes minted by an interactive `bootstrap-owner` run; redeemed via `POST /auth/claim-owner`. |
 | `contentObjects` | The core table — `type` (`contentTypeValues`), `slug` (unique per site), `title`/`body`/`status`/`sourceUrl`, freeform JSON `metadata` (shape varies by type, not modeled in SQL). |
 | `dailyVisitCounts` | Privacy-preserving UTC-day page-view aggregates keyed by site, article (empty for non-article pages), and coarse source category. It deliberately contains no IP, user agent, visitor/session id, full referrer, or individual request row. |
-| `assets` | Uploaded files — `variants` (JSON, e.g. `medium`/`original` URLs), `exif` (JSON, photos only). Linked from a `contentObjects.metadata.assetId`/`coverAssetId` field, **not** a DB foreign key — `objects.ts`'s `referencedAssetIds`/`assertOwnedAssets` walk those metadata fields by hand. |
+| `assets` | Uploaded files — `variants` (JSON, e.g. `medium`/`original` URLs), `exif` (JSON, photos only). Linked from a `contentObjects.metadata.assetId`/`coverAssetId`/`artworkAssetId`/`previewAssetId` field, **not** a DB foreign key — `objects.ts`'s `referencedAssetIds`/`assertOwnedAssets` walk those metadata fields by hand. |
 
 ## Privacy-preserving statistics
 
@@ -257,6 +257,13 @@ in ownership validation and lifecycle cleanup. This keeps themes, metadata,
 feeds, and federation from making visitor-time artwork requests to Apple or any
 other provider. `showArtwork: false` retains the local artwork for the editor
 while omitting it from every public surface; absence means visible.
+
+Link metadata can retain an Open Graph preview through `previewAssetId` and
+`previewImageUrl`, with `showPreview: false` using the same visibility contract.
+On creation the server downloads the resolver's transient `imageUrl` through
+the SSRF guard and ordinary image pipeline, then stores only the owned local
+asset URL. Public themes and page metadata therefore never need a visitor-time
+request to the linked site merely to paint the preview.
 
 i18n (`render/i18n.ts`) — `MessageKey` union + `t(locale, key, params?)`;
 `site.locale` threads through every render call. Add a string here, not as
