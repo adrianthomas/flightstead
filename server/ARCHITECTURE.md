@@ -69,7 +69,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 | `/sitemap.xml`, `/robots.txt` | Search-engine discovery using the site's canonical origin; the sitemap includes enabled optional pages |
 | `/about`, `/about-shareblog`, `/changelog` | Static-ish pages; `/about` renders optional long-form owner copy, while the shared profile stays in the site-wide footer |
 | `/my-work`, `/contact` | Personal portfolio pages, available only when the deployment-wide `ENABLE_WORK_PAGE=true`; otherwise 404 and omitted from footer/sitemap |
-| `/impressum` | Legal and privacy page, including a statistics disclosure that reflects the site's current `statsEnabled` setting. Available only when `ENABLE_IMPRESSUM_PAGE=true`; otherwise 404 and omitted from footer/sitemap. |
+| `/impressum` | Owner-authored optional page whose `legalPageTitle` supplies the heading, browser title, and footer label. Available only when `legalPage` has content; otherwise 404 and omitted from footer/sitemap. |
 
 After all explicit routes, imported `metadata.import.legacyPath` values provide
 permanent redirects from historical root-level WordPress permalinks to the
@@ -88,7 +88,7 @@ called on every object/site mutation.
 | Table | Purpose |
 |---|---|
 | `users` | One row per email. |
-| `sites` | One per user (today). Site identity (`title`, `tagline`) is distinct from the footer profile (`profileName`, `location`, `profileLinks`, `contactLinks`); legacy introduction/single-contact fields remain compatible. Also stores `theme`, `about`, `federationEnabled`, `statsEnabled`, and `subdomain`/canonical `customDomain`. |
+| `sites` | One per user (today). Site identity (`title`, `tagline`) is distinct from the footer profile (`profileName`, `location`, `profileLinks`, `contactLinks`); legacy introduction/single-contact fields remain compatible. Also stores `theme`, owner-authored `about`, optional `legalPage` copy and `legalPageTitle`, `federationEnabled`, `statsEnabled`, and `subdomain`/canonical `customDomain`. |
 | `siteActorKeys` | ActivityPub keypair, deliberately its own table (never returned in a site API response — see the comment in schema.ts). |
 | `apFollowers` | Remote Fediverse followers per site; backs both the followers collection and outbound delivery recipient list. |
 | `apiTokens` | Bearer tokens, hashed; `revokedAt` for logout. |

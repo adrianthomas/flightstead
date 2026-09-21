@@ -142,7 +142,7 @@ export function Layout({
   const usesFullNavigation = theme === "think";
   const usesCompactCategoryFilter = !usesInteractiveDetail && !usesFullNavigation;
   const hasWorkPage = workPageEnabled();
-  const hasImpressumPage = impressumPageEnabled();
+  const hasImpressumPage = impressumPageEnabled(site.legalPage);
   // The canonical host is also the Fediverse identity host. The actor's
   // identifier remains the stable site subdomain, while a configured custom
   // domain replaces the deployment's default <subdomain>.<BASE_DOMAIN> host.
@@ -2157,7 +2157,7 @@ export function Layout({
                 <a href="/search">{t(site.locale, "search")}</a>
                 <a href="/about">{t(site.locale, "about")}</a>
                 {hasWorkPage ? <><a href="/my-work">My work</a><a href="/contact">Contact</a></> : null}
-                {hasImpressumPage ? <a href="/impressum">Legal</a> : null}
+                {hasImpressumPage ? <a href="/impressum">{site.legalPageTitle?.trim() || "Legal"}</a> : null}
               </nav>
             </div>
           </footer>

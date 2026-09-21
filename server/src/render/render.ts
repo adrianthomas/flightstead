@@ -317,7 +317,8 @@ export function renderContactPage(site: Site): string {
 }
 
 export function renderImpressumPage(site: Site): string {
-  return wrap(site, "Legal", React.createElement(LegalPage, { statsEnabled: site.statsEnabled }), {
+  const title = site.legalPageTitle?.trim() || "Legal";
+  return wrap(site, title, React.createElement(LegalPage, { title, content: site.legalPage ?? "" }), {
     currentPath: "/impressum",
     metadata: {
       path: "/impressum",

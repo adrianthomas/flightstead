@@ -202,7 +202,7 @@ export async function sitePageRoutes(app: FastifyInstance) {
       "/",
       "/archive",
       ...(workPageEnabled() ? ["/my-work", "/contact"] : []),
-      ...(impressumPageEnabled() ? ["/impressum"] : []),
+      ...(impressumPageEnabled(site.legalPage) ? ["/impressum"] : []),
       "/about",
       ...paths,
     ];
@@ -310,8 +310,8 @@ export async function sitePageRoutes(app: FastifyInstance) {
   });
 
   app.get("/impressum", { preHandler: resolveTenant }, async (request, reply) => {
-    if (!impressumPageEnabled()) return reply.code(404).send("Not found");
     const site = request.site!;
+    if (!impressumPageEnabled(site.legalPage)) return reply.code(404).send("Not found");
     return sendCachedHtml(request, reply, site.id, async () => renderImpressumPage(site));
   });
 

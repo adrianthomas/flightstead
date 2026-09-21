@@ -63,6 +63,8 @@ const updateSiteSchema = z
     contactLinks: z.array(profileLinkSchema.omit({ relMe: true })).max(20).optional(),
     customDomain: customDomainSchema.optional(),
     about: z.string().max(20_000).optional(),
+    legalPage: z.string().max(50_000).optional(),
+    legalPageTitle: z.string().trim().min(1).max(80).optional(),
     federationEnabled: z.boolean().optional(),
     statsEnabled: z.boolean().optional(),
   })
@@ -151,6 +153,8 @@ export async function siteRoutes(app: FastifyInstance) {
         } : {}),
         ...(body.customDomain !== undefined ? { customDomain: body.customDomain || null } : {}),
         ...(body.about !== undefined ? { about: body.about || null } : {}),
+        ...(body.legalPage !== undefined ? { legalPage: body.legalPage.trim() ? body.legalPage : null } : {}),
+        ...(body.legalPageTitle !== undefined ? { legalPageTitle: body.legalPageTitle } : {}),
         ...(body.federationEnabled !== undefined ? { federationEnabled: body.federationEnabled } : {}),
         ...(body.statsEnabled !== undefined ? { statsEnabled: body.statsEnabled } : {}),
         updatedAt: new Date(),

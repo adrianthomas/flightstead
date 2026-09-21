@@ -110,9 +110,11 @@ keyboard focus, reduced motion, semantic links, dark mode, and responsive layout
 intact.
 
 `ENABLE_WORK_PAGE=true` exposes `/my-work` and `/contact`.
-`ENABLE_IMPRESSUM_PAGE=true` exposes `/impressum`. These are server-level,
-deployment-wide flags; disabled routes return 404 and are omitted from the
-footer and sitemap. `/about` is always routable but may have no long-form body.
+The owner-authored Legal Page setting exposes `/impressum` when it has content;
+its separate title setting controls the heading and footer label. Clearing the
+content returns the route to 404 and omits it from the footer and sitemap.
+`ENABLE_WORK_PAGE` remains a server-level, deployment-wide flag. `/about` is
+always routable but may have no long-form body.
 
 ## Companion iOS repository
 

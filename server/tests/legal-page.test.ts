@@ -3,7 +3,7 @@ import test from "node:test";
 import { renderImpressumPage } from "../src/render/render.js";
 import type { Site } from "../src/render/templates/types.js";
 
-function site(statsEnabled: boolean): Site {
+function site(legalPage: string | null): Site {
   return {
     id: "legal-site",
     ownerUserId: "legal-owner",
@@ -20,34 +20,27 @@ function site(statsEnabled: boolean): Site {
     contactUrl: null,
     contactLinks: [],
     about: null,
+    legalPage,
+    legalPageTitle: "Privacy & legal",
     locale: "en",
     theme: "classic",
     federationEnabled: true,
-    statsEnabled,
+    statsEnabled: true,
     createdAt: new Date(0),
     updatedAt: new Date(0),
   };
 }
 
-test("legal page identifies itself as Legal and discloses enabled statistics", () => {
+test("legal page renders configured rich text without allowing raw HTML", () => {
   process.env.BASE_DOMAIN = "example.test";
-  process.env.ENABLE_IMPRESSUM_PAGE = "true";
-  const html = renderImpressumPage(site(true));
+  const html = renderImpressumPage(site("## Publisher\n\n**Ada Example**\n\nEmail: [hello@example.test](mailto:hello@example.test)\n\n<script>alert('no')</script>"));
 
-  assert.match(html, /<title>Legal — Legal test<\/title>/);
-  assert.match(html, /<h1>Legal<\/h1>/);
-  assert.match(html, /Status: Reichweitenmessung aktiviert\./);
-  assert.match(html, /Do Not Track/);
-  assert.match(html, /href="\/impressum">Legal<\/a>/);
-  assert.doesNotMatch(html, /Status: Reichweitenmessung deaktiviert\./);
-});
-
-test("legal page discloses disabled statistics and deletion of old counters", () => {
-  process.env.BASE_DOMAIN = "example.test";
-  process.env.ENABLE_IMPRESSUM_PAGE = "true";
-  const html = renderImpressumPage(site(false));
-
-  assert.match(html, /Status: Reichweitenmessung deaktiviert\./);
-  assert.match(html, /zuvor gespeicherte aggregierte Zähler unwiderruflich gelöscht/);
-  assert.doesNotMatch(html, /Status: Reichweitenmessung aktiviert\./);
+  assert.match(html, /<title>Privacy &amp; legal — Legal test<\/title>/);
+  assert.match(html, /<h1>Privacy &amp; legal<\/h1>/);
+  assert.match(html, /<h3>Publisher<\/h3>/);
+  assert.match(html, /<strong>Ada Example<\/strong>/);
+  assert.match(html, /href="mailto:hello@example\.test"/);
+  assert.match(html, /&lt;script&gt;alert\(&#39;no&#39;\)&lt;\/script&gt;/);
+  assert.match(html, /href="\/impressum">Privacy &amp; legal<\/a>/);
+  assert.doesNotMatch(html, /<script>alert/);
 });

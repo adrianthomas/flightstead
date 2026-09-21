@@ -70,6 +70,13 @@ export const sites = sqliteTable("sites", {
   // null/empty means the site has no About page, and the footer link and
   // /about route are both hidden in that case.
   about: text("about"),
+  // Owner-authored legal notice and privacy policy. Non-empty content enables
+  // /impressum and its footer/sitemap links; it uses the safe rich-text
+  // formatter rather than accepting raw HTML.
+  legalPage: text("legal_page"),
+  // Displayed as the page heading, browser title, and footer navigation label.
+  // Null retains the compatibility default, "Legal".
+  legalPageTitle: text("legal_page_title"),
   locale: text("locale").notNull().default("en"),
   theme: text("theme", { enum: themeValues }).notNull().default("classic"),
   // Whether publishing or retracting a post delivers Create/Delete activities

@@ -1,0 +1,1 @@
+ALTER TABLE `sites` ADD `legal_page` text;

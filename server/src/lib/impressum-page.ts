@@ -1,3 +1,3 @@
-export function impressumPageEnabled(): boolean {
-  return process.env.ENABLE_IMPRESSUM_PAGE === "true";
+export function impressumPageEnabled(legalPage: string | null): boolean {
+  return Boolean(legalPage?.trim());
 }

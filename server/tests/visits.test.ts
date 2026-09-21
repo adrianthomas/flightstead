@@ -28,7 +28,6 @@ test("privacy signals, prefetches, bots, and non-GET requests are not counted", 
 
 test("public HTML visits flow into the authenticated aggregate stats response", async () => {
   process.env.BASE_DOMAIN = "stats.test";
-  process.env.ENABLE_IMPRESSUM_PAGE = "true";
   const suffix = randomUUID().slice(0, 8);
   const userId = randomUUID();
   const siteId = randomUUID();
@@ -36,7 +35,14 @@ test("public HTML visits flow into the authenticated aggregate stats response", 
   const unreadArticleId = randomUUID();
   const token = `stats-token-${suffix}`;
   await db.insert(users).values({ id: userId, email: `stats-${suffix}@example.com` });
-  await db.insert(sites).values({ id: siteId, ownerUserId: userId, subdomain: `stats-${suffix}`, title: "Stats" });
+  await db.insert(sites).values({
+    id: siteId,
+    ownerUserId: userId,
+    subdomain: `stats-${suffix}`,
+    title: "Stats",
+    legalPage: "## Privacy\n\nConfigured legal copy.",
+    legalPageTitle: "Policies",
+  });
   await db.insert(apiTokens).values({ userId, tokenHash: hashToken(token) });
   await db.insert(contentObjects).values({
     id: articleId,
@@ -82,7 +88,8 @@ test("public HTML visits flow into the authenticated aggregate stats response", 
 
     const enabledLegal = await app.inject({ method: "GET", url: "/impressum", headers: { host, "user-agent": "Safari" } });
     assert.equal(enabledLegal.statusCode, 200);
-    assert.match(enabledLegal.body, /Status: Reichweitenmessung aktiviert\./);
+    assert.match(enabledLegal.body, /<h1>Policies<\/h1>/);
+    assert.match(enabledLegal.body, /Configured legal copy\./);
 
     const disabled = await app.inject({
       method: "PATCH",
@@ -97,8 +104,19 @@ test("public HTML visits flow into the authenticated aggregate stats response", 
 
     const disabledLegal = await app.inject({ method: "GET", url: "/impressum", headers: { host, "user-agent": "Safari" } });
     assert.equal(disabledLegal.statusCode, 200);
-    assert.match(disabledLegal.body, /Status: Reichweitenmessung deaktiviert\./);
-    assert.doesNotMatch(disabledLegal.body, /Status: Reichweitenmessung aktiviert\./);
+    assert.match(disabledLegal.body, /Configured legal copy\./);
+
+    const clearedLegal = await app.inject({
+      method: "PATCH",
+      url: "/api/v1/sites",
+      headers: { authorization: `Bearer ${token}`, "content-type": "application/json" },
+      payload: { legalPage: " \n ", legalPageTitle: "Terms" },
+    });
+    assert.equal(clearedLegal.statusCode, 200);
+    assert.equal(clearedLegal.json().site.legalPage, null);
+    assert.equal(clearedLegal.json().site.legalPageTitle, "Terms");
+    const missingLegal = await app.inject({ method: "GET", url: "/impressum", headers: { host, "user-agent": "Safari" } });
+    assert.equal(missingLegal.statusCode, 404);
 
     const disabledStats = await app.inject({ method: "GET", url: "/api/v1/stats", headers: { authorization: `Bearer ${token}` } });
     assert.equal(disabledStats.statusCode, 403);
