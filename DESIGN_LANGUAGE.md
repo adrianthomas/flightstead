@@ -13,13 +13,16 @@ different layouts or native platform controls.
 2. **Civil aviation, not novelty aviation.** Prefer grounded trainer aircraft,
    logbook labels, painted metal, windsocks, and airfield colors. Avoid airline
    clichés, military markings, cartoons, badges, stamps, or faux nostalgia.
-3. **One clear subject.** At icon size, the yellow aircraft is the mark. Do not
-   add a hangar, webpage, clouds, or other secondary symbols.
+3. **One clear subject at compact sizes.** At icon size, the yellow aircraft is
+   the mark. Do not add a hangar, webpage, clouds, or other secondary symbols.
+   Wide editorial artwork may establish the airfield with grass, an open
+   Quonset hangar, and a windsock.
 4. **Grounded and credible.** When parked, both main wheels and the tailwheel
    must visibly meet one ground plane with tight contact shadows. Never let the
    aircraft appear to float accidentally.
 5. **Warm restraint.** Texture may add tactility, but shapes and contrast must
-   remain clear. Avoid glossy 3D, neon, baby blue, or busy scenic detail.
+   remain clear. Avoid glossy 3D, neon, childish pastel blue, or busy scenic
+   detail. Pool blue is a deliberate brand color, not a generic sky gradient.
 
 ## Color palette
 
@@ -29,26 +32,29 @@ with these values.
 
 | Token | Hex | Role |
 |---|---:|---|
-| Smoky navy | `#163247` | Primary aircraft-image field; dark branded surfaces |
+| Pool blue | `#3FA6C4` | App icon field and bold branded fills |
+| Smoky navy | `#163247` | Dark branded surfaces and aircraft-window detail |
 | Trainer yellow | `#F5C252` | Aircraft, primary action, short emphasis rule |
 | Warm apron | `#9A8F7A` | Ground plane and neutral illustration support |
 | Ink | `#203D4B` | Primary light-mode brand text and dark aircraft detail |
 | Paper | `#F7F8F5` | Main light canvas |
 | Surface | `#FFFFFF` | Raised light surfaces and cards |
 | Petrol | `#28586D` | Links, controls, and secondary branded emphasis |
-| Pale field | `#E2EFF3` | Quiet UI selection fields only; not a hero/icon background |
+| Coastal tint | `#D9EEF5` | Quiet UI fields and large soft background transitions |
 | Signal red | `#AE493B` | Windsock and sparing status/detail accents |
 | Linen | `#F7FAF5` | Warm light detail and windsock stripe |
 
 ### Color use
 
-- Smoky navy and trainer yellow form the primary identity pair.
-- Warm apron grounds aircraft artwork; it should occupy less visual weight than
-  the navy field.
+- Pool blue and trainer yellow form the primary identity pair.
+- Smoky navy provides mature contrast in windows, type, and dark surfaces.
+- Warm apron and grass ground wide airfield artwork without becoming primary
+  brand colors.
 - Petrol is the interaction accent. Do not substitute a bright cyan or royal
   blue.
-- Pale field is acceptable for small UI fills, but must not dominate marketing
-  or icon artwork; large baby-blue fields make the identity feel juvenile.
+- Coastal tint is acceptable for quiet UI fills and marketing gradients. Use
+  exact pool blue for compact brand fields; do not drift toward pastel baby
+  blue.
 - Signal red is an accent, never a competing primary color.
 - Check text and control combinations against WCAG AA. Illustration colors do
   not replace semantic system colors for errors, warnings, or disabled states.
@@ -56,15 +62,17 @@ with these values.
 ## Aircraft artwork
 
 The canonical aircraft is a sunny-yellow, high-wing civilian taildragger shown
-from a front three-quarter viewpoint. It has deep-navy windows, one navy fuselage
-stripe, dark wheels, and a restrained golden-age aviation-poster finish.
+from a front three-quarter viewpoint. It has deep-navy windows, dark wheels,
+and a restrained modern interpretation of golden-age aviation-poster artwork.
 
 ### App icon and compact emblem
 
-- Use the aircraft alone on smoky navy over a warm-apron ground band.
+- Use the aircraft alone on an uninterrupted pool-blue `#3FA6C4` field.
 - Keep the complete silhouette inside the iOS safe area.
 - Preserve a clear read at 48–60 px: wing, fuselage, propeller hub, two main
-  wheels, and tail.
+  wheels, and the small grounded tailwheel.
+- Park the stopped two-blade propeller horizontally, parallel to the main wing,
+  so it does not merge with the landing gear at Home Screen size.
 - Remove scenery, buildings, text, browser metaphors, clouds, and decorative
   props.
 - Use tight shadows at the tire contact points; avoid a detached diffuse shadow.
@@ -73,17 +81,19 @@ stripe, dark wheels, and a restrained golden-age aviation-poster finish.
 
 ### Wide hero
 
-- Use the same aircraft, viewpoint, colors, and grounded stance in a 3:2 crop.
-- Extend the smoky navy and warm apron rather than adding scenery.
-- Leave calm negative space around the subject for responsive cropping.
-- Do not reintroduce a hangar simply to communicate “website”; product copy and
-  surrounding layout carry that meaning.
+- Use the more detailed yellow aircraft in a credible three-point parked stance
+  in front of an open green Quonset hangar.
+- Grass, a pale apron, a simple windsock, and clear coastal sky establish a small
+  civil aerodrome. Keep the scene calm and uncluttered.
+- Leave useful negative space and keep the aircraft/hangar readable in wide,
+  rounded responsive crops.
+- This scenic treatment belongs on the website hero and spacious welcome, Help,
+  and empty-state moments. Never shrink it into a compact emblem.
 
 ### Dark and tinted variants
 
-- The standard smoky-navy artwork is already suitable for dark appearance.
-- Tinted artwork is grayscale: charcoal field, silver-white aircraft,
-  medium-grey apron, near-black details.
+- The standard pool-blue artwork is already suitable for dark appearance.
+- Tinted artwork is a mechanical grayscale conversion of the same composition.
 - Variants may change color only. Silhouette, scale, stance, and crop stay fixed.
 
 ## Typography and graphic details
@@ -104,7 +114,8 @@ Before shipping a branded surface:
 
 - Does the plane match the canonical yellow taildragger and viewpoint?
 - If parked, are all wheels visibly grounded?
-- Is smoky navy—not baby blue—the dominant image field?
+- Does the compact mark use exact pool blue rather than a pastel approximation?
+- Is scenic hangar artwork reserved for surfaces large enough to read it?
 - Does the artwork remain readable at its smallest real size?
 - Are UI controls still native, accessible, and semantically colored?
 - Are icon, dark, tinted, in-app, and website assets derived from retained
