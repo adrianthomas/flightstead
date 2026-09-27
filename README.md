@@ -96,8 +96,5 @@ illustration rules, and brand usage are defined in
 
 ## License
 
-Flightstead is a [Navigationstack.com](https://navigationstack.com) app. The
-repository name, deployment service names and existing `X-Shareblog-*` headers
-remain unchanged for compatibility with installed servers and iOS clients.
-
-[MIT](LICENSE)
+Flightstead is [MIT-licensed](LICENSE). Attribution is appreciated—let me know
+how you're using Flightstead; I'm curious to see what people build with it!
