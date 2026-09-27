@@ -59,7 +59,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 
 | Path | Renders |
 |---|---|
-| `/` | Home — all types mixed, paginated 20 at a time (`renderList`). An unknown bare `BASE_DOMAIN` has no product-page fallback and returns the ordinary unknown-tenant 404. |
+| `/` | Home — all types mixed, paginated 20 at a time (`renderList`). Before the first site row is created, the bare `BASE_DOMAIN` and a single-level prospective tenant host show a no-index, no-store setup-pending page with links to the public setup guide and FAQ; the API host is excluded. Once any site exists, unknown hosts return the ordinary unknown-tenant 404. |
 | `/posts`, `/articles`, `/links`, `/books`, `/music`, `/photos`, `/quotes` | Per-type listings (`LISTING_TYPES`), paginated 20 at a time |
 | `/<listing>/feed.xml`, `/feed.xml` | RSS (`renderFeed`) |
 | `/<prefix>/:slug` (`DETAIL_TYPES`) | Detail page (`renderObjectPage`) — 404s if not published |

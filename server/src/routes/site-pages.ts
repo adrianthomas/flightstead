@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { and, eq, desc, count, gte, lt, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "../db/client.js";
-import { contentObjects } from "../db/schema.js";
+import { contentObjects, sites } from "../db/schema.js";
 import type { ContentType } from "../db/schema.js";
 import { resolveTenant } from "../middleware/tenant.js";
 import {
@@ -28,6 +28,7 @@ import { workPageEnabled } from "../lib/work-page.js";
 import { impressumPageEnabled } from "../lib/impressum-page.js";
 import { renderFavicon } from "../render/favicon.js";
 import { recordVisit } from "../analytics/visits.js";
+import { isPendingSiteHost, renderPendingPage } from "../render/pending-page.js";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -36,6 +37,14 @@ declare module "fastify" {
 }
 
 const PAGE_SIZE = 20;
+
+// A holding page is useful only during first-run setup. Once any site exists,
+// an unknown hostname is a genuine routing error and must remain a 404 rather
+// than pretending that somebody is still configuring it.
+async function installationHasSite(): Promise<boolean> {
+  const [site] = await db.select({ id: sites.id }).from(sites).limit(1);
+  return Boolean(site);
+}
 
 const pageQuerySchema = z.object({ page: z.coerce.number().int().min(1).max(10_000).default(1) });
 
@@ -162,9 +171,21 @@ export async function sitePageRoutes(app: FastifyInstance) {
   });
 
   app.get("/", async (request, reply) => {
-    await resolveTenant(request, reply);
-    if (reply.sent) return;
-    const site = request.site!;
+    const resolvedSite = await siteForHost(request.headers.host);
+    if (!resolvedSite) {
+      if (isPendingSiteHost(request.headers.host, process.env.BASE_DOMAIN) && !(await installationHasSite())) {
+        // no-store is important here: the real site should appear immediately
+        // after the app completes onboarding.
+        return reply
+          .code(200)
+          .header("content-type", "text/html; charset=utf-8")
+          .header("cache-control", "no-store")
+          .send(renderPendingPage());
+      }
+      return reply.code(404).send({ error: { code: "not_found", message: "Unknown site." } });
+    }
+    request.site = resolvedSite;
+    const site = resolvedSite;
     const { page } = pageQuerySchema.parse(request.query);
     return sendCachedHtml(request, reply, site.id, async () => {
       const [objects, total, availablePaths] = await Promise.all([

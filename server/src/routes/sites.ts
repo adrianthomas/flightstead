@@ -102,6 +102,11 @@ export async function siteRoutes(app: FastifyInstance) {
       })
       .returning();
 
+    // A visitor may have loaded the first-run holding page before onboarding.
+    // Clear the cached negative hostname lookup so the new site is routable
+    // immediately instead of remaining pending for up to 30 seconds.
+    invalidateTenantCache();
+
     return reply.code(201).send({ site });
   });
 
