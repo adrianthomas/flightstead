@@ -3,6 +3,7 @@ dist/
 .env
 data/uploads/*
 !data/uploads/.gitkeep
+data/review-uploads/
 *.log
 playwright-report/
 test-results/

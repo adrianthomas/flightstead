@@ -2,6 +2,7 @@ import { eq, and, isNull, gt } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { ownerClaims, users } from "../db/schema.js";
 import { hashToken } from "./tokens.js";
+import { claimAppReviewAccount } from "./app-review.js";
 
 /** How long a pairing code printed by `bootstrap-owner.ts` stays valid. */
 export const CLAIM_CODE_TTL_MINUTES = 20;
@@ -14,14 +15,20 @@ export const CLAIM_CODE_TTL_MINUTES = 20;
  * itself instead of an email address.
  */
 export async function claimOwner(code: string) {
-  const codeHash = hashToken(code);
+  // Generated owner codes use an uppercase, ambiguity-free alphabet. Treat
+  // manual entry and pasted codes the same as the QR payload so keyboard
+  // casing and surrounding whitespace cannot invalidate a fresh code.
+  const trimmedCode = code.trim();
+  const codeHash = hashToken(trimmedCode.toUpperCase());
   const [row] = await db
     .select()
     .from(ownerClaims)
     .where(and(eq(ownerClaims.codeHash, codeHash), isNull(ownerClaims.consumedAt), gt(ownerClaims.expiresAt, new Date())))
     .limit(1);
 
-  if (!row) return null;
+  // The durable App Review credential is independently generated and remains
+  // case-sensitive; only discard accidental surrounding whitespace for it.
+  if (!row) return claimAppReviewAccount(trimmedCode);
 
   await db.update(ownerClaims).set({ consumedAt: new Date() }).where(eq(ownerClaims.id, row.id));
 

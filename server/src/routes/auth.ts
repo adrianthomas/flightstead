@@ -7,6 +7,7 @@ import { requestAuthCode, verifyMobileCode, verifyWebMagicLink } from "../auth/m
 import { claimOwner } from "../auth/owner-claim.js";
 import { generateApiToken, hashToken } from "../auth/tokens.js";
 import { authGuard } from "../middleware/auth-guard.js";
+import { deleteAccount } from "../auth/account-deletion.js";
 
 const requestCodeSchema = z.object({
   email: z.string().email().toLowerCase(),
@@ -20,7 +21,7 @@ const verifyCodeSchema = z.object({
 });
 
 const claimOwnerSchema = z.object({
-  code: z.string().min(4).max(32),
+  code: z.string().min(4).max(64),
   deviceName: z.string().max(120).optional(),
 });
 
@@ -147,6 +148,12 @@ export async function authRoutes(app: FastifyInstance) {
       .update(apiTokens)
       .set({ revokedAt: new Date() })
       .where(and(eq(apiTokens.userId, request.authUser!.id), isNull(apiTokens.revokedAt)));
+    return reply.code(204).send();
+  });
+
+  app.delete("/account", { preHandler: authGuard }, async (request, reply) => {
+    z.object({ confirmation: z.literal("DELETE") }).parse(request.body);
+    await deleteAccount(request.authUser!, request.log);
     return reply.code(204).send();
   });
 

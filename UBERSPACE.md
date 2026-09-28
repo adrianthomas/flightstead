@@ -71,8 +71,8 @@ codes from console-logged (dev only, never emailed) to sent via `SMTP_*`,
 and it's what the `ALLOWED_SIGNUP_EMAILS` requirement below is gated on —
 leave it as `development` and both protections silently don't apply.
 
-**`ALLOWED_SIGNUP_EMAILS` is required** — the server refuses to boot without
-it in production (`server.ts`). Set it to whichever address(es) should be
+**`ALLOWED_SIGNUP_EMAILS` is required for an email-enabled production
+instance** — the server refuses to boot without it (`server.ts`). Set it to whichever address(es) should be
 able to sign in at all; without it, anyone who finds your API could request
 a code, verify it, and create their own account and site on your account.
 Everyone else's request still returns success either way, so it can't be
@@ -86,8 +86,9 @@ internet. `SMTP_HOST` is your account's own Uberspace host name (e.g.
 or TLS cert validation fails.
 
 Uberspace's SMTP needs a real mailbox to authenticate as; create one before
-starting the server (`NODE_ENV=production` refuses to boot without working
-SMTP config, since auth codes are only emailed, never console-logged):
+using email sign-in. Production auth codes are only emailed and never
+console-logged, so a missing SMTP configuration makes an email request fail
+instead of leaking its code into the logs:
 
 ```bash
 uberspace mail user add noreply
@@ -205,6 +206,212 @@ Otherwise, same as any other host — see step 7 in
 [SELF_HOSTING.md](SELF_HOSTING.md): enter `yourdomain.com` (no scheme
 needed), and it assumes the `api.<domain>` convention set up above. Sign-in
 codes go to whichever address(es) you put in `ALLOWED_SIGNUP_EMAILS`.
+
+## Dedicated App Store Review instance on the same Uberspace account
+
+Do not put a durable review credential on the instance that contains your own
+site. Run a second Flightstead process in a separate checkout, on a separate
+port, SQLite database, uploads directory, and hostname. It can use the
+same Uberspace account without sharing application data.
+
+The single-host example below uses:
+
+- API and public review site: `review.yourdomain.com`
+- process name: `flightstead-review`
+- port: `3100`
+- checkout: `/home/<username>/flightstead-review`
+
+Choose another unused port if `3100` is already present in
+`uberspace web backend list`.
+
+### 1. Install an isolated checkout
+
+```bash
+cd ~
+git clone <your-fork-or-this-repo> flightstead-review
+cd flightstead-review/server
+```
+
+On a second checkout in the same memory-constrained Uberspace account, prefer
+reusing the production checkout's already-installed dependency tree. A fresh
+`npm install` was observed to be OOM-killed. First confirm both checkouts have
+the same `package-lock.json`, then:
+
+```bash
+ln -s /home/<username>/shareblog/server/node_modules node_modules
+npm run build
+```
+
+Do not copy the production `.env`, `data/`, or `dist/`; only the dependency
+tree is shared. Re-run the review build after a production dependency update.
+On a host with enough memory, or where no matching production dependency tree
+exists, use `npm install && npm run build` instead.
+
+Only application source belongs in Git. Never add the review `.env`, database,
+uploads, generated access code, or App Store Connect notes to the repository.
+The repository ignores `.env` and `server/data/`, but the restrictive file
+permissions below are still required.
+
+### 2. Generate the durable credential
+
+```bash
+npm run app-review:credential
+```
+
+This prints two different values:
+
+- **Access code** — save this once in your password manager and later in App
+  Store Connect. Do not put it in `.env` or source control.
+- **`APP_REVIEW_ACCESS_CODE_HASH=...`** — put this hash in `.env`. The original
+  code cannot be recovered from it.
+
+### 3. Create the private review configuration
+
+```bash
+umask 077
+cp .env.example .env
+chmod 600 .env
+nano .env
+```
+
+Use the following values, substituting your real domain, a dedicated display
+email, and the generated hash:
+
+```dotenv
+NODE_ENV=production
+PORT=3100
+BASE_DOMAIN=yourdomain.com
+API_BASE_URL=https://review.yourdomain.com
+
+DATABASE_URL=./data/review.db
+STORAGE_DRIVER=local
+LOCAL_STORAGE_DIR=./data/review-uploads
+
+ENABLE_WORK_PAGE=false
+DISABLE_EMAIL_AUTH=true
+
+APP_REVIEW_EMAIL=app-review@yourdomain.com
+APP_REVIEW_ACCESS_CODE_HASH=<generated-64-character-hash>
+APP_REVIEW_SITE_SUBDOMAIN=review
+APP_REVIEW_SITE_TITLE=Flightstead App Review
+```
+
+`DISABLE_EMAIL_AUTH=true` deliberately removes the SMTP/email-code path from
+this instance, so it does not need `SMTP_*` or `ALLOWED_SIGNUP_EMAILS`. The only
+login is the high-entropy review pairing code. The review site is created with
+federation disabled so test posts are not broadcast.
+
+```bash
+npm run db:migrate
+chmod 700 data
+```
+
+Do **not** run `npm run bootstrap-owner` for this instance; the first valid
+review login provisions exactly the dedicated review account and site.
+
+### 4. Add a separate supervised process
+
+Run `which node`, then create `~/etc/services.d/flightstead-review.ini` with
+the returned Node path:
+
+```ini
+[program:flightstead-review]
+command=/home/<username>/bin/node dist/server.js
+directory=/home/<username>/flightstead-review/server
+autostart=true
+autorestart=true
+startsecs=5
+stdout_logfile=/home/<username>/logs/flightstead-review.log
+stderr_logfile=/home/<username>/logs/flightstead-review-error.log
+```
+
+```bash
+supervisorctl reread
+supervisorctl update
+supervisorctl status flightstead-review
+```
+
+### 5. Add the TLS domain and route only it to the review port
+
+```bash
+uberspace web domain add review.yourdomain.com
+uberspace web backend set review.yourdomain.com --http --port 3100
+```
+
+Create the exact DNS records printed by `domain add` and wait for
+Uberspace to issue the certificates. Verify the API without exposing the
+credential:
+
+```bash
+curl --fail https://review.yourdomain.com/api/v1/themes
+```
+
+This dedicated deployment intentionally serves both its API and its only public
+tenant from `review.yourdomain.com`; its process, database, media, and login
+remain separate from production.
+
+### 6. Provision and test the account end to end
+
+In a Release/TestFlight build of Flightstead:
+
+1. Enter the full URL `https://review.yourdomain.com` as the server. Including
+   `https://` makes the app use this host directly instead of inferring an
+   `api.` subdomain.
+2. Open **Have a pairing code instead of a QR?**
+3. Enter the generated access code.
+4. Create representative draft and published posts, upload an image, open the
+   public site, sign out, and sign in again with the same code.
+5. Keep the sample content suitable for an external reviewer. Do not use real
+   personal data or production credentials.
+
+The credential stays valid across devices and server restarts until its hash
+is removed or replaced. Account deletion removes the review data, but a later
+login with the configured code safely recreates the review account.
+
+### 7. Put the login in App Store Connect
+
+Use the dedicated review email as the demo-account username and the generated
+access code as its password. In Review Notes say:
+
+> Server: `https://review.yourdomain.com`. On the first screen, enter that full URL,
+> choose “Have a pairing code instead of a QR?”, and enter the supplied demo
+> account password as the pairing code. The credential is reusable and does
+> not require email or two-factor authentication.
+
+### Rotation and shutdown
+
+To rotate a suspected or previously submitted credential, generate a new one,
+replace only `APP_REVIEW_ACCESS_CODE_HASH` in `.env`, revoke every previously
+issued review session, and restart:
+
+```bash
+npm run app-review:credential
+nano .env
+npm run app-review:revoke-sessions
+supervisorctl restart flightstead-review
+```
+
+Update App Store Connect with the new plaintext access code. To disable review
+access after review, first run `npm run app-review:revoke-sessions`, remove all
+four `APP_REVIEW_*` values, and restart the process. Removing the hash alone
+prevents new logins but does not revoke tokens already issued to devices.
+
+Update this review checkout independently from the production process:
+
+```bash
+cd ~/flightstead-review
+git pull --ff-only
+cd server
+npm install
+npm run build
+npm run db:migrate
+supervisorctl restart flightstead-review
+supervisorctl status flightstead-review
+```
+
+Do not use the repository-root `deploy.sh` unchanged for this process: its
+default service name is `shareblog`, and it runs `bootstrap-owner`, neither of
+which is appropriate for the isolated review instance.
 
 ## Updating
 

@@ -195,6 +195,21 @@ from a physical device (e.g. `http://192.168.1.5:3000`), use **Settings →
 Change server** — that field accepts a full `http(s)://` URL too, used
 as-is instead of assuming `api.<domain>`.
 
+### Optional App Store Review account
+
+A dedicated review instance can expose a stable pairing credential without
+weakening ordinary owner pairing or sharing production data. Generate one with
+`npm run app-review:credential`, store only its SHA-256 value as
+`APP_REVIEW_ACCESS_CODE_HASH`, and configure it together with
+`APP_REVIEW_EMAIL`, `APP_REVIEW_SITE_SUBDOMAIN`, and `APP_REVIEW_SITE_TITLE`.
+Entering the plaintext code through the app's normal manual pairing flow
+creates the isolated review user and non-federating site on first use and signs
+into that same account thereafter. `DISABLE_EMAIL_AUTH=true` can remove the
+unused SMTP login path on this instance. Keep the plaintext code only in a
+password manager and App Store Connect; never put it in `.env` or source
+control. See [UBERSPACE.md](UBERSPACE.md#dedicated-app-store-review-instance-on-the-same-uberspace-account)
+for an isolated same-account deployment and credential rotation procedure.
+
 ## Updating
 
 ```bash

@@ -19,6 +19,7 @@ imports/
 /data/
 server/data/uploads/*
 !server/data/uploads/.gitkeep
+server/data/review-uploads/
 server/data/*.db*
 
 # The private companion iOS app lives in the separate shareblog-ios checkout.

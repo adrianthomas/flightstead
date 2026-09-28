@@ -6,11 +6,16 @@ import { sendEmail } from "./email.js";
 
 const CODE_TTL_MINUTES = 10;
 
+function emailAuthDisabled(): boolean {
+  return process.env.DISABLE_EMAIL_AUTH === "true";
+}
+
 // When set, only these emails can sign in or create an account — without it,
 // anyone who finds the API can request a code, verify it, and create their
 // own site on this box (real risk for a self-hosted single-tenant instance,
 // none for local dev, so it's opt-in via env rather than hardcoded).
 function isAllowedEmail(email: string): boolean {
+  if (emailAuthDisabled()) return false;
   const allowlist = process.env.ALLOWED_SIGNUP_EMAILS;
   if (!allowlist) return true;
   return allowlist
@@ -83,12 +88,14 @@ async function findOrCreateUser(email: string) {
 }
 
 export async function verifyMobileCode(email: string, code: string) {
+  if (emailAuthDisabled()) return null;
   const consumed = await consumeToken(email, code, "mobile_code");
   if (!consumed) return null;
   return findOrCreateUser(email);
 }
 
 export async function verifyWebMagicLink(secret: string) {
+  if (emailAuthDisabled()) return null;
   const tokenHash = hashToken(secret);
   const [row] = await db
     .select()
