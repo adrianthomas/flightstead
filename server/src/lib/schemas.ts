@@ -1,5 +1,12 @@
 import { z } from "zod";
 import { contentTypeValues } from "../db/schema.js";
+import { isSafeLinkUrl } from "../render/format.js";
+
+// z.string().url() only checks URL syntax — it happily accepts
+// `javascript:`/`data:` values, which the templates that render these
+// fields put straight into an href. Use this wherever a stored URL becomes
+// a link a visitor can click.
+const linkUrlSchema = z.string().url().refine(isSafeLinkUrl, "URL must use http, https, or mailto.");
 
 export const thoughtMetadataSchema = z.object({}).strict();
 
@@ -18,26 +25,26 @@ export const bookMetadataSchema = z.object({
   rating: z.number().int().min(1).max(5).optional(),
   links: z
     .object({
-      bookshop: z.string().url().optional(),
-      bookshopUk: z.string().url().optional(),
-      genialokal: z.string().url().optional(),
-      standardEbooks: z.string().url().optional(),
-      overdrive: z.string().url().optional(),
+      bookshop: linkUrlSchema.optional(),
+      bookshopUk: linkUrlSchema.optional(),
+      genialokal: linkUrlSchema.optional(),
+      standardEbooks: linkUrlSchema.optional(),
+      overdrive: linkUrlSchema.optional(),
       amazon: z
         .object({
-          us: z.string().url().optional(),
-          uk: z.string().url().optional(),
-          de: z.string().url().optional(),
-          fr: z.string().url().optional(),
-          it: z.string().url().optional(),
-          es: z.string().url().optional(),
-          ca: z.string().url().optional(),
-          jp: z.string().url().optional(),
+          us: linkUrlSchema.optional(),
+          uk: linkUrlSchema.optional(),
+          de: linkUrlSchema.optional(),
+          fr: linkUrlSchema.optional(),
+          it: linkUrlSchema.optional(),
+          es: linkUrlSchema.optional(),
+          ca: linkUrlSchema.optional(),
+          jp: linkUrlSchema.optional(),
         })
         .optional(),
-      kobo: z.string().url().optional(),
-      appleBooks: z.string().url().optional(),
-      storygraph: z.string().url().optional(),
+      kobo: linkUrlSchema.optional(),
+      appleBooks: linkUrlSchema.optional(),
+      storygraph: linkUrlSchema.optional(),
     })
     .default({}),
   source: z.enum(["open_library", "google_books", "manual"]),
@@ -95,7 +102,7 @@ export const createObjectSchema = z
     title: z.string().max(300).optional(),
     body: z.string().optional(),
     status: z.enum(["draft", "published"]).default("draft"),
-    sourceUrl: z.string().url().optional(),
+    sourceUrl: linkUrlSchema.optional(),
     metadata: z.record(z.string(), z.unknown()),
   })
   .superRefine((val, ctx) => {

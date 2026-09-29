@@ -31,7 +31,7 @@ import type {
 } from "./templates/types.js";
 import { publicBookCoverUrl, publicLinkPreviewImageUrl, publicMusicArtworkUrl } from "./templates/types.js";
 import { t, resolveLocale, type MessageKey } from "./i18n.js";
-import { formatBasicText, formatRichText, stripBasicFormatting } from "./format.js";
+import { formatBasicText, formatRichText, isSafeLinkUrl, stripBasicFormatting } from "./format.js";
 import { siteOrigin } from "./site-url.js";
 import { bookRetailerLinksFor } from "../lib/book-links.js";
 import { musicLinksFor } from "../lib/music-links.js";
@@ -464,8 +464,13 @@ function escapeXml(value: string): string {
 // the site's own detail page, reused here so the feed item carries the same
 // buy/listen links instead of stranding the reader with just a name.
 function linkList(entries: Array<{ label: string; url: string }>): string {
-  if (entries.length === 0) return "";
-  const links = entries.map(({ label, url }) => `<a href="${escapeXml(url)}">${escapeXml(label)}</a>`).join(" · ");
+  // escapeXml only makes the value well-formed XML — it doesn't restrict
+  // scheme, so a stored `javascript:`/`data:` URL (predating the write-time
+  // validation added to these fields) would otherwise still reach this
+  // href unfiltered.
+  const safeEntries = entries.filter(({ url }) => isSafeLinkUrl(url));
+  if (safeEntries.length === 0) return "";
+  const links = safeEntries.map(({ label, url }) => `<a href="${escapeXml(url)}">${escapeXml(label)}</a>`).join(" · ");
   return `<p>${links}</p>`;
 }
 

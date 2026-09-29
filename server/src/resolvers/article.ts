@@ -7,7 +7,7 @@ import metascraperAuthor from "metascraper-author";
 import metascraperPublisher from "metascraper-publisher";
 import metascraperUrl from "metascraper-url";
 import type { ResolvedArticle } from "./types.js";
-import { assertSafeFetchTarget } from "../lib/ssrf-guard.js";
+import { assertSafeFetchTarget, safeDnsLookup } from "../lib/ssrf-guard.js";
 
 const scraper = metascraper([
   metascraperTitle(),
@@ -26,6 +26,7 @@ export async function resolveArticle(targetUrl: string): Promise<ResolvedArticle
     await assertSafeFetchTarget(targetUrl);
     const response = await got(targetUrl, {
       timeout: { request: 8000 },
+      dnsLookup: safeDnsLookup,
       hooks: {
         beforeRedirect: [
           async (options) => {

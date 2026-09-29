@@ -1,4 +1,5 @@
 import React from "react";
+import { isSafeLinkUrl } from "../format.js";
 import type { ContactLink, ProfileLink, Site } from "./types.js";
 
 export function siteContactLinks(site: Site): ContactLink[] {
@@ -8,8 +9,11 @@ export function siteContactLinks(site: Site): ContactLink[] {
 }
 
 export function SiteProfile({ site }: { site: Site }) {
-  const profileLinks = (site.profileLinks ?? []) as ProfileLink[];
-  const contactLinks = siteContactLinks(site);
+  // A stored `javascript:`/`data:` link URL (predating the write-time
+  // validation added to these fields) must not reach the hrefs below
+  // unfiltered.
+  const profileLinks = ((site.profileLinks ?? []) as ProfileLink[]).filter((link) => isSafeLinkUrl(link.url));
+  const contactLinks = siteContactLinks(site).filter((link) => isSafeLinkUrl(link.url));
   const name = site.profileName?.trim() || site.title;
 
   return (

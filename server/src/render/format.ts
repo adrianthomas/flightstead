@@ -16,6 +16,14 @@
 
 const SAFE_LINK_PROTOCOL = /^(https?:|mailto:)/i;
 
+// Shared with schemas.ts (rejects javascript:/data: at write time) and with
+// any template that renders a stored URL field into an href outside of
+// formatBasicText/formatRichText's own markdown-link handling above, since
+// those fields don't pass through this file's escaping otherwise.
+export function isSafeLinkUrl(value: string): boolean {
+  return SAFE_LINK_PROTOCOL.test(value);
+}
+
 function isSafeImageUrl(value: string): boolean {
   try {
     const url = new URL(value);

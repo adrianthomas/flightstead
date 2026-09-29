@@ -1,5 +1,6 @@
 import { lookup } from "node:dns/promises";
-import { isIP } from "node:net";
+import { lookup as lookupCallback, type LookupAddress } from "node:dns";
+import { isIP, type LookupFunction } from "node:net";
 
 function isPrivateIPv4(ip: string): boolean {
   const [a, b] = ip.split(".").map(Number);
@@ -66,3 +67,29 @@ export async function assertSafeFetchTarget(rawUrl: string | URL): Promise<void>
     throw new Error("Refusing to fetch a private/internal address.");
   }
 }
+
+/**
+ * Pass as got's `dnsLookup` option alongside assertSafeFetchTarget, not
+ * instead of it. assertSafeFetchTarget validates the URL up front, but a
+ * plain `dns.lookup()` check followed by an ordinary request lets the HTTP
+ * client re-resolve the hostname on its own moments later — two separate
+ * DNS queries an attacker's resolver can answer differently (a public IP
+ * for the check, a private one for the connection). Using this function as
+ * the client's own resolution logic makes the validated address the one
+ * actually connected to, closing that window.
+ */
+export const safeDnsLookup: LookupFunction = (hostname, options, callback) => {
+  const family = typeof options === "number" ? options : options?.family;
+  lookupCallback(hostname, { all: true, verbatim: true, family }, (err, addresses) => {
+    if (err) {
+      callback(err, "", 0);
+      return;
+    }
+    const records = addresses as LookupAddress[];
+    if (records.length === 0 || records.some((record) => isPrivateAddress(record.address))) {
+      callback(new Error("Refusing to fetch a private/internal address."), "", 0);
+      return;
+    }
+    callback(null, records[0].address, records[0].family);
+  });
+};

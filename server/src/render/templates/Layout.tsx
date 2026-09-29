@@ -12,6 +12,7 @@ import type { ProfileLink } from "./types.js";
 import { workPageEnabled } from "../../lib/work-page.js";
 import { impressumPageEnabled } from "../../lib/impressum-page.js";
 import { SiteProfile } from "./SiteProfile.js";
+import { isSafeLinkUrl } from "../format.js";
 
 export interface PageMetadata {
   path?: string;
@@ -200,7 +201,7 @@ export function Layout({
         {metadata.imageUrl ? <meta name="twitter:image" content={metadata.imageUrl} /> : null}
         <link rel="icon" type={site.profileImageUrl ? undefined : "image/svg+xml"} href={site.profileImageUrl ?? "/favicon.svg?v=1"} />
         {site.profileImageUrl ? <link rel="apple-touch-icon" href={site.profileImageUrl} /> : null}
-        {profileLinks.filter((link) => link.relMe).map((link) => (
+        {profileLinks.filter((link) => link.relMe && isSafeLinkUrl(link.url)).map((link) => (
           <link key={link.url} rel="me" href={link.url} />
         ))}
         <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />

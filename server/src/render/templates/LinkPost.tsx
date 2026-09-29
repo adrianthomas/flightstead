@@ -3,14 +3,18 @@ import { publicLinkPreviewImageUrl, type ContentObject, type LinkMetadata } from
 import type { Theme } from "../../db/schema.js";
 import { formatDate } from "./ThoughtPost.js";
 import { t } from "../i18n.js";
-import { formatBasicText } from "../format.js";
+import { formatBasicText, isSafeLinkUrl } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
 import { CloseButton } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetLinkFeedItem } from "../themes/cabinet.js";
 import { BackLink } from "./BackLink.js";
 
 function externalUrl(object: ContentObject): string {
-  return object.sourceUrl ?? `/links/${object.slug}`;
+  // A stored `javascript:`/`data:` sourceUrl (predating the write-time
+  // validation added to this field) must not reach this href unfiltered —
+  // fall back to the post's own page rather than render it.
+  if (object.sourceUrl && isSafeLinkUrl(object.sourceUrl)) return object.sourceUrl;
+  return `/links/${object.slug}`;
 }
 
 function linkHost(object: ContentObject): string | undefined {

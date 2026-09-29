@@ -7,6 +7,13 @@ import { authGuard } from "../middleware/auth-guard.js";
 import { slugify } from "../lib/slugify.js";
 import { invalidateSitePages } from "../render/page-cache.js";
 import { invalidateTenantCache } from "../middleware/tenant.js";
+import { isSafeLinkUrl } from "../render/format.js";
+
+// z.string().url() only checks URL syntax — it happily accepts
+// `javascript:`/`data:` values, which SiteProfile.tsx/ContactPage.tsx put
+// straight into an href. Use this wherever a stored URL becomes a link a
+// visitor can click.
+const linkUrlSchema = z.string().url().max(2_000).refine(isSafeLinkUrl, "URL must use http, https, or mailto.");
 
 const createSiteSchema = z.object({
   subdomain: z
@@ -26,7 +33,7 @@ const RESERVED_SUBDOMAINS = new Set(["api", "www", "app", "admin", "mail", "ftp"
 
 const profileLinkSchema = z.object({
   label: z.string().trim().min(1).max(80),
-  url: z.string().url().max(2_000),
+  url: linkUrlSchema,
   relMe: z.boolean().optional(),
 });
 
@@ -59,7 +66,7 @@ const updateSiteSchema = z
     profileImageUrl: z.union([z.string().url().max(2_000), z.literal("")]).optional(),
     profileLinks: z.array(profileLinkSchema).max(20).optional(),
     contactLabel: z.string().max(80).optional(),
-    contactUrl: z.union([z.string().url().max(2_000), z.literal("")]).optional(),
+    contactUrl: z.union([linkUrlSchema, z.literal("")]).optional(),
     contactLinks: z.array(profileLinkSchema.omit({ relMe: true })).max(20).optional(),
     customDomain: customDomainSchema.optional(),
     about: z.string().max(20_000).optional(),

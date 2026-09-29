@@ -5,7 +5,7 @@ import { formatDate } from "./ThoughtPost.js";
 import { t } from "../i18n.js";
 import { CardsFeedItem, CardsDetailHeader, CardsBookDetailHeader } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
-import { formatBasicText } from "../format.js";
+import { formatBasicText, isSafeLinkUrl } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
 import { BackLink } from "./BackLink.js";
 import { bookRetailerLinksFor } from "../../lib/book-links.js";
@@ -70,7 +70,10 @@ export function flattenLinks(links: NonNullable<BookMetadata["links"]>): BookLin
     const url = links[key];
     if (url) entries.push({ key, label: STORE_LABELS[key], url });
   }
-  return entries;
+  // A manual (non-ISBN) post's links are stored client-supplied URLs; a
+  // `javascript:`/`data:` value predating the write-time validation added
+  // to this field must not reach BookLinkAnchor's href unfiltered.
+  return entries.filter((entry) => isSafeLinkUrl(entry.url));
 }
 
 function BookLinkAnchor({ entry }: { entry: BookLink }) {

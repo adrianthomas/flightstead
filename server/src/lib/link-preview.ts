@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { assets } from "../db/schema.js";
 import { createImageAsset, imageAssetResponse } from "./image-assets.js";
-import { assertSafeFetchTarget } from "./ssrf-guard.js";
+import { assertSafeFetchTarget, safeDnsLookup } from "./ssrf-guard.js";
 
 const MAX_PREVIEW_BYTES = 10 * 1024 * 1024;
 
@@ -26,6 +26,7 @@ async function importPreview(siteId: string, imageUrl: string) {
   await assertSafeFetchTarget(imageUrl);
   const response = await got(imageUrl, {
     timeout: { request: 8000 },
+    dnsLookup: safeDnsLookup,
     hooks: {
       beforeRedirect: [async (options) => assertSafeFetchTarget(`${options.url}`)],
     },

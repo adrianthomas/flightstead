@@ -1,10 +1,14 @@
 import React from "react";
+import { isSafeLinkUrl } from "../format.js";
 import type { ProfileLink, Site } from "./types.js";
 import { siteContactLinks } from "./SiteProfile.js";
 
 export function ContactPage({ site }: { site: Site }) {
-  const profileLinks = (site.profileLinks ?? []) as ProfileLink[];
-  const contactLinks = siteContactLinks(site);
+  // A stored `javascript:`/`data:` link URL (predating the write-time
+  // validation added to these fields) must not reach the hrefs below
+  // unfiltered.
+  const profileLinks = ((site.profileLinks ?? []) as ProfileLink[]).filter((link) => isSafeLinkUrl(link.url));
+  const contactLinks = siteContactLinks(site).filter((link) => isSafeLinkUrl(link.url));
   return (
     <article className="contact-page">
       <p className="work-eyebrow">Contact</p>
