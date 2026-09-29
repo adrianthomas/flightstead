@@ -63,8 +63,8 @@ npm install
 npm run build
 npm run db:migrate
 npm run bootstrap-owner
-supervisorctl restart shareblog
-supervisorctl status shareblog
+supervisorctl restart flightstead
+supervisorctl status flightstead
 REMOTE
 
 echo "==> Done"

@@ -41,8 +41,8 @@ sites to appear without touching the server each time.
 ## 1. Get the code onto the server
 
 ```bash
-git clone <your-fork-or-this-repo> shareblog
-cd shareblog/server
+git clone <your-fork-or-this-repo> flightstead
+cd flightstead/server
 npm install
 npm run build
 ```
@@ -57,11 +57,11 @@ Copy `.env.example` to `.env` and fill in production values:
 ```
 NODE_ENV=production
 PORT=3000
-DATABASE_URL=/home/youruser/shareblog/server/data/shareblog.db
+DATABASE_URL=/home/youruser/flightstead/server/data/flightstead.db
 BASE_DOMAIN=yourdomain.com
 API_BASE_URL=https://api.yourdomain.com
 STORAGE_DRIVER=local
-LOCAL_STORAGE_DIR=/home/youruser/shareblog/server/data/uploads
+LOCAL_STORAGE_DIR=/home/youruser/flightstead/server/data/uploads
 SMTP_HOST=<your SMTP host>
 SMTP_PORT=587
 SMTP_USER=<smtp username>
@@ -88,7 +88,7 @@ can't be used to probe which addresses are allowlisted — see
 `DATABASE_URL` is just a file path — SQLite creates it automatically on
 first migration, no server to provision. It's worth pointing it at the same
 `data/` directory as `LOCAL_STORAGE_DIR`: a full backup is then just
-`systemctl stop shareblog && cp -r data/ backup/`.
+`systemctl stop flightstead && cp -r data/ backup/`.
 
 ## 3. Run migrations
 
@@ -120,7 +120,7 @@ set it to the same address you bootstrap with.
 
 ## 5. Keep the server running
 
-A basic systemd unit at `/etc/systemd/system/shareblog.service`:
+A basic systemd unit at `/etc/systemd/system/flightstead.service`:
 
 ```ini
 [Unit]
@@ -130,18 +130,18 @@ After=network.target
 [Service]
 Type=simple
 User=youruser
-WorkingDirectory=/home/youruser/shareblog/server
+WorkingDirectory=/home/youruser/flightstead/server
 ExecStart=/usr/bin/node dist/server.js
 Restart=always
-EnvironmentFile=/home/youruser/shareblog/server/.env
+EnvironmentFile=/home/youruser/flightstead/server/.env
 
 [Install]
 WantedBy=multi-user.target
 ```
 
 ```bash
-sudo systemctl enable --now shareblog
-sudo systemctl status shareblog
+sudo systemctl enable --now flightstead
+sudo systemctl status flightstead
 ```
 
 ## 6. Reverse proxy + TLS
@@ -218,7 +218,7 @@ npm install
 npm run build
 npm run db:migrate
 npm run bootstrap-owner
-sudo systemctl restart shareblog
+sudo systemctl restart flightstead
 ```
 
 (`bootstrap-owner` is a no-op once an owner exists — harmless to run on

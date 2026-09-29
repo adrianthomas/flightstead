@@ -7,10 +7,9 @@ The customer-facing product is **Flightstead**, a Navigationstack.com app:
 and product pages use that name. The standalone product website lives in the
 separate `flightstead-marketing` repo and is deployed independently; this
 server never renders it.
-The GitHub repository,
-deployment service names, `shareblog://pair` payload, `X-Shareblog-*` headers,
-legacy product route and iOS bundle/storage identifiers stay unchanged for
-compatibility.
+The GitHub repository and new deployment examples use the Flightstead name.
+The `shareblog://pair` payload, `X-Shareblog-*` headers, legacy product route,
+and iOS bundle/storage identifiers stay unchanged for compatibility.
 
 A fast-orientation reference for `server/`: route tables, schema tables, and
 the checklist for cross-cutting changes (like adding a content type) that touch

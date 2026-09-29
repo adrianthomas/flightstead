@@ -129,6 +129,9 @@ inspect that repository's `AGENTS.md`, `product-spec.md`, and
 preserve compatibility with already-installed clients where possible. Merely
 changing the public renderer does not require an iOS change.
 
+Use command-line tooling for App Store Connect operations; do not use Safari
+to manage App Store Connect.
+
 ## Keep the handoff current
 
 Update `server/ARCHITECTURE.md` in the same change when routes, tables, render

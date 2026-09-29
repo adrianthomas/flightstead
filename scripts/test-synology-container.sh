@@ -21,7 +21,7 @@ docker run --detach \
   --env BASE_DOMAIN=example.test \
   --env API_BASE_URL=https://api.example.test \
   --env ALLOWED_SIGNUP_EMAILS=owner@example.test \
-  --env DATABASE_URL=/app/data/shareblog.db \
+  --env DATABASE_URL=/app/data/flightstead.db \
   --env STORAGE_DRIVER=local \
   --env LOCAL_STORAGE_DIR=/app/data/uploads \
   --volume "$data_dir:/app/data" \
@@ -32,7 +32,7 @@ while [ "$attempt" -lt 45 ]; do
   status="$(docker inspect --format '{{.State.Health.Status}}' "$container")"
   running="$(docker inspect --format '{{.State.Running}}' "$container")"
   if [ "$status" = "healthy" ]; then
-    docker exec "$container" test -f /app/data/shareblog.db
+    docker exec "$container" test -f /app/data/flightstead.db
     echo "Synology container smoke test passed for $platform."
     exit 0
   fi

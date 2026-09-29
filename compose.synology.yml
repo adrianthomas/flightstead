@@ -1,8 +1,8 @@
 services:
-  shareblog:
+  flightstead:
     build:
       context: ./server
-    container_name: shareblog
+    container_name: flightstead
     restart: unless-stopped
     env_file:
       - synology.env

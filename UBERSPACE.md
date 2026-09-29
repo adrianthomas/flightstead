@@ -22,8 +22,8 @@ needs `sudo`, and nothing here will work if you try to use it.
 
 ```bash
 ssh <username>@<host>.uberspace.de
-git clone <your-fork-or-this-repo> shareblog
-cd shareblog/server
+git clone <your-fork-or-this-repo> flightstead
+cd flightstead/server
 ```
 
 ## 2. Pick a Node.js version and install
@@ -103,7 +103,7 @@ address (`noreply@yourdomain.com` once that domain is added via
 `DATABASE_URL` is just a path in your account's own storage — SQLite
 creates the file automatically on first migration, no role/database to
 provision. Keeping it under `data/` next to `LOCAL_STORAGE_DIR` means a
-full backup is just `supervisorctl stop shareblog && cp -r data/ backup/`.
+full backup is just `supervisorctl stop flightstead && cp -r data/ backup/`.
 
 ## 4. Run migrations
 
@@ -147,17 +147,17 @@ Find the node binary Uberspace set up in step 2 first:
 which node
 ```
 
-Then create `~/etc/services.d/shareblog.ini`:
+Then create `~/etc/services.d/flightstead.ini`:
 
 ```ini
-[program:shareblog]
+[program:flightstead]
 command=/home/<username>/bin/node dist/server.js
-directory=/home/<username>/shareblog/server
+directory=/home/<username>/flightstead/server
 autostart=true
 autorestart=true
 startsecs=5
-stdout_logfile=/home/<username>/logs/shareblog.log
-stderr_logfile=/home/<username>/logs/shareblog-error.log
+stdout_logfile=/home/<username>/logs/flightstead.log
+stderr_logfile=/home/<username>/logs/flightstead-error.log
 ```
 
 (swap the `command=` path for whatever `which node` actually printed if
@@ -166,7 +166,7 @@ it differs)
 ```bash
 supervisorctl reread
 supervisorctl update
-supervisorctl status shareblog
+supervisorctl status flightstead
 ```
 
 ## 7. Domains and routing
@@ -238,7 +238,7 @@ reusing the production checkout's already-installed dependency tree. A fresh
 the same `package-lock.json`, then:
 
 ```bash
-ln -s /home/<username>/shareblog/server/node_modules node_modules
+ln -s /home/<username>/flightstead/server/node_modules node_modules
 npm run build
 ```
 
@@ -410,7 +410,7 @@ supervisorctl status flightstead-review
 ```
 
 Do not use the repository-root `deploy.sh` unchanged for this process: its
-default service name is `shareblog`, and it runs `bootstrap-owner`, neither of
+default service name is `flightstead`, and it runs `bootstrap-owner`, neither of
 which is appropriate for the isolated review instance.
 
 ## Updating
@@ -421,7 +421,7 @@ npm install
 npm run build
 npm run db:migrate
 npm run bootstrap-owner
-supervisorctl restart shareblog
+supervisorctl restart flightstead
 ```
 
 (`bootstrap-owner` is a no-op once an owner exists — harmless to run on
@@ -444,7 +444,7 @@ from your own machine. It refuses to run with uncommitted local changes,
 then SSHes in and either `git pull`s the existing clone at `REMOTE_PATH`
 or, on the very first run, `git clone`s `REPO_URL` there — followed by
 `npm install`, `npm run build`, `npm run db:migrate`,
-`npm run bootstrap-owner`, and `supervisorctl restart shareblog` in
+`npm run bootstrap-owner`, and `supervisorctl restart flightstead` in
 `server/`, the same commands you'd type by hand. Push to `origin` yourself
 first; the script's own push step is commented out, since the remote
 `git pull` needs your commits to already be there. `deploy.env` is

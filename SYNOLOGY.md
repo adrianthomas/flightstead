@@ -26,7 +26,7 @@ Download the repository's source archive, then use File Station to extract it
 to a durable location such as:
 
 ```text
-/volume1/docker/shareblog
+/volume1/docker/flightstead
 ```
 
 The directory should contain `compose.synology.yml`, `synology.env.example`,
@@ -53,13 +53,13 @@ folder exists fails with `Bind mount failed: '.../data' does not exist`.
 
 ## 2. Create the Container Manager project
 
-In **Container Manager → Project**, choose **Create**. Use `shareblog` as the
+In **Container Manager → Project**, choose **Create**. Use `flightstead` as the
 project name, select the extracted directory as its path, and upload
 `compose.synology.yml` as the Compose file. Build and start the project.
 
 The first build can take several minutes, especially on an ARM NAS. Every
 start applies pending database migrations automatically. In the project details,
-the `shareblog` container should become healthy and its log should end with
+the `flightstead` container should become healthy and its log should end with
 `Flightstead server listening on :3000`.
 
 The Compose file publishes the app only on the NAS loopback interface at
@@ -109,7 +109,7 @@ subdomain or custom domain.
 
 ## 4. Create and pair the owner
 
-Open **Container Manager → Container → shareblog → Details → Terminal** and
+Open **Container Manager → Container → flightstead → Details → Terminal** and
 create a terminal with this command, replacing the address:
 
 ```sh
@@ -124,7 +124,7 @@ If you use SSH on the NAS, the equivalent command from the project directory
 is:
 
 ```sh
-sudo docker compose -f compose.synology.yml exec shareblog \
+sudo docker compose -f compose.synology.yml exec flightstead \
   node dist/db/bootstrap-owner.js --email you@example.com
 ```
 
