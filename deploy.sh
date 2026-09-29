@@ -19,6 +19,11 @@ source deploy.env
 : "${UBERSPACE_HOST:?set in deploy.env}"
 : "${REMOTE_PATH:?set in deploy.env}"
 : "${REPO_URL:?set in deploy.env}"
+SERVICE_NAME="${SERVICE_NAME:-shareblog}"
+if [[ ! "$SERVICE_NAME" =~ ^[A-Za-z0-9._-]+$ ]]; then
+  echo "SERVICE_NAME may only contain letters, numbers, dots, underscores, and hyphens." >&2
+  exit 1
+fi
 
 if [ -n "$(git status --porcelain)" ]; then
   echo "Working tree has uncommitted changes — commit or stash before deploying." >&2
@@ -63,8 +68,8 @@ npm install
 npm run build
 npm run db:migrate
 npm run bootstrap-owner
-supervisorctl restart flightstead
-supervisorctl status flightstead
+supervisorctl restart "${SERVICE_NAME}"
+supervisorctl status "${SERVICE_NAME}"
 REMOTE
 
 echo "==> Done"

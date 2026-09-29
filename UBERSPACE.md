@@ -431,7 +431,8 @@ every update, same as `deploy.sh` does.)
 
 [deploy.sh](deploy.sh) at the repo root runs the update steps above over
 SSH: copy `deploy.env.example` to `deploy.env`, fill in `UBERSPACE_USER`,
-`UBERSPACE_HOST`, `REMOTE_PATH` (the repo path from step 1), and
+`UBERSPACE_HOST`, `REMOTE_PATH` (the repo path from step 1), `SERVICE_NAME`
+(the supervisor process from step 6), and
 `REPO_URL` (an `https://` clone URL — the Uberspace box has no GitHub
 credentials of its own, so this only works against a public repo), then
 run
@@ -444,11 +445,12 @@ from your own machine. It refuses to run with uncommitted local changes,
 then SSHes in and either `git pull`s the existing clone at `REMOTE_PATH`
 or, on the very first run, `git clone`s `REPO_URL` there — followed by
 `npm install`, `npm run build`, `npm run db:migrate`,
-`npm run bootstrap-owner`, and `supervisorctl restart flightstead` in
+`npm run bootstrap-owner`, and `supervisorctl restart "$SERVICE_NAME"` in
 `server/`, the same commands you'd type by hand. Push to `origin` yourself
 first; the script's own push step is commented out, since the remote
 `git pull` needs your commits to already be there. `deploy.env` is
-gitignored since it's machine-specific. Note this only handles
+gitignored since it's machine-specific. For compatibility with existing
+installations, an omitted `SERVICE_NAME` defaults to `shareblog`. Note this only handles
 updates/first clone — the one-time account setup (steps 2, 3, 6, and 7
 above: Node version, `.env`, the supervisord service file, domains) still
 has to be done by hand before the first `./deploy.sh` run will fully
