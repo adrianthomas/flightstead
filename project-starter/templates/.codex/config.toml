@@ -1,0 +1,17 @@
+# Sol leads the project; Luna handles focused delegated work.
+model = "gpt-6.1-sol"
+model_reasoning_effort = "high"
+
+[agents]
+enabled = true
+default_subagent_model = "gpt-6-luna"
+default_subagent_reasoning_effort = "medium"
+max_concurrent_threads_per_session = 3
+
+[agents.explorer]
+description = "Luna: read-only repository exploration, contract tracing, and test discovery for the Sol lead."
+config_file = "agents/explorer.toml"
+
+[agents.worker]
+description = "Luna: implement a bounded task in explicitly assigned files, run focused checks, and report to the Sol lead."
+config_file = "agents/worker.toml"

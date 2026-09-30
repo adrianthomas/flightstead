@@ -1,0 +1,67 @@
+opt_out_usage
+default_platform(:ios)
+
+def release_api_key
+  app_store_connect_api_key(
+    key_id: ENV.fetch("ASC_KEY_ID"),
+    issuer_id: ENV.fetch("ASC_ISSUER_ID"),
+    key_filepath: ENV.fetch("ASC_KEY_PATH"),
+    duration: 1_200,
+    in_house: false
+  )
+end
+
+platform :ios do
+  desc "Verify access to the configured app"
+  lane :asc_preflight do
+    release_api_key
+    identifier = ENV.fetch("IOS_APP_IDENTIFIER")
+    app = Spaceship::ConnectAPI::App.find(identifier)
+    UI.user_error!("App Store Connect app not found: #{identifier}") unless app
+    UI.success("App Store Connect access verified")
+  end
+
+  desc "Archive the committed source and upload to TestFlight"
+  lane :beta do
+    key = release_api_key
+    identifier = ENV.fetch("IOS_APP_IDENTIFIER")
+    project = ENV.fetch("IOS_PROJECT")
+    version = get_version_number(
+      xcodeproj: project,
+      target: ENV.fetch("IOS_TARGET"),
+      configuration: "Release"
+    )
+    next_build = latest_testflight_build_number(
+      api_key: key,
+      app_identifier: identifier,
+      version: version,
+      initial_build_number: 0
+    ) + 1
+    output = ENV.fetch("IOS_RELEASE_OUTPUT")
+    build_app(
+      project: project,
+      scheme: ENV.fetch("IOS_SCHEME"),
+      clean: true,
+      export_options: {
+        method: "app-store",
+        teamID: ENV.fetch("APPLE_TEAM_ID"),
+        signingStyle: "automatic"
+      },
+      output_directory: output,
+      output_name: "App.ipa",
+      archive_path: File.join(output, "App.xcarchive"),
+      derived_data_path: File.join(output, "DerivedData"),
+      include_symbols: true,
+      include_bitcode: false,
+      xcargs: "CURRENT_PROJECT_VERSION=#{next_build} -allowProvisioningUpdates",
+      export_xcargs: "-allowProvisioningUpdates"
+    )
+    upload_to_testflight(
+      api_key: key,
+      app_identifier: identifier,
+      ipa: File.join(output, "App.ipa"),
+      skip_waiting_for_build_processing: true,
+      distribute_external: false
+    )
+  end
+end
