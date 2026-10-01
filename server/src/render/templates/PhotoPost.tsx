@@ -51,6 +51,8 @@ export function formatExif(exif: AssetExif | undefined, locale: string): CardsEx
 export function PhotoPost({
   object,
   imageUrl,
+  imageWidth,
+  imageHeight,
   exif,
   linked = true,
   locale = "en",
@@ -60,6 +62,8 @@ export function PhotoPost({
 }: {
   object: ContentObject;
   imageUrl: string;
+  imageWidth?: number;
+  imageHeight?: number;
   exif?: AssetExif;
   linked?: boolean;
   locale?: string;
@@ -140,7 +144,7 @@ export function PhotoPost({
     );
   }
 
-  const image = <img src={imageUrl} alt={imageAlt} />;
+  const image = <img src={imageUrl} alt={imageAlt} width={imageWidth} height={imageHeight} />;
   const exifRows = formatExif(exif, locale);
 
   return (

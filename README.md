@@ -28,9 +28,10 @@ live.
   categories are built in. Flightstead does not retain visitor IP addresses,
   user agents, session identifiers, full referrer URLs, or individual request
   logs for analytics.
-- **Seven selectable themes.** Choose from Basic, Cards, Washi, Prism, Ledger,
-  Cabinet, and Stream, with light/dark and responsive layouts. Stream displays
-  complete posts in a finely typeset chronological reading flow.
+- **Eight selectable themes.** Choose from Basic, Cards, Washi, Prism, Ledger,
+  Cabinet, Stream, and Think, with light/dark and responsive layouts. Stream
+  displays complete posts in a finely typeset chronological reading flow;
+  Think pairs retro studio typography with silver navigation and cobalt lead stories.
 - **Useful publishing features out of the box.** Search, archives, RSS,
   sitemaps, social metadata, custom domains, and optional Fediverse publishing
   are included.

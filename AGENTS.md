@@ -102,8 +102,8 @@ with `npm run db:generate`, inspect the generated SQL, and exercise it with
 
 ## Public rendering and feature flags
 
-All seven selectable themes (`classic`, `cards`, `washi`, `prism`, `ledger`,
-`cabinet`, `stream`) share the accessibility baseline described in
+All eight selectable themes (`classic`, `cards`, `washi`, `prism`, `ledger`,
+`cabinet`, `stream`, `think`) share the accessibility baseline described in
 `server/ARCHITECTURE.md`. A rendering change is not complete until the relevant
 classic, cards-derived, and Cabinet paths have been considered. Keep hit areas,
 keyboard focus, reduced motion, semantic links, dark mode, and responsive layout

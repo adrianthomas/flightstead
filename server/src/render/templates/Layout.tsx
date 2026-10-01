@@ -33,7 +33,7 @@ const THEME_CHROME_COLORS: Record<Site["theme"], { light: string; dark: string }
   cabinet: { light: "#f3f1ea", dark: "#11120f" },
   stream: { light: "#faf9f6", dark: "#171b18" },
   aqua: { light: "#dfe3e8", dark: "#20252b" },
-  think: { light: "#ffffff", dark: "#111111" },
+  think: { light: "#f0f0eb", dark: "#141517" },
 };
 
 // Shows the Amazon storefront closest to the visitor's browser-reported
@@ -2308,7 +2308,7 @@ export function Layout({
               <CabinetNavigation locale={site.locale} currentPath={currentPath} availablePaths={availablePaths} />
             ) : usesCardsInteraction && !cardsDetail ? (
               <CardsCategoryFilter locale={site.locale} currentPath={currentPath} availablePaths={availablePaths} />
-            ) : usesCompactCategoryFilter ? (
+            ) : usesCompactCategoryFilter || usesFullNavigation ? (
               <CategoryFilter site={site} currentPath={currentPath} availablePaths={availablePaths} />
             ) : null}
           </div>

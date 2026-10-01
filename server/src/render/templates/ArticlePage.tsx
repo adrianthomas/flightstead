@@ -22,11 +22,17 @@ export function ArticleCard({
   locale = "en",
   theme = "classic",
   coverImageUrl,
+  eager = false,
+  imageWidth,
+  imageHeight,
 }: {
   object: ContentObject;
   locale?: string;
   theme?: Theme;
   coverImageUrl?: string;
+  eager?: boolean;
+  imageWidth?: number;
+  imageHeight?: number;
 }) {
   const metadata = object.metadata as ArticleMetadata;
   const excerpt = articleExcerpt(object, metadata);
@@ -96,7 +102,7 @@ export function ArticleCard({
     <article className="card article-card">
       {coverImageUrl ? (
         <a className="article-card-cover" href={`/articles/${object.slug}`} aria-label={object.title ?? t(locale, "articles")}>
-          <img src={coverImageUrl} alt={coverAltText} loading="lazy" />
+          <img src={coverImageUrl} alt={coverAltText} width={imageWidth} height={imageHeight} loading={eager ? "eager" : "lazy"} />
         </a>
       ) : null}
       <h2>

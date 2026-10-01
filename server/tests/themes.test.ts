@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { buildApp } from "../src/app.js";
 
-test("theme catalog exposes Basic while retaining hidden render-only themes", async () => {
+test("theme catalog exposes Basic and redesigned Think while keeping Aqua hidden", async () => {
   const app = buildApp();
 
   try {
@@ -20,6 +20,7 @@ test("theme catalog exposes Basic while retaining hidden render-only themes", as
         { id: "ledger", name: "Ledger" },
         { id: "cabinet", name: "Cabinet" },
         { id: "stream", name: "Stream" },
+        { id: "think", name: "Think" },
       ],
     );
   } finally {

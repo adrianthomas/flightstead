@@ -1,6 +1,6 @@
 import { test, expect, type Page } from "@playwright/test";
 import { execFileSync } from "node:child_process";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
 
 // Mints a fresh owner account + API token directly in the test DB, reusing
@@ -1275,4 +1275,135 @@ test("Markdown import preserves dates, legacy links, and multiple local images",
   expect(repeated).toContain('"imported": 0');
   expect(repeated).toContain('"skippedExisting": 1');
   expect(repeated).toContain('"images": 0');
+});
+
+// Think remains a renderable legacy theme. Its retro editorial presentation
+// still uses ordinary same-origin links so the feed works without enhancement.
+test("Think feed stays readable and usable across viewport sizes and color schemes", async ({ page }) => {
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "think", customDomain: "" }, "PATCH");
+  try {
+    const reviewDir = "/tmp/flightstead-think-review";
+    mkdirSync(reviewDir, { recursive: true });
+    for (const width of [320, 390, 560, 768, 1280]) {
+      for (const colorScheme of ["light", "dark"] as const) {
+        await test.step(`${width}px ${colorScheme}`, async () => {
+          await page.setViewportSize({ width, height: 900 });
+          await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+          await page.goto(siteBaseURL + "/");
+
+          const dimensions = await page.evaluate(() => ({
+            viewport: document.documentElement.clientWidth,
+            document: document.documentElement.scrollWidth,
+            body: document.body.scrollWidth,
+          }));
+          expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
+          expect(dimensions.body).toBeLessThanOrEqual(dimensions.viewport);
+
+          const entries = page.locator(".think-entry");
+          await expect(entries.first()).toBeVisible();
+          await expect(entries.first().locator(".think-entry-label")).toBeVisible();
+          await expect(entries.first().locator(".think-entry-content")).toBeVisible();
+          await expect(entries.first().locator(".think-entry-action")).toHaveAttribute("href", /\//);
+          await page.screenshot({ path: path.join(reviewDir, `${width}-${colorScheme}.png`), fullPage: true });
+
+          // Every visible destination in the primary navigation and every
+          // entry permalink keeps the shared 44px hit target baseline.
+          const targets = page.locator(
+            ".think-navigation a:visible, .category-filter-trigger:visible, .think-entry-action:visible, .site-identity h1 a:visible, .rss-link:visible, .link-btn-reset:visible",
+          );
+          for (let index = 0; index < await targets.count(); index++) {
+            const box = await targets.nth(index).boundingBox();
+            expect(box, `target ${index} should be visible`).not.toBeNull();
+            expect(box!.height, `target ${index} should be at least 44px tall`).toBeGreaterThanOrEqual(44);
+          }
+
+          await page.goto(siteBaseURL + "/books");
+          const bookImage = page.locator('.think-entry[data-type="book"] img').first();
+          await expect(bookImage).toBeVisible();
+          const bookRatio = await bookImage.evaluate((element) => {
+            const { width: imageWidth, height: imageHeight } = element.getBoundingClientRect();
+            return imageWidth / imageHeight;
+          });
+          expect(bookRatio).toBeLessThan(0.9);
+          await page.goto(siteBaseURL + "/music");
+          const musicImage = page.locator('.think-entry[data-type="music"] img').first();
+          await expect(musicImage).toBeVisible();
+          const musicRatio = await musicImage.evaluate((element) => {
+            const { width: imageWidth, height: imageHeight } = element.getBoundingClientRect();
+            return imageWidth / imageHeight;
+          });
+          expect(musicRatio).toBeGreaterThan(0.9);
+          expect(musicRatio).toBeLessThan(1.1);
+        });
+      }
+    }
+  } finally {
+    await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards", customDomain: "" }, "PATCH");
+  }
+});
+
+test("Think supports keyboard navigation, browser Back, and 200% text at 320px", async ({ page, browser }) => {
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "think", customDomain: "" }, "PATCH");
+  try {
+    await page.setViewportSize({ width: 320, height: 740 });
+    await page.goto(siteBaseURL + "/");
+    const filter = page.locator(".category-filter-trigger");
+    await expect(filter).toBeVisible();
+    await expect(filter).toHaveCSS("min-height", "44px");
+    await filter.click();
+    await page.locator('.category-filter-menu a[href="/articles"]').click();
+    await expect(page).toHaveURL(siteBaseURL + "/articles");
+    await expect(page.locator(".think-entry").first()).toBeVisible();
+
+    const permalink = page.locator('.think-entry-action[href="/articles/a-covered-article"]');
+    await permalink.focus();
+    await expect(permalink).toBeFocused();
+    expect(await permalink.evaluate((element) => getComputedStyle(element).outlineStyle)).not.toBe("none");
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/articles\/a-covered-article$/);
+    await expect(page.locator("main h1")).toHaveText("A covered article");
+    const copyButton = page.locator("main .copy-btn").first();
+    const copyButtonBox = await copyButton.boundingBox();
+    expect(copyButtonBox).not.toBeNull();
+    expect(copyButtonBox!.width).toBeGreaterThanOrEqual(44);
+    expect(copyButtonBox!.height).toBeGreaterThanOrEqual(44);
+    const backLink = page.locator("main .back-link");
+    await expect(backLink).toBeVisible();
+    await expect(backLink).toHaveAttribute("href", "/");
+    await backLink.click();
+    await expect(page).toHaveURL(siteBaseURL + "/");
+
+    await page.goto(siteBaseURL + "/articles");
+    await permalink.click();
+    await expect(page).toHaveURL(/\/articles\/a-covered-article$/);
+    await page.goBack();
+    await expect(page).toHaveURL(siteBaseURL + "/articles");
+    await expect(permalink).toBeVisible();
+
+    await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+    const reflowWidths = await page.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      document: document.documentElement.scrollWidth,
+      body: document.body.scrollWidth,
+    }));
+    expect(reflowWidths.document).toBeLessThanOrEqual(reflowWidths.viewport);
+    expect(reflowWidths.body).toBeLessThanOrEqual(reflowWidths.viewport);
+    await expect(page.locator(".think-entry-action").first()).toBeVisible();
+
+    const noScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: 740 } });
+    try {
+      const reader = await noScript.newPage();
+      await reader.goto(siteBaseURL + "/books");
+      await expect(reader.locator(".think-entry[data-type='book']").first()).toBeVisible();
+      await expect(reader.locator("main")).toContainText("A reading note.");
+      await reader.goto(siteBaseURL + "/articles");
+      await reader.locator('.think-entry-action[href="/articles/a-covered-article"]').click();
+      await expect(reader).toHaveURL(/\/articles\//);
+      await expect(reader.locator("main h1")).toBeVisible();
+    } finally {
+      await noScript.close();
+    }
+  } finally {
+    await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards", customDomain: "" }, "PATCH");
+  }
 });

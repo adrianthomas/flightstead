@@ -48,7 +48,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 |---|---|---|
 | `routes/auth.ts` | `POST /auth/request-code`, `POST /auth/verify-code`, `POST /auth/claim-owner`, `GET /auth/magic/:token`, `POST /auth/logout`, `DELETE /account`, `GET /me` | Magic-code email auth (mobile gets a bearer token, web gets a session cookie), plus `claim-owner` — redeems a short-lived pairing code minted by an interactive `npm run bootstrap-owner` run (`db/bootstrap-owner.ts` + `auth/owner-claim.ts`), the QR/manual-code alternative to email for first sign-in (see the `ownerClaims` table below). A dedicated test server may opt into a durable, reusable App Review credential with all four `APP_REVIEW_*` environment values; only its SHA-256 hash is stored, it provisions an isolated non-federating review site, and `DISABLE_EMAIL_AUTH=true` can close the unused email path. Logout and `app-review:revoke-sessions` revoke every token for the account. Account deletion removes the user, owned site, content, media, statistics, tokens, and federation records, but deliberately does not uninstall the self-hosted server or touch operator-managed DNS, backups, or hosting. |
 | `routes/sites.ts` | site CRUD (create; update identity/domain/theme/about/federation) | One site per user today (`sites.ownerUserId` is `.unique()`). New identity fields are additive for older clients. |
-| `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of selectable site themes (`id`/`name`/`description`) used by iOS Settings. The stable `classic` id is presented as Basic. Aqua and Think remain valid renderable values for existing sites but are intentionally omitted from this catalog. |
+| `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of eight selectable site themes (`id`/`name`/`description`) used by iOS Settings, including the redesigned Think theme. The stable `classic` id is presented as Basic. Aqua remains a valid renderable value for existing sites but is intentionally omitted from this catalog. |
 | `routes/objects.ts` | `POST/GET/PATCH/DELETE /objects`, `GET /objects/:id` | Owns slug generation (`uniqueSlug`, `slugSourceText`), asset-ownership checks and deletion (including URL-only inline Article/Thought images and cached music artwork), cache invalidation, and ActivityPub Create/Delete delivery on publish, unpublish, and deletion. It also normalizes legacy iOS article posts that arrived as `thought` with a leading Markdown H1 into real `article` rows. `GET /objects` hides `link` rows unless the client sends `X-Shareblog-Features: link-content-type`, because old iOS apps decode `ContentType` as a closed enum. |
 | `routes/assets.ts` | asset upload | Feeds `image/worker.ts` for variants + EXIF extraction. |
 | `routes/resolve.ts` | book/music/article metadata lookup | Thin wrapper over `resolvers/*.ts`; used by the iOS compose screens before publish, not stored server-side until the object is created. Books accept titles, author/title text, ISBNs, or links. Music accepts title/artist text or any source URL and translates it to an Apple catalog match; unmatched source links retain editable title/artist only. |
@@ -170,9 +170,21 @@ WebKit checks the mixed feed at 320, 390,
 Aqua (currently hidden from the selectable catalog) keeps the Basic semantic templates and adds a responsive two-column feed,
 pinstriped desktop chrome, translucent blue controls, and polished content
 panels with no additional script or third-party runtime assets.
-Think (also currently hidden) keeps the Basic semantic templates but follows Apple's early-2000s
-web language rather than its desktop UI: graphite global navigation, a dominant
-lead story, and compact three-up promotional modules on an airy white canvas.
+Think is a selectable retro studio journal inspired by early personal
+computing: Helvetica display type, a narrow spectrum signature, silver category
+tabs, cobalt lead entries, and a neutral light/dark reading canvas. It keeps the
+Basic semantic content templates; `renderList()` wraps each entry with a localized
+type label and an explicit same-origin permalink without enclosing authored links.
+Covered articles and photos have split lead compositions on wide screens, while
+books retain portrait covers and music retains square artwork. The chronological
+grid moves from three columns to two, then one; below 640px the tab bar yields to
+the shared native category disclosure. Direct detail pages have a Home backlink,
+natural cover proportions, and a bounded reading column. A lead article/link
+preview loads eagerly, while later previews retain lazy loading. Feed photos
+and article covers reuse stored intrinsic dimensions to reserve media space.
+No new client script, font payload, or dependency is needed. WebKit checks the five review
+widths in both color schemes, category selection, keyboard/permalink navigation,
+browser Back, 200% text at 320px, and reading with JavaScript disabled.
 
 Cabinet is a standalone interactive pipeline rather than a Cards skin.
 `themes/cabinet.tsx` owns its chronological rail, numbered navigation,

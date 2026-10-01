@@ -51,7 +51,7 @@ const themeOptions = [
   {
     id: "think",
     name: "Think",
-    description: "An airy early-2000s product homepage with graphite navigation, a bold lead story, and crisp promo tiles.",
+    description: "A retro personal journal with bold typography, silver navigation, and electric blue lead stories.",
   },
 ] satisfies ThemeOption[];
 
@@ -60,10 +60,9 @@ if (missingThemeMetadata.length > 0) {
   throw new Error(`Missing theme metadata for: ${missingThemeMetadata.join(", ")}`);
 }
 
-// Aqua and Think remain valid persisted values so existing sites keep
-// rendering unchanged, but they are intentionally absent from the catalog
-// while those designs are held back from new selection.
-const selectableThemeIds = new Set<Theme>(["classic", "cards", "washi", "prism", "ledger", "cabinet", "stream"]);
+// Aqua remains a valid persisted value for existing sites, but is held
+// back from new selection. The redesigned Think theme is selectable.
+const selectableThemeIds = new Set<Theme>(["classic", "cards", "washi", "prism", "ledger", "cabinet", "stream", "think"]);
 const selectableThemeOptions = themeOptions.filter((option) => selectableThemeIds.has(option.id));
 
 export async function themeRoutes(app: FastifyInstance) {

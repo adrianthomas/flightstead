@@ -60,12 +60,20 @@ function wrap(
   );
 }
 
-async function assetImageUrl(assetId: string | undefined): Promise<string | undefined> {
+async function assetImage(assetId: string | undefined): Promise<{ url: string; width?: number; height?: number } | undefined> {
   if (!assetId) return undefined;
   const [asset] = await db.select().from(assets).where(eq(assets.id, assetId)).limit(1);
   if (!asset) return undefined;
   const variants = asset.variants as Record<string, string>;
-  return storage.getUrl(variants.medium ?? variants.original ?? asset.storageKey);
+  return {
+    url: storage.getUrl(variants.medium ?? variants.original ?? asset.storageKey),
+    width: asset.width ?? undefined,
+    height: asset.height ?? undefined,
+  };
+}
+
+async function assetImageUrl(assetId: string | undefined): Promise<string | undefined> {
+  return (await assetImage(assetId))?.url;
 }
 
 async function photoImageUrl(object: ContentObject): Promise<string> {
@@ -119,31 +127,40 @@ async function renderStreamItem(object: ContentObject, locale: string, detail = 
   });
 }
 
-async function renderCard(object: ContentObject, locale: string, theme: Site["theme"]): Promise<React.ReactNode> {
+async function renderCard(object: ContentObject, locale: string, theme: Site["theme"], eager = false): Promise<React.ReactNode> {
   switch (object.type) {
     case "thought":
       return React.createElement(ThoughtPost, { object, locale, theme });
-    case "photo":
+    case "photo": {
+      const image = await assetImage((object.metadata as PhotoMetadata).assetId);
       return React.createElement(PhotoPost, {
         object,
-        imageUrl: await photoImageUrl(object),
+        imageUrl: image?.url ?? "",
+        imageWidth: theme === "think" ? image?.width : undefined,
+        imageHeight: theme === "think" ? image?.height : undefined,
         exif: await photoExif(object),
         locale,
         theme,
       });
+    }
     case "book":
       return React.createElement(BookCard, { object, locale, theme });
     case "music":
       return React.createElement(MusicCard, { object, locale, theme });
-    case "article":
+    case "article": {
+      const image = await assetImage((object.metadata as ArticleMetadata).coverAssetId);
       return React.createElement(ArticleCard, {
         object,
         locale,
         theme,
-        coverImageUrl: await articleImageUrl(object),
+        coverImageUrl: image?.url,
+        imageWidth: theme === "think" ? image?.width : undefined,
+        imageHeight: theme === "think" ? image?.height : undefined,
+        eager,
       });
+    }
     case "link":
-      return React.createElement(LinkPost, { object, locale, theme });
+      return React.createElement(LinkPost, { object, locale, theme, eager });
     case "quote":
       return React.createElement(QuotePost, { object, locale, theme });
   }
@@ -212,7 +229,7 @@ export async function renderList(
 ): Promise<string> {
   const cards = await Promise.all(objects.map((object, index) => site.theme === "stream"
     ? renderStreamItem(object, site.locale, false, index === 0)
-    : renderCard(object, site.locale, site.theme)));
+    : renderCard(object, site.locale, site.theme, site.theme === "think" && index === 0)));
   const wrapOpts = { currentPath, availablePaths };
   const pageTitle = currentPath === "/" ? undefined : title;
   const pagination = paginationNode(site, currentPath, options.page ?? 1, options.totalPages ?? 1, options.query);
@@ -234,7 +251,18 @@ export async function renderList(
         : site.theme === "aqua"
           ? React.createElement("div", { className: "aqua-feed" }, ...cards)
         : site.theme === "think"
-          ? React.createElement("div", { className: "think-feed" }, ...cards)
+          ? React.createElement("div", { className: "think-feed" }, ...cards.map((card, index) => {
+              const object = objects[index];
+              const href = `/${PATH_PREFIX[object.type]}/${object.slug}`;
+              return React.createElement("div", { className: "think-entry", "data-type": object.type, key: object.id },
+                React.createElement("p", { className: "think-entry-label" }, t(site.locale, PATH_PREFIX[object.type] as MessageKey)),
+                React.createElement("div", { className: "think-entry-content" }, card),
+                React.createElement("a", {
+                  className: "think-entry-action", href,
+                  "aria-label": `${t(site.locale, "readMore")}: ${object.title ?? feedContentSummary(object)}`,
+                }, t(site.locale, "readMore"), React.createElement("span", { "aria-hidden": true }, "→")),
+              );
+            }))
         : site.theme === "washi"
           ? React.createElement(
               "div",
@@ -306,7 +334,13 @@ export async function renderObjectPage(
             : object.type === "link"
               ? publicLinkPreviewImageUrl(object.metadata as LinkMetadata)
             : undefined;
-  return wrap(site, detailTitle, detail, {
+  const content = site.theme === "think"
+    ? React.createElement(React.Fragment, null,
+        React.createElement(BackLink, { href: "/", label: t(site.locale, "backTo", { section: t(site.locale, "home") }) }),
+        detail,
+      )
+    : detail;
+  return wrap(site, detailTitle, content, {
     currentPath: currentPath ?? `/${PATH_PREFIX[object.type]}/${object.slug}`,
     cardsDetail:
       site.theme === "cards" || site.theme === "prism" || site.theme === "ledger" || site.theme === "cabinet",

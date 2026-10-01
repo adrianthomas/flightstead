@@ -51,6 +51,7 @@ export function LinkPost({
   theme = "classic",
   backHref,
   backLabel,
+  eager = false,
 }: {
   object: ContentObject;
   linked?: boolean;
@@ -58,6 +59,7 @@ export function LinkPost({
   theme?: Theme;
   backHref?: string;
   backLabel?: string;
+  eager?: boolean;
 }) {
   const metadata = object.metadata as LinkMetadata;
   const bodyHtml = formatBasicText(object.body ?? "");
@@ -142,7 +144,7 @@ export function LinkPost({
         <BackLink href={backHref!} label={backLabel!} />
       ) : null}
       <article className="card link-card">
-        {previewImageUrl ? <img className="link-preview-image" src={previewImageUrl} alt="" loading="lazy" /> : null}
+        {previewImageUrl ? <img className="link-preview-image" src={previewImageUrl} alt="" loading={eager ? "eager" : "lazy"} /> : null}
         <div className="link-topline">
           <p className="meta">{t(locale, "links")}</p>
           {host ? <p className="link-host">{host}</p> : null}
