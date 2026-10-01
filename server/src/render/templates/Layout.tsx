@@ -1656,6 +1656,8 @@ export function Layout({
                   --ledger-surface: #ffffff;
                   --ledger-raised: #ececf0;
                   --ledger-separator: #e1e1e6;
+                  --ledger-music: #7040b0;
+                  --ledger-book: #93601a;
                   --ledger-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 10px 26px rgba(15, 23, 42, 0.06);
                 }
                 @media (prefers-color-scheme: dark) {
@@ -1664,6 +1666,8 @@ export function Layout({
                     --ledger-surface: #1c1c1e;
                     --ledger-raised: #2c2c2e;
                     --ledger-separator: #38383a;
+                    --ledger-music: #c3a1ff;
+                    --ledger-book: #dfb77f;
                     --ledger-shadow: 0 1px 2px rgba(0, 0, 0, 0.26), 0 14px 34px rgba(0, 0, 0, 0.28);
                   }
                 }
@@ -1717,7 +1721,7 @@ export function Layout({
                 }
                 body.theme-ledger .cards-feed {
                   display: grid;
-                  grid-template-columns: 1fr;
+                  grid-template-columns: minmax(0, 1fr);
                   gap: 0;
                   border: 1px solid var(--ledger-separator);
                   border-radius: 14px;
@@ -1732,7 +1736,8 @@ export function Layout({
                   box-shadow: none;
                   border: 0;
                   border-bottom: 1px solid var(--ledger-separator);
-                  min-height: 7rem;
+                  min-width: 0;
+                  min-height: 0;
                   transition: background 0.16s ease;
                 }
                 body.theme-ledger .cards-item:last-child {
@@ -1748,20 +1753,20 @@ export function Layout({
                   outline-offset: -2px;
                 }
                 body.theme-ledger .cards-hero {
-                  display: grid;
-                  grid-template-columns: 7.4rem minmax(0, 1fr);
-                  align-items: stretch;
-                  min-height: 6.8rem;
+                  display: flex;
+                  flex-direction: column;
+                  min-height: 0;
                   aspect-ratio: auto;
                   background: var(--ledger-surface);
                 }
                 body.theme-ledger .cards-hero img {
                   position: static;
-                  width: 7.4rem;
-                  height: 100%;
-                  min-height: 6.8rem;
+                  width: 100%;
+                  height: auto;
+                  min-height: 0;
+                  aspect-ratio: 16 / 9;
                   object-fit: cover;
-                  border-right: 1px solid var(--ledger-separator);
+                  border: 0;
                 }
                 body.theme-ledger .cards-scrim {
                   display: none;
@@ -1772,7 +1777,7 @@ export function Layout({
                   flex-direction: column;
                   justify-content: center;
                   min-width: 0;
-                  padding: 1rem 2.65rem 1rem 1.15rem;
+                  padding: 1.15rem 2.75rem 1.15rem 1.25rem;
                   color: var(--fg);
                 }
                 body.theme-ledger .cards-eyebrow,
@@ -1822,8 +1827,8 @@ export function Layout({
                 }
                 body.theme-ledger .cards-text-card,
                 body.theme-ledger .cards-link-card {
-                  min-height: 7rem;
-                  padding: 1rem 2.75rem 1rem 1.15rem;
+                  min-height: 0;
+                  padding: 1.25rem 2.75rem 1.25rem 1.25rem;
                   background: transparent;
                   border: 0;
                   border-radius: 0;
@@ -1866,7 +1871,7 @@ export function Layout({
                   color: var(--muted);
                 }
                 body.theme-ledger .cards-quote-card {
-                  padding: 1rem 2.75rem 1rem 1.15rem;
+                  padding: 1.5rem 2.75rem 1.5rem 1.25rem;
                   background: transparent;
                   border-radius: 0;
                   box-shadow: none;
@@ -1904,6 +1909,170 @@ export function Layout({
                   border-right: 1.5px solid color-mix(in srgb, var(--muted) 68%, transparent);
                   transform: translateY(-50%) rotate(45deg);
                   pointer-events: none;
+                }
+                /* Feed-only rules must win over Cards' type-specific
+                   grids without changing fetched or direct detail pages. */
+                body.theme-ledger .cards-feed .cards-title,
+                body.theme-ledger .cards-feed .cards-text-title,
+                body.theme-ledger .cards-feed .cards-article-feed-title,
+                body.theme-ledger .cards-feed .cards-link-title {
+                  display: block;
+                  overflow: visible;
+                  overflow-wrap: anywhere;
+                  -webkit-line-clamp: unset;
+                  margin: 0;
+                  font-size: 1.1rem;
+                  line-height: 1.4;
+                  font-weight: 650;
+                  letter-spacing: -0.015em;
+                }
+                body.theme-ledger .cards-feed .cards-subtitle {
+                  display: block;
+                  overflow: visible;
+                  overflow-wrap: anywhere;
+                  -webkit-line-clamp: unset;
+                  font-size: 0.9rem;
+                  line-height: 1.5;
+                  font-weight: 400;
+                }
+                body.theme-ledger .cards-feed .cards-eyebrow,
+                body.theme-ledger .cards-feed .cards-text-badge,
+                body.theme-ledger .cards-feed .cards-quote-badge {
+                  margin: 0 0 0.55rem;
+                  padding: 0;
+                  border-radius: 0;
+                  background: transparent;
+                  color: var(--focus);
+                  font-size: 0.68rem;
+                  line-height: 1.4;
+                }
+                body.theme-ledger .cards-feed [data-cards-type="music"] .cards-eyebrow {
+                  color: var(--ledger-music);
+                }
+                body.theme-ledger .cards-feed [data-cards-type="book"] .cards-eyebrow {
+                  color: var(--ledger-book);
+                }
+                body.theme-ledger .cards-feed [data-cards-type="music"] .cards-hero,
+                body.theme-ledger .cards-feed [data-cards-type="book"] .cards-hero {
+                  display: grid;
+                  grid-template-columns: 4.75rem minmax(0, 1fr);
+                  align-items: center;
+                  gap: 1rem;
+                  height: auto;
+                  min-height: 0;
+                  padding: 1.25rem 2.75rem 1.25rem 1.25rem;
+                  background: transparent;
+                }
+                body.theme-ledger .cards-feed [data-cards-type="book"] .cards-hero::before {
+                  display: none;
+                }
+                body.theme-ledger .cards-feed [data-cards-type="music"] .cards-hero img,
+                body.theme-ledger .cards-feed [data-cards-type="book"] .cards-hero img {
+                  position: static;
+                  width: 100%;
+                  max-width: 100%;
+                  height: auto;
+                  min-height: 0;
+                  max-height: none;
+                  aspect-ratio: 1;
+                  object-fit: cover;
+                  border: 0;
+                  border-radius: 6px;
+                  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
+                }
+                body.theme-ledger .cards-feed [data-cards-type="book"] .cards-hero img {
+                  aspect-ratio: auto;
+                  object-fit: contain;
+                }
+                body.theme-ledger .cards-feed [data-cards-type="music"] .cards-caption,
+                body.theme-ledger .cards-feed [data-cards-type="book"] .cards-caption {
+                  padding: 0;
+                }
+                body.theme-ledger .cards-feed .cards-article-feed-image {
+                  display: block;
+                  border-radius: 0;
+                }
+                body.theme-ledger .cards-feed .cards-article-feed-copy {
+                  min-width: 0;
+                  padding: 1.25rem 2.75rem 1.25rem 1.25rem;
+                }
+                body.theme-ledger .cards-feed .cards-article-feed-excerpt,
+                body.theme-ledger .cards-feed .cards-text-subtitle {
+                  margin-top: 0.6rem;
+                  font-size: 0.95rem;
+                  line-height: 1.55;
+                  -webkit-line-clamp: 3;
+                }
+                body.theme-ledger .cards-feed .cards-text-date {
+                  margin-top: 0.75rem;
+                }
+                body.theme-ledger .cards-feed .cards-text-card--thought .cards-text-title {
+                  display: -webkit-box;
+                  -webkit-line-clamp: 8;
+                  overflow: hidden;
+                }
+                body.theme-ledger .cards-feed .cards-article-feed-card::after,
+                body.theme-ledger .cards-feed [data-cards-type="photo"]::after {
+                  top: auto;
+                  bottom: 1.7rem;
+                }
+                body.theme-ledger .cards-feed [data-cards-type="photo"] .cards-title {
+                  font-weight: 550;
+                }
+                body.theme-ledger .cards-feed .cards-link-card {
+                  padding-right: 1.25rem;
+                }
+                body.theme-ledger .cards-feed .cards-link-preview-image {
+                  width: 100%;
+                  max-height: 14rem;
+                  aspect-ratio: 16 / 9;
+                  margin: 0 0 1.15rem;
+                  border-radius: 8px;
+                }
+                body.theme-ledger .cards-feed .cards-link-topline {
+                  flex-wrap: wrap;
+                  gap: 0.35rem 0.75rem;
+                }
+                body.theme-ledger .cards-feed .cards-link-host {
+                  max-width: 100%;
+                }
+                body.theme-ledger .cards-feed .cards-link-comment {
+                  overflow-wrap: anywhere;
+                }
+                body.theme-ledger .cards-feed .cards-item--quote {
+                  background: color-mix(in srgb, var(--focus) 4%, var(--ledger-surface));
+                }
+                body.theme-ledger .cards-feed .cards-quote-text {
+                  padding-left: 1rem;
+                  border-left: 2px solid color-mix(in srgb, var(--focus) 50%, var(--ledger-separator));
+                  font-family: Georgia, "Times New Roman", serif;
+                  font-size: 1.18rem;
+                  line-height: 1.6;
+                  font-weight: 400;
+                  letter-spacing: 0;
+                  overflow-wrap: anywhere;
+                }
+                body.theme-ledger .cards-feed .cards-quote-author {
+                  margin-left: 1rem;
+                  letter-spacing: 0;
+                }
+                body.theme-ledger .cards-item--quote:focus-visible .cards-quote-card {
+                  outline: none;
+                }
+                @media (min-width: 720px) {
+                  body.theme-ledger .cards-feed .cards-article-feed-card {
+                    display: grid;
+                    grid-template-columns: 14rem minmax(0, 1fr);
+                    align-items: center;
+                  }
+                  body.theme-ledger .cards-feed .cards-article-feed-image {
+                    align-self: stretch;
+                    height: 100%;
+                  }
+                  body.theme-ledger .cards-feed .cards-article-feed-image img {
+                    height: 100%;
+                    min-height: 12rem;
+                  }
                 }
                 body.theme-ledger .cards-filter-trigger {
                   width: 44px;
@@ -2007,6 +2176,28 @@ export function Layout({
                   background: var(--ledger-surface);
                   box-shadow: var(--ledger-shadow);
                 }
+                body.theme-ledger .cards-detail-header--quote .cards-quote-text {
+                  font-family: Georgia, "Times New Roman", serif;
+                  font-size: clamp(1.2rem, 3vw, 1.5rem);
+                  font-weight: 400;
+                  line-height: 1.65;
+                  letter-spacing: 0;
+                }
+                body.theme-ledger .cards-book-header .cards-book-title,
+                body.theme-ledger .cards-music-header .cards-music-title {
+                  font-size: clamp(1.5rem, 4vw, 2.25rem);
+                  line-height: 1.25;
+                }
+                /* The photo detail retains Cards' black, full-screen
+                   viewer; its caption needs the matching light ink. */
+                body.theme-ledger .cards-detail-header--photo .cards-photo-title {
+                  color: #fff;
+                  font-size: clamp(1.4rem, 3.4vw, 1.9rem);
+                }
+                body.theme-ledger .cards-detail-header--photo .cards-photo-eyebrow,
+                body.theme-ledger .cards-detail-header--photo .cards-photo-subtitle {
+                  color: rgba(255, 255, 255, 0.82);
+                }
                 body.theme-ledger .cards-book-cover,
                 body.theme-ledger .cards-music-artwork,
                 body.theme-ledger .cards-article-body img,
@@ -2026,7 +2217,10 @@ export function Layout({
                 }
                 @media (max-width: 560px) {
                   body.theme-ledger header.site-header {
-                    align-items: flex-start;
+                    position: relative;
+                    gap: 0;
+                    padding-left: max(1rem, env(safe-area-inset-left));
+                    padding-right: max(1rem, env(safe-area-inset-right));
                   }
                   body.theme-ledger .site-header-left {
                     width: 100%;
@@ -2035,32 +2229,34 @@ export function Layout({
                   body.theme-ledger .site-header-right {
                     align-items: flex-start;
                   }
-                  body.theme-ledger .cards-feed {
-                    border-left: 0;
-                    border-right: 0;
-                    border-radius: 0;
-                    margin-left: -1.25rem;
-                    margin-right: -1.25rem;
+                  body.theme-ledger .cards-category-filter {
+                    flex-shrink: 0;
                   }
-                  body.theme-ledger .cards-hero {
-                    grid-template-columns: 5.8rem minmax(0, 1fr);
+                  body.theme-ledger .cards-filter-menu {
+                    left: auto;
+                    right: 0;
                   }
-                  body.theme-ledger .cards-hero img {
-                    width: 5.8rem;
+                  body.theme-ledger main {
+                    padding: 1rem max(0.75rem, env(safe-area-inset-right)) 2rem max(0.75rem, env(safe-area-inset-left));
                   }
-                  body.theme-ledger .cards-item[data-cards-type="photo"] .cards-hero {
-                    grid-template-columns: 7rem minmax(0, 1fr);
-                    min-height: 7rem;
+                  body.theme-ledger .cards-feed [data-cards-type="music"] .cards-hero,
+                  body.theme-ledger .cards-feed [data-cards-type="book"] .cards-hero {
+                    grid-template-columns: 4rem minmax(0, 1fr);
+                    gap: 0.85rem;
+                    padding: 1rem 2.25rem 1rem 1rem;
                   }
-                  body.theme-ledger .cards-item[data-cards-type="photo"] .cards-hero img {
-                    width: 7rem;
-                    min-height: 7rem;
+                  body.theme-ledger .cards-feed .cards-caption,
+                  body.theme-ledger .cards-feed .cards-text-card,
+                  body.theme-ledger .cards-feed .cards-quote-card,
+                  body.theme-ledger .cards-feed .cards-article-feed-copy {
+                    padding: 1.15rem 2.25rem 1.15rem 1rem;
                   }
-                  body.theme-ledger .cards-caption,
-                  body.theme-ledger .cards-text-card,
-                  body.theme-ledger .cards-quote-card,
-                  body.theme-ledger .cards-link-card {
-                    padding: 0.9rem 1rem;
+                  body.theme-ledger .cards-feed [data-cards-type="music"] .cards-caption,
+                  body.theme-ledger .cards-feed [data-cards-type="book"] .cards-caption {
+                    padding: 0;
+                  }
+                  body.theme-ledger .cards-item::after {
+                    right: 0.9rem;
                   }
                 }
               `,

@@ -140,7 +140,7 @@ test.beforeAll(async ({ baseURL }) => {
   });
   await api(apiBaseURL, ownerToken, "/api/v1/objects", {
     type: "book",
-    title: "Test Book",
+    title: "A Field Guide to Finding Small Joys in Unexpected Places",
     status: "published",
     body: "A reading note.",
     metadata: {
@@ -159,7 +159,7 @@ test.beforeAll(async ({ baseURL }) => {
     body: "A listening note.",
     metadata: {
       artist: "Test Artist",
-      releaseTitle: "Test Album",
+      releaseTitle: "The Long Way Home: Songs for Slow Sunday Mornings",
       artworkAssetId: musicArtwork.id,
       artworkUrl: musicArtwork.url,
       links: { appleMusic: "https://music.apple.com/us/album/test-album/123" },
@@ -437,6 +437,138 @@ test("every theme can open and leave a covered article", async ({ page }) => {
       await expect(page).toHaveURL(homeURL);
       await expect(article).toBeVisible();
     });
+  }
+});
+
+test("Ledger keeps its feed readable from narrow phones through desktop", async ({ page }) => {
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "ledger" }, "PATCH");
+  try {
+    for (const viewport of [
+      { width: 320, height: 740, colorScheme: "light" as const },
+      { width: 390, height: 844, colorScheme: "dark" as const },
+      { width: 560, height: 900, colorScheme: "light" as const },
+      { width: 768, height: 900, colorScheme: "light" as const },
+      { width: 1280, height: 900, colorScheme: "dark" as const },
+    ]) {
+      await test.step(`${viewport.width}px ${viewport.colorScheme}`, async () => {
+        await page.setViewportSize({ width: viewport.width, height: viewport.height });
+        await page.emulateMedia({ colorScheme: viewport.colorScheme });
+        await page.goto(siteBaseURL + "/");
+
+        const dimensions = await page.evaluate(() => ({
+          viewport: document.documentElement.clientWidth,
+          document: document.documentElement.scrollWidth,
+          body: document.body.scrollWidth,
+        }));
+        expect(dimensions.document).toBeLessThanOrEqual(dimensions.viewport);
+        expect(dimensions.body).toBeLessThanOrEqual(dimensions.viewport);
+
+        const feed = page.locator(".cards-feed");
+        const feedBox = await feed.boundingBox();
+        expect(feedBox).not.toBeNull();
+        expect(feedBox!.x).toBeGreaterThan(0);
+        expect(feedBox!.x + feedBox!.width).toBeLessThan(viewport.width);
+        const feedRadius = await feed.evaluate((element) => parseFloat(getComputedStyle(element).borderTopLeftRadius));
+        expect(feedRadius).toBeGreaterThan(0);
+
+        const article = page.locator(".cards-article-feed-card").first();
+        const articleImage = article.locator(".cards-article-feed-image img");
+        const articleCopy = article.locator(".cards-article-feed-copy");
+        await expect(articleImage).toBeVisible();
+        const imageBox = await articleImage.boundingBox();
+        const copyBox = await articleCopy.boundingBox();
+        expect(imageBox).not.toBeNull();
+        expect(copyBox).not.toBeNull();
+        if (viewport.width >= 720) {
+          expect(imageBox!.x + imageBox!.width).toBeLessThanOrEqual(copyBox!.x + 1);
+          const verticalOverlap = Math.min(imageBox!.y + imageBox!.height, copyBox!.y + copyBox!.height)
+            - Math.max(imageBox!.y, copyBox!.y);
+          expect(verticalOverlap).toBeGreaterThan(0);
+        } else {
+          expect(Math.abs(imageBox!.x - copyBox!.x)).toBeLessThan(2);
+          expect(imageBox!.width).toBeGreaterThan(viewport.width * 0.75);
+          expect(imageBox!.width / imageBox!.height).toBeGreaterThan(1.65);
+          expect(imageBox!.width / imageBox!.height).toBeLessThan(1.95);
+        }
+
+        if (viewport.width < 720) {
+          for (const type of ["book", "music"]) {
+            const card = page.locator(`.cards-item[data-cards-type="${type}"]`).first();
+            const image = card.locator(".cards-hero img");
+            await expect(image).toBeVisible();
+            const imageBox = await image.boundingBox();
+            expect(imageBox).not.toBeNull();
+            expect(imageBox!.width).toBeGreaterThanOrEqual(64);
+            expect(imageBox!.width).toBeLessThanOrEqual(80);
+
+            const title = card.locator(".cards-title");
+            const expectedTitle = type === "book"
+              ? "A Field Guide to Finding Small Joys in Unexpected Places"
+              : "The Long Way Home: Songs for Slow Sunday Mornings";
+            await expect(title).toHaveText(expectedTitle);
+            const titleMetrics = await title.evaluate((element) => {
+              const style = getComputedStyle(element);
+              const bounds = element.getBoundingClientRect();
+              return {
+                visibleLines: bounds.height / Number.parseFloat(style.lineHeight),
+                scrollHeight: element.scrollHeight,
+                clientHeight: element.clientHeight,
+              };
+            });
+            expect(titleMetrics.scrollHeight).toBeLessThanOrEqual(titleMetrics.clientHeight + 1);
+            if (viewport.width === 320) expect(titleMetrics.visibleLines).toBeGreaterThan(2);
+          }
+
+          // The row's decorative chevron stays outside the longest visible
+          // title, leaving enough room for the text to wrap naturally.
+          const textRow = page.locator('.cards-item[data-cards-type="book"] .cards-caption').first();
+          const row = page.locator('.cards-item[data-cards-type="book"]').first();
+          const clearance = await row.evaluate((element) => {
+            const text = element.querySelector<HTMLElement>(".cards-caption .cards-title")!;
+            const rect = text.getBoundingClientRect();
+            const rowRect = element.getBoundingClientRect();
+            const arrow = getComputedStyle(element, "::after");
+            const arrowLeft = rowRect.right - Number.parseFloat(arrow.right) - Number.parseFloat(arrow.width);
+            return arrowLeft - rect.right;
+          });
+          await expect(textRow).toBeVisible();
+          expect(clearance).toBeGreaterThanOrEqual(8);
+        }
+      });
+    }
+  } finally {
+    await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
+  }
+});
+
+test("Ledger covered article close restores mobile feed scroll", async ({ page }) => {
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "ledger" }, "PATCH");
+  try {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto(siteBaseURL + "/");
+
+    const article = page.locator(".cards-article-feed-card").first();
+    const box = await article.boundingBox();
+    expect(box).not.toBeNull();
+    await page.evaluate((y) => window.scrollTo(0, y), Math.max(0, box!.y - 72));
+    const initialScrollY = await page.evaluate(() => window.scrollY);
+    expect(initialScrollY).toBeGreaterThan(0);
+    const reference = page.locator(".cards-item[data-cards-type='thought']").last();
+    const initialReferenceBox = await reference.boundingBox();
+
+    await article.click();
+    const dialog = page.locator('.cards-panel[role="dialog"]');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator("h1", { hasText: "A covered article" })).toBeVisible();
+    await dialog.locator(".cards-close").click();
+    await dialog.waitFor({ state: "detached" });
+
+    expect(await page.evaluate(() => window.scrollY)).toBe(initialScrollY);
+    const finalReferenceBox = await reference.boundingBox();
+    expect(finalReferenceBox).not.toBeNull();
+    expect(finalReferenceBox!.y).toBeCloseTo(initialReferenceBox!.y, 1);
+  } finally {
+    await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
   }
 });
 

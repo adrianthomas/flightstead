@@ -145,6 +145,17 @@ high-contrast surfaces, and saturated blue/pink accents. Ledger is also
 cards-derived, but presents the feed as a single-column professional index with
 separators and compact type labels; its branch in `cardsScript` uses an
 iOS-style right-to-left push detail panel instead of the expanding-card motion.
+Ledger's feed overrides are scoped to `.cards-feed` to resolve Cards' stronger
+book/music selectors without changing detail headers. Books and music use
+compact artwork alongside fully wrapping titles; covered articles stack a
+16:9 image above their copy below 720px and use a two-column row above it.
+Photos stay image-led, while quotes use a tinted surface and serif reading
+type. The list keeps its inset border and rounded corners on phones, with
+reserved chevron clearance; the phone header scrolls away and its filter
+popover aligns to the right edge. Detail pages retain larger book/music
+headings, serif quote text, and light captions on the black photo viewer.
+WebKit checks the mixed feed at 320, 390,
+560, 768, and 1280px, plus mobile article open/close scroll restoration.
 Aqua (currently hidden from the selectable catalog) keeps the Basic semantic templates and adds a responsive two-column feed,
 pinstriped desktop chrome, translucent blue controls, and polished content
 panels with no additional script or third-party runtime assets.
