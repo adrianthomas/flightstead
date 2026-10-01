@@ -6,6 +6,7 @@ import { cabinetStyles, CabinetNavigation } from "../themes/cabinet.js";
 import { cabinetScript } from "../themes/cabinet-script.js";
 import { aquaStyles } from "../themes/aqua.js";
 import { thinkStyles } from "../themes/think.js";
+import { streamStyles } from "../themes/stream.js";
 import { copyButtonScript, CopyHandleButton } from "./CopyButton.js";
 import { absoluteSiteUrl, siteOrigin } from "../site-url.js";
 import type { ProfileLink } from "./types.js";
@@ -30,6 +31,7 @@ const THEME_CHROME_COLORS: Record<Site["theme"], { light: string; dark: string }
   prism: { light: "#f7f8ff", dark: "#101321" },
   ledger: { light: "#f8fafc", dark: "#0f1115" },
   cabinet: { light: "#f3f1ea", dark: "#11120f" },
+  stream: { light: "#faf9f6", dark: "#171b18" },
   aqua: { light: "#dfe3e8", dark: "#20252b" },
   think: { light: "#ffffff", dark: "#111111" },
 };
@@ -86,9 +88,12 @@ function CategoryFilter({
   /** Nav paths (e.g. "/posts") that have at least one published post. When omitted, all tabs are shown. */
   availablePaths?: string[];
 }) {
+  const items = navItems(site, availablePaths);
+  const activeItem = items.find(item => item.href !== "/" && currentPath.startsWith(item.href));
+  const label = site.theme === "stream" && activeItem ? activeItem.label : t(site.locale, "filterCategories");
   return (
     <details className="category-filter">
-      <summary className="category-filter-trigger" aria-label={t(site.locale, "filterCategories")}>
+      <summary className="category-filter-trigger" aria-label={label === t(site.locale, "filterCategories") ? label : `${t(site.locale, "filterCategories")}: ${label}`}>
         <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true" focusable="false">
           <path
             d="M7.5 8.5h9M9.5 12h5M11 15.5h2"
@@ -98,10 +103,10 @@ function CategoryFilter({
             fill="none"
           />
         </svg>
-        <span>{t(site.locale, "filterCategories")}</span>
+        <span>{label}</span>
       </summary>
       <nav className="category-filter-menu" aria-label={t(site.locale, "primaryNavigation")}>
-        {navItems(site, availablePaths).map((item) => {
+        {items.map((item) => {
           const active = item.href === "/" ? currentPath === "/" : currentPath.startsWith(item.href);
           return (
             <a key={item.href} href={item.href} aria-current={active ? "page" : undefined}>
@@ -693,6 +698,7 @@ export function Layout({
         {usesCabinetInteraction ? <style dangerouslySetInnerHTML={{ __html: cabinetStyles }} /> : null}
         {theme === "aqua" ? <style dangerouslySetInnerHTML={{ __html: aquaStyles }} /> : null}
         {theme === "think" ? <style dangerouslySetInnerHTML={{ __html: thinkStyles }} /> : null}
+        {theme === "stream" ? <style dangerouslySetInnerHTML={{ __html: streamStyles }} /> : null}
         {theme === "washi" ? (
           // Washi keeps the classic templates but gives list pages their own
           // feed wrapper in render.ts, so it can be more composed than classic

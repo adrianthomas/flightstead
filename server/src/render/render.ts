@@ -35,6 +35,8 @@ import { formatBasicText, formatRichText, isSafeLinkUrl, stripBasicFormatting } 
 import { siteOrigin } from "./site-url.js";
 import { bookRetailerLinksFor } from "../lib/book-links.js";
 import { musicLinksFor } from "../lib/music-links.js";
+import { StreamItem } from "./themes/stream.js";
+import { BackLink } from "./templates/BackLink.js";
 
 function wrap(
   site: Site,
@@ -96,6 +98,27 @@ export const PATH_PREFIX: Record<ContentObject["type"], string> = {
   quote: "quotes",
 };
 
+async function renderStreamItem(object: ContentObject, locale: string, detail = false, eager = false): Promise<React.ReactNode> {
+  const assetId = object.type === "photo"
+    ? (object.metadata as PhotoMetadata).assetId
+    : object.type === "article" ? (object.metadata as ArticleMetadata).coverAssetId
+    : object.type === "link" ? (object.metadata as LinkMetadata).previewAssetId : undefined;
+  const [asset] = assetId ? await db.select().from(assets).where(eq(assets.id, assetId)).limit(1) : [];
+  const variants = asset?.variants as Record<string, string> | undefined;
+  return React.createElement(StreamItem, {
+    key: object.id,
+    object,
+    locale,
+    href: `/${PATH_PREFIX[object.type]}/${object.slug}`,
+    imageUrl: asset ? storage.getUrl(variants?.medium ?? variants?.original ?? asset.storageKey) : undefined,
+    imageWidth: asset?.width ?? undefined,
+    imageHeight: asset?.height ?? undefined,
+    exif: object.type === "photo" ? (asset?.exif as AssetExif | null) ?? undefined : undefined,
+    detail,
+    eager,
+  });
+}
+
 async function renderCard(object: ContentObject, locale: string, theme: Site["theme"]): Promise<React.ReactNode> {
   switch (object.type) {
     case "thought":
@@ -135,6 +158,13 @@ async function renderDetail(object: ContentObject, locale: string, theme: Site["
   const backHref = "/";
   const backLabel = t(locale, "backTo", { section: t(locale, "home") });
   const detailProps = { theme, backHref, backLabel };
+
+  if (theme === "stream") {
+    return React.createElement(React.Fragment, null,
+      React.createElement(BackLink, { href: backHref, label: backLabel }),
+      await renderStreamItem(object, locale, true, true),
+    );
+  }
 
   switch (object.type) {
     case "thought":
@@ -180,7 +210,9 @@ export async function renderList(
     metadata?: PageMetadata;
   } = {},
 ): Promise<string> {
-  const cards = await Promise.all(objects.map((object) => renderCard(object, site.locale, site.theme)));
+  const cards = await Promise.all(objects.map((object, index) => site.theme === "stream"
+    ? renderStreamItem(object, site.locale, false, index === 0)
+    : renderCard(object, site.locale, site.theme)));
   const wrapOpts = { currentPath, availablePaths };
   const pageTitle = currentPath === "/" ? undefined : title;
   const pagination = paginationNode(site, currentPath, options.page ?? 1, options.totalPages ?? 1, options.query);
@@ -193,7 +225,9 @@ export async function renderList(
     );
   }
   const list =
-    site.theme === "cabinet"
+    site.theme === "stream"
+      ? React.createElement("div", { className: "stream-feed" }, ...cards)
+      : site.theme === "cabinet"
       ? React.createElement("div", { className: "cabinet-feed" }, ...cards)
       : site.theme === "cards" || site.theme === "prism" || site.theme === "ledger"
         ? React.createElement("div", { className: "cards-feed" }, ...cards)

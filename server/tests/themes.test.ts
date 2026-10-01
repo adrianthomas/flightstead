@@ -19,6 +19,7 @@ test("theme catalog exposes Basic while retaining hidden render-only themes", as
         { id: "prism", name: "Prism" },
         { id: "ledger", name: "Ledger" },
         { id: "cabinet", name: "Cabinet" },
+        { id: "stream", name: "Stream" },
       ],
     );
   } finally {

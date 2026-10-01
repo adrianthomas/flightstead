@@ -38,6 +38,7 @@ async function api(baseURL: string, token: string, path: string, body: unknown, 
     body: JSON.stringify(body),
   });
   if (!res.ok) throw new Error(`${method} ${path} -> ${res.status}: ${await res.text()}`);
+  if (res.status === 204) return undefined;
   return res.json();
 }
 
@@ -396,6 +397,7 @@ test("every theme can open and leave a covered article", async ({ page }) => {
     { id: "washi", interaction: "navigation" },
     { id: "aqua", interaction: "navigation" },
     { id: "think", interaction: "navigation" },
+    { id: "stream", interaction: "navigation" },
     { id: "cards", interaction: "cards-overlay" },
     { id: "prism", interaction: "cards-overlay" },
     { id: "ledger", interaction: "cards-overlay" },
@@ -437,6 +439,67 @@ test("every theme can open and leave a covered article", async ({ page }) => {
       await expect(page).toHaveURL(homeURL);
       await expect(article).toBeVisible();
     });
+  }
+});
+
+test("Stream makes full posts readable inline with ordinary navigation at every width", async ({ page, browser }) => {
+  test.setTimeout(60_000);
+  const finalParagraph = "The last paragraph is here on the homepage, without opening an article.";
+  const { object } = await api(apiBaseURL, ownerToken, "/api/v1/objects", {
+    type: "article", title: "The pleasure of paying attention", status: "published",
+    body: `A place to collect the small things that make a day feel different. ${"Good writing deserves room to breathe. ".repeat(12)}\n\n## A little room to think\n\n- Keep the interesting details\n- Leave space for the unexpected\n\nAn independent [reference](https://example.com/reference) remains usable.\n\n${finalParagraph}`,
+    metadata: { excerpt: "On noticing what is already in front of us." },
+  });
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "stream" }, "PATCH");
+  try {
+    for (const width of [320, 390, 560, 768, 1280]) {
+      for (const colorScheme of ["light", "dark"] as const) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+        await page.goto(siteBaseURL + "/");
+        const article = page.locator(".stream-item--article").first();
+        await expect(article).toContainText(finalParagraph);
+        await expect(article.locator(".stream-body li")).toHaveCount(2);
+        await expect(article.locator('a[href="https://example.com/reference"]')).toHaveCount(1);
+        for (const text of ["A reading note.", "A listening note.", "A test photo.", "A short note about why this belongs in the cabinet."]) await expect(page.locator("main")).toContainText(text);
+        await expect(page.locator(".stream-feed > .stream-item")).toHaveCount(12);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+        expect(await page.locator("a a, a button").count()).toBe(0);
+        const cover = page.locator(".stream-item--article .stream-feature-image");
+        await expect(cover).toHaveAttribute("width", "240");
+        await expect(cover).toHaveAttribute("height", "96");
+        const ratio = await cover.evaluate((image) => { const box = image.getBoundingClientRect(); return box.width / box.height; });
+        expect(ratio).toBeCloseTo(2.5, 1);
+      }
+    }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator(".stream-permalink").first().focus();
+    await expect(page.locator(".stream-permalink").first()).toBeFocused();
+    expect(await page.locator(".stream-permalink").first().evaluate(el => getComputedStyle(el).outlineStyle)).not.toBe("none");
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(new RegExp(`/articles/${object.slug}$`));
+    await expect(page.locator("main h1")).toHaveText("The pleasure of paying attention");
+    await expect(page.locator("main")).toContainText(finalParagraph);
+    await page.goBack();
+    await expect(page).toHaveURL(siteBaseURL + "/");
+    await page.locator(".category-filter-trigger").click();
+    await page.locator('.category-filter-menu a[href="/articles"]').click();
+    await expect(page.locator(".stream-feed > article")).toHaveCount(2);
+    await expect(page.locator(".category-filter-trigger")).toContainText("Articles");
+    await page.evaluate(() => { document.documentElement.style.fontSize = "200%"; });
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
+    await page.goto(siteBaseURL + "/articles");
+    const noScript = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 320, height: 740 } });
+    try {
+      const reader = await noScript.newPage();
+      await reader.goto(siteBaseURL + "/");
+      await expect(reader.locator("main")).toContainText(finalParagraph);
+      await reader.locator(".stream-permalink").first().click();
+      await expect(reader.locator("main h1")).toHaveText("The pleasure of paying attention");
+    } finally { await noScript.close(); }
+  } finally {
+    await api(apiBaseURL, ownerToken, `/api/v1/objects/${object.id}`, {}, "DELETE");
+    await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
   }
 });
 
@@ -1108,7 +1171,7 @@ test("site identity drives public profile and discovery metadata", async ({ page
   const robots = await fetch(siteBaseURL + "/robots.txt");
   expect(await robots.text()).toContain("/sitemap.xml");
 
-  for (const theme of ["classic", "cards", "washi", "prism", "ledger", "cabinet"]) {
+  for (const theme of ["classic", "cards", "washi", "prism", "ledger", "cabinet", "stream"]) {
     await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme }, "PATCH");
     await page.goto(siteBaseURL + "/about");
     const identityBox = await page.locator("footer .site-profile-identity").boundingBox();

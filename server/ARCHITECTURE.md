@@ -125,7 +125,18 @@ and the standalone `cabinetScript` in `themes/cabinet-script.ts`).
 
 `render.ts` orchestrates: `renderCard`/`renderDetail` switch on
 `ContentType` to the matching template in `render/templates/*.tsx`, every
-page is wrapped via `wrap()` in `Layout.tsx`. Templates have three rendering
+page is wrapped via `wrap()` in `Layout.tsx`. Stream uses a separate
+`themes/stream.tsx` component for both listings and direct detail URLs: all
+seven content types expose their full authored text inline, including article
+bodies, reviews, photo captions, and quote commentary. It keeps ordinary
+permalink and outbound links, the native category filter, and 20-item pagination;
+there is no overlay script. Its scoped stylesheet pairs Charter/Georgia reading
+type with system UI type, a quiet date margin, neutral light/dark colors, and
+uncropped media. Asset-backed photos, article covers, and link previews reserve intrinsic space;
+cover/artwork/preview visibility and destination helpers remain shared. Stream is
+selectable through `/api/v1/themes` and the companion iOS catalog. The SQLite
+theme column remains plain text, so adding its accepted id requires no migration.
+The remaining templates have three rendering
 paths: classic-style markup (also used by Washi), the cards pipeline shared by
 `cards`/`prism`/`ledger`, and Cabinet's explicit per-type feed/detail markup.
 The cards-derived themes usually render `CardsFeedItem`/`CardsDetailHeader`
@@ -224,7 +235,7 @@ Article `metadata.coverAssetId` is the card/detail header image, with
 `metadata.coverAltText` as its alt text. Inline markdown images in the article
 body are separate body images and render below the title/excerpt/date content.
 The WebKit suite exercises covered-article open/return behavior across every
-theme: ordinary history navigation for Basic, Washi, Aqua, and Think; Cards
+theme: ordinary history navigation for Basic, Washi, Stream, Aqua, and Think; Cards
 overlays for Cards, Prism, and Ledger; and the Cabinet overlay. Separate tests
 retain gesture-level pull-down coverage for Cards and Cabinet plus the
 specialized photo, book, and music animation paths.
@@ -360,7 +371,11 @@ SQLite DB and dev server on port 3100, seeded through `bootstrap-owner.ts`
 + the live API — see the spec file for the pattern). The run never reuses an
 existing server on that port, and its ignored throwaway owner-token file lets
 a replacement Playwright worker continue against the same test database after
-a failed test. Its primary coverage is
+a failed test. Stream has unit coverage for complete mixed-content listings,
+direct URLs, safe links, hidden media, and localized empty states; WebKit checks
+all five review widths in light/dark mode, intrinsic cover proportions, full
+inline article text, keyboard permalink navigation, filtering, enlarged text,
+and reading without JavaScript. Its primary interaction coverage is
 `themes/cards.tsx`'s scroll-lock/restore mechanism
 around opening and closing a card (`lockPageScroll`/`unlockPageScroll`) —
 a bug class subtle enough to have regressed silently once already. It also

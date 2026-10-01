@@ -20,6 +20,7 @@ export type MessageKey =
   | "releaseHistory"
   | "currentlyRunning"
   | "copyLink"
+  | "permalink"
   | "openLink"
   | "readMore"
   | "urlCopied"
@@ -73,6 +74,7 @@ const MESSAGES: Record<string, Messages> = {
     releaseHistory: "Release history",
     currentlyRunning: "Currently running {commit}",
     copyLink: "Copy link",
+    permalink: "Permalink",
     openLink: "Open Link",
     readMore: "Read more",
     urlCopied: "URL copied",
@@ -123,6 +125,7 @@ const MESSAGES: Record<string, Messages> = {
     releaseHistory: "Versionshistorie",
     currentlyRunning: "Aktuell läuft {commit}",
     copyLink: "Link kopieren",
+    permalink: "Permalink",
     openLink: "Link öffnen",
     readMore: "Weiterlesen",
     urlCopied: "URL kopiert",
@@ -173,6 +176,7 @@ const MESSAGES: Record<string, Messages> = {
     releaseHistory: "Historique des versions",
     currentlyRunning: "Version actuelle : {commit}",
     copyLink: "Copier le lien",
+    permalink: "Lien permanent",
     openLink: "Ouvrir le lien",
     readMore: "Lire la suite",
     urlCopied: "URL copiée",
@@ -223,6 +227,7 @@ const MESSAGES: Record<string, Messages> = {
     releaseHistory: "Historial de versiones",
     currentlyRunning: "Ejecutando actualmente {commit}",
     copyLink: "Copiar enlace",
+    permalink: "Enlace permanente",
     openLink: "Abrir enlace",
     readMore: "Leer más",
     urlCopied: "URL copiada",
@@ -273,6 +278,7 @@ const MESSAGES: Record<string, Messages> = {
     releaseHistory: "更新履歴",
     currentlyRunning: "現在のバージョン: {commit}",
     copyLink: "リンクをコピー",
+    permalink: "パーマリンク",
     openLink: "リンクを開く",
     readMore: "続きを読む",
     urlCopied: "URLをコピーしました",

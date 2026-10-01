@@ -39,6 +39,11 @@ const themeOptions = [
     description: "An editorial cabinet of photos, notes, books, music, and essays, wired together as one living personal index.",
   },
   {
+    id: "stream",
+    name: "Stream",
+    description: "A finely typeset reading stream with complete posts, quiet details, and naturally proportioned images.",
+  },
+  {
     id: "aqua",
     name: "Aqua",
     description: "A bright turn-of-the-century desktop look with pinstripes, polished chrome, and candy-blue controls.",
@@ -58,7 +63,7 @@ if (missingThemeMetadata.length > 0) {
 // Aqua and Think remain valid persisted values so existing sites keep
 // rendering unchanged, but they are intentionally absent from the catalog
 // while those designs are held back from new selection.
-const selectableThemeIds = new Set<Theme>(["classic", "cards", "washi", "prism", "ledger", "cabinet"]);
+const selectableThemeIds = new Set<Theme>(["classic", "cards", "washi", "prism", "ledger", "cabinet", "stream"]);
 const selectableThemeOptions = themeOptions.filter((option) => selectableThemeIds.has(option.id));
 
 export async function themeRoutes(app: FastifyInstance) {
