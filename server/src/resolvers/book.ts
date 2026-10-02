@@ -14,6 +14,22 @@ interface OpenLibrarySearchResponse {
   docs: OpenLibraryDoc[];
 }
 
+export function bookUrlSearchFallback(url: URL): string | undefined {
+  // Apple uses a catalog ID as its last path segment, not a searchable
+  // book identifier. Keep the readable title when page scraping fails.
+  const appleSlug = url.hostname.toLowerCase() === "books.apple.com"
+    ? url.pathname.match(/\/book\/([^/]+)\/id\d+\/?$/)?.[1]
+    : undefined;
+  if (appleSlug) {
+    try {
+      return decodeURIComponent(appleSlug).replace(/-/g, " ").trim() || undefined;
+    } catch {
+      // Malformed escaping must not prevent the ordinary URL fallback.
+    }
+  }
+  return url.pathname.split("/").filter(Boolean).pop();
+}
+
 export async function resolveBook(query: string): Promise<ResolvedBookCandidate[]> {
   let searchQuery = query.trim();
   try {
@@ -24,7 +40,7 @@ export async function resolveBook(query: string): Promise<ResolvedBookCandidate[
         searchQuery = isbn.replace(/-/g, "");
       } else {
         const article = await resolveArticle(url.toString());
-        searchQuery = article.title ?? url.pathname.split("/").filter(Boolean).pop() ?? query;
+        searchQuery = article.title ?? bookUrlSearchFallback(url) ?? query;
       }
     }
   } catch {

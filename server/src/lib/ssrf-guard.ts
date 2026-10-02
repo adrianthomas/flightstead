@@ -79,17 +79,21 @@ export async function assertSafeFetchTarget(rawUrl: string | URL): Promise<void>
  * actually connected to, closing that window.
  */
 export const safeDnsLookup: LookupFunction = (hostname, options, callback) => {
-  const family = typeof options === "number" ? options : options?.family;
-  lookupCallback(hostname, { all: true, verbatim: true, family }, (err, addresses) => {
+  const returnAll = typeof options !== "number" && options?.all === true;
+  const lookupOptions = typeof options === "number"
+    ? { all: true, verbatim: true, family: options }
+    : { ...options, all: true, verbatim: true };
+
+  lookupCallback(hostname, lookupOptions, (err, addresses) => {
     if (err) {
-      callback(err, "", 0);
+      callback(err, returnAll ? [] : "", 0);
       return;
     }
     const records = addresses as LookupAddress[];
     if (records.length === 0 || records.some((record) => isPrivateAddress(record.address))) {
-      callback(new Error("Refusing to fetch a private/internal address."), "", 0);
+      callback(new Error("Refusing to fetch a private/internal address."), returnAll ? [] : "", 0);
       return;
     }
-    callback(null, records[0].address, records[0].family);
+    callback(null, returnAll ? records : records[0].address, returnAll ? undefined : records[0].family);
   });
 };

@@ -82,6 +82,19 @@ mapping a `ContentType` to its URL segment (`photo` → `/photos`) — reused by
 `siteId` + full URL) before rendering, and `invalidateSitePages(siteId)` is
 called on every object/site mutation.
 
+## Metadata resolution
+
+Book links without an ISBN are scraped for a title before searching Open
+Library. If an Apple Books page cannot be read, its readable title slug supplies the search term
+instead of the numeric Apple catalog ID. Plain text and ISBN lookups keep the
+same candidate response format.
+
+User-supplied page fetches validate the URL and every redirect through
+`lib/ssrf-guard.ts`. Its DNS callback validates all returned addresses and
+honors Node's single-address and `all: true` callback formats, so modern Node
+connection attempts retain the same private-network protection. Regression
+tests cover both callback formats, blocked addresses, and Apple Books fallback.
+
 ## Database (`db/schema.ts`, SQLite via Drizzle)
 
 | Table | Purpose |
