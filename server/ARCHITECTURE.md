@@ -150,6 +150,10 @@ the switch is enabled again. Deleted history is intentionally unrecoverable.
 
 ## Render pipeline
 
+For theme and public web design work, read [THEME_GUIDELINES.md](THEME_GUIDELINES.md)
+alongside this implementation map. It defines the shared design and review
+baseline; the theme-specific behavior below remains the implementation reference.
+
 Server-side React only (`renderToStaticMarkup`), no client hydration, no
 bundler for client JS — interactive themes use plain template-literal scripts
 injected as inline `<script>` elements (`cardsScript` in `themes/cards.tsx`,
@@ -426,6 +430,13 @@ arm64. The operator workflow and hostname-preserving DSM proxy setup live in
 No lint script. From `server/`, `npm run build` is the canonical TypeScript
 check and `npm test` runs the fast Node test suite in `tests/*.test.ts` (current
 coverage includes book/music destination policy and generated favicon safety).
+Resolver-flow tests (`book-resolution.test.ts`, `music-resolution.test.ts`) use
+Nock fixtures for Kobo, Amazon, Libby, Apple Books, Apple Music, Spotify, and
+YouTube inputs, manual title/author/artist searches, and failure fallbacks.
+`resolve-routes.test.ts` exercises the authenticated API response shapes, legacy
+music URL inputs, opt-in candidates, validation, and provider error envelopes.
+These tests block live HTTP; book source-page tests also stub DNS. They verify
+our handling of provider responses, not continued availability of live services.
 Use manual/browser verification for behavior that static and unit checks cannot
 cover.
 
