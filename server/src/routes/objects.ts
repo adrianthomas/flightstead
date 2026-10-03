@@ -10,6 +10,7 @@ import { invalidateSitePages } from "../render/page-cache.js";
 import { storage } from "../storage/index.js";
 import { deliverCreateActivity, deliverDeleteActivity } from "../activitypub/federation.js";
 import { materializeAppleMusicMetadata } from "../lib/apple-music.js";
+import { materializeBookCoverMetadata, mergeBookCoverMetadata } from "../lib/book-cover.js";
 import { materializeLinkPreviewMetadata } from "../lib/link-preview.js";
 
 // Structured image references live in metadata, while inline Article and
@@ -61,7 +62,7 @@ async function deleteAsset(asset: Asset): Promise<void> {
 // deletion of another site's files the moment multi-tenancy opens up (only
 // one account can exist today, so this is unreachable in practice — but
 // cheap to close now while it's still just a code review finding).
-async function assertOwnedAssets(siteId: string, metadata: unknown): Promise<void> {
+export async function assertOwnedAssets(siteId: string, metadata: unknown): Promise<void> {
   const ids = [...new Set(metadataAssetIds(metadata))];
   if (ids.length === 0) return;
   const owned = await db
@@ -133,6 +134,11 @@ export async function objectRoutes(app: FastifyInstance) {
     }
 
     let body = normalizeLegacyArticle(createObjectSchema.parse(request.body));
+    if (body.type === "book") {
+      // Reject foreign asset references before normalization can replace them.
+      await assertOwnedAssets(site.id, body.metadata);
+      body = { ...body, metadata: await materializeBookCoverMetadata(site.id, body.metadata, request.log) };
+    }
     if (body.type === "music") {
       const normalized = await materializeAppleMusicMetadata(site.id, body.metadata, body.sourceUrl, request.log);
       body = { ...body, metadata: normalized.metadata, sourceUrl: normalized.sourceUrl };
@@ -230,6 +236,11 @@ export async function objectRoutes(app: FastifyInstance) {
       .limit(1);
     if (!existing) return reply.code(404).send({ error: { code: "not_found", message: "Object not found." } });
 
+    if (existing.type === "book" && body.metadata !== undefined) {
+      const merged = mergeBookCoverMetadata(existing.metadata, body.metadata);
+      await assertOwnedAssets(site.id, merged);
+      body = { ...body, metadata: await materializeBookCoverMetadata(site.id, merged, request.log) };
+    }
     if (existing.type === "music" && body.metadata !== undefined) {
       const normalized = await materializeAppleMusicMetadata(site.id, body.metadata, existing.sourceUrl ?? undefined, request.log);
       body = { ...body, metadata: normalized.metadata };

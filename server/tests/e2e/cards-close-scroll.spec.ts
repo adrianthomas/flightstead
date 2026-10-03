@@ -49,9 +49,9 @@ async function api(baseURL: string, token: string, path: string, body: unknown, 
 // render, not a stand-in.
 const TINY_JPEG_BASE64 =
   "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAAIAAgBAREA/8QAFQABAQAAAAAAAAAAAAAAAAAAAAj/xAAUEAEAAAAAAAAAAAAAAAAAAAAA/9oACAEBAAA/AKp//9k=";
-const PORTRAIT_COVER_DATA_URI = `data:image/svg+xml;base64,${Buffer.from(
+const PORTRAIT_COVER_SVG = Buffer.from(
   '<svg xmlns="http://www.w3.org/2000/svg" width="80" height="124" viewBox="0 0 80 124"><rect width="80" height="124" fill="#83512e"/><rect x="9" y="12" width="62" height="100" rx="2" fill="#f7ead7"/><text x="40" y="43" text-anchor="middle" font-size="12" font-family="serif" fill="#2f2217">Test</text><text x="40" y="60" text-anchor="middle" font-size="12" font-family="serif" fill="#2f2217">Book</text></svg>',
-).toString("base64")}`;
+);
 const LANDSCAPE_COVER_SVG = Buffer.from(
   '<svg xmlns="http://www.w3.org/2000/svg" width="240" height="96" viewBox="0 0 240 96"><rect width="240" height="96" fill="#78bce8"/><rect y="58" width="240" height="38" fill="#64884b"/></svg>',
 );
@@ -70,9 +70,9 @@ async function uploadAsset(baseURL: string, token: string): Promise<{ id: string
   return { id: asset.id as string, url: asset.url as string };
 }
 
-async function uploadLandscapeAsset(baseURL: string, token: string): Promise<{ id: string; url: string }> {
+async function uploadCoverAsset(baseURL: string, token: string, bytes = LANDSCAPE_COVER_SVG): Promise<{ id: string; url: string }> {
   const form = new FormData();
-  form.append("file", new Blob([LANDSCAPE_COVER_SVG], { type: "image/svg+xml" }), "article-cover.svg");
+  form.append("file", new Blob([bytes], { type: "image/svg+xml" }), "cover.svg");
   const res = await fetch(`${baseURL.replace("localhost", "api.localhost")}/api/v1/assets`, {
     method: "POST",
     headers: { Authorization: `Bearer ${token}` },
@@ -123,7 +123,7 @@ test.beforeAll(async ({ baseURL }) => {
   for (const post of POSTS) {
     await api(apiBaseURL, ownerToken, "/api/v1/objects", post);
   }
-  const articleCover = await uploadLandscapeAsset(apiBaseURL, ownerToken);
+  const articleCover = await uploadCoverAsset(apiBaseURL, ownerToken);
   await api(apiBaseURL, ownerToken, "/api/v1/objects", {
     type: "article",
     title: "A covered article",
@@ -139,6 +139,7 @@ test.beforeAll(async ({ baseURL }) => {
     body: "A short note about why this belongs in the cabinet.",
     metadata: { excerpt: "The source and the owner's note remain distinct destinations." },
   });
+  const bookCover = await uploadCoverAsset(apiBaseURL, ownerToken, PORTRAIT_COVER_SVG);
   await api(apiBaseURL, ownerToken, "/api/v1/objects", {
     type: "book",
     title: "A Field Guide to Finding Small Joys in Unexpected Places",
@@ -147,7 +148,8 @@ test.beforeAll(async ({ baseURL }) => {
     metadata: {
       author: "Test Author",
       rating: 4,
-      coverUrl: PORTRAIT_COVER_DATA_URI,
+      coverAssetId: bookCover.id,
+      coverUrl: bookCover.url,
       links: {},
       source: "manual",
     },
@@ -669,6 +671,41 @@ test("deleting article and photo drafts removes their uploaded assets", async ()
     expect(assetResponse.status).toBe(404);
     expect((await fetch(asset.url)).status).toBe(404);
   }
+});
+
+test("book cover visibility retains its owned asset through edits and deletes it with the post", async () => {
+  const cover = await uploadCoverAsset(apiBaseURL, ownerToken, PORTRAIT_COVER_SVG);
+  const { object } = await api(apiBaseURL, ownerToken, "/api/v1/objects", {
+    type: "book", title: "A book with a retained cover", status: "published",
+    body: "A comment that stays with the book.",
+    metadata: {
+      author: "A. Writer", source: "apple_books", rating: 4, showCover: false,
+      coverAssetId: cover.id, coverUrl: "https://example.com/untrusted-cover.jpg", links: {},
+    },
+  });
+  expect(object.metadata.coverAssetId).toBe(cover.id);
+  expect(object.metadata.coverUrl).toBe(cover.url);
+  expect(object.metadata.showCover).toBe(false);
+  const permalink = `${siteBaseURL}/books/${object.slug}`;
+  expect(await (await fetch(permalink)).text()).not.toContain(cover.url);
+
+  const { object: visible } = await api(apiBaseURL, ownerToken, `/api/v1/objects/${object.id}`, {
+    metadata: { author: "A. Writer", source: "apple_books", links: {} },
+  }, "PATCH");
+  expect(visible.metadata.coverAssetId).toBe(cover.id);
+  expect(visible.metadata.coverUrl).toBe(cover.url);
+  expect(visible.metadata.showCover).toBeUndefined();
+  expect(visible.metadata.rating).toBeUndefined();
+  expect(visible.body).toBe("A comment that stays with the book.");
+  expect(await (await fetch(permalink)).text()).toContain(cover.url);
+
+  await api(apiBaseURL, ownerToken, `/api/v1/objects/${object.id}`, {
+    metadata: { ...visible.metadata, showCover: false },
+  }, "PATCH");
+  expect(await (await fetch(permalink)).text()).not.toContain(cover.url);
+  expect((await fetch(cover.url)).status).toBe(200);
+  await api(apiBaseURL, ownerToken, `/api/v1/objects/${object.id}`, {}, "DELETE");
+  expect((await fetch(cover.url)).status).toBe(404);
 });
 
 async function expectMusicCardKeepsDetailAnimation(page: Page) {

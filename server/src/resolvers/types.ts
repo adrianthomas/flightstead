@@ -9,7 +9,7 @@ export interface ResolvedBookCandidate {
   isbn13?: string;
   isbn10?: string;
   coverUrl?: string;
-  source: "open_library" | "google_books";
+  source: "open_library" | "google_books" | "apple_books";
   links: GeneratedBookRetailerLinks;
 }
 
@@ -21,6 +21,8 @@ export interface ResolvedMusic {
   sourceUrl?: string;
   links: MusicLinks;
 }
+
+export type ResolvedMusicCandidate = ResolvedMusic;
 
 export interface ResolvedArticle {
   title?: string;

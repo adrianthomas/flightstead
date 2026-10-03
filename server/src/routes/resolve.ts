@@ -2,7 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { authGuard } from "../middleware/auth-guard.js";
 import { resolveBook } from "../resolvers/book.js";
-import { resolveMusic } from "../resolvers/music.js";
+import { resolveMusic, resolveMusicCandidates } from "../resolvers/music.js";
 import { resolveArticle } from "../resolvers/article.js";
 
 export async function resolveRoutes(app: FastifyInstance) {
@@ -20,12 +20,18 @@ export async function resolveRoutes(app: FastifyInstance) {
   app.post("/resolve/music", { preHandler: authGuard }, async (request, reply) => {
     // `url` remains accepted for installed clients. New clients send the
     // broader `query`, which may be either a URL or an artist/title search.
-    const { query, url } = z.object({
+    const { query, url, includeCandidates } = z.object({
       query: z.string().min(1).optional(),
       url: z.string().url().optional(),
+      includeCandidates: z.boolean().optional(),
     }).refine((value) => value.query || value.url).parse(request.body);
     try {
-      const result = await resolveMusic(query ?? url!);
+      const input = query ?? url!;
+      if (includeCandidates) {
+        const candidates = await resolveMusicCandidates(input);
+        return reply.send({ ...(candidates[0] ?? {}), candidates });
+      }
+      const result = await resolveMusic(input);
       return reply.send(result);
     } catch (err) {
       request.log.error(err, "music resolver failed");

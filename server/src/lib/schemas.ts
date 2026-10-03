@@ -22,6 +22,7 @@ export const bookMetadataSchema = z.object({
   isbn10: z.string().optional(),
   coverAssetId: z.string().uuid().optional(),
   coverUrl: z.string().url().optional(),
+  showCover: z.boolean().optional(),
   rating: z.number().int().min(1).max(5).optional(),
   links: z
     .object({
@@ -47,7 +48,7 @@ export const bookMetadataSchema = z.object({
       storygraph: linkUrlSchema.optional(),
     })
     .default({}),
-  source: z.enum(["open_library", "google_books", "manual"]),
+  source: z.enum(["open_library", "google_books", "apple_books", "manual"]),
 });
 
 export const articleMetadataSchema = z.object({

@@ -51,7 +51,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 | `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of eight selectable site themes (`id`/`name`/`description`) used by iOS Settings, including the redesigned Think theme. The stable `classic` id is presented as Basic. Aqua remains a valid renderable value for existing sites but is intentionally omitted from this catalog. |
 | `routes/objects.ts` | `POST/GET/PATCH/DELETE /objects`, `GET /objects/:id` | Owns slug generation (`uniqueSlug`, `slugSourceText`), asset-ownership checks and deletion (including URL-only inline Article/Thought images and cached music artwork), cache invalidation, and ActivityPub Create/Delete delivery on publish, unpublish, and deletion. It also normalizes legacy iOS article posts that arrived as `thought` with a leading Markdown H1 into real `article` rows. `GET /objects` hides `link` rows unless the client sends `X-Shareblog-Features: link-content-type`, because old iOS apps decode `ContentType` as a closed enum. |
 | `routes/assets.ts` | asset upload | Feeds `image/worker.ts` for variants + EXIF extraction. |
-| `routes/resolve.ts` | book/music/article metadata lookup | Thin wrapper over `resolvers/*.ts`; used by the iOS compose screens before publish, not stored server-side until the object is created. Books accept titles, author/title text, ISBNs, or links. Music accepts title/artist text or any source URL and translates it to an Apple catalog match; unmatched source links retain editable title/artist only. |
+| `routes/resolve.ts` | book/music/article metadata lookup | Thin wrapper over `resolvers/*.ts`; used by the iOS compose screens before publish, not stored server-side until the object is created. Books accept titles, author/title text, ISBNs, or links and return candidates with matching cover artwork. Music accepts title/artist text or any source URL; `includeCandidates: true` adds a selectable candidate list alongside the legacy scalar fields. Unmatched music links retain editable title/artist only. |
 | `routes/stats.ts` | `GET /stats` | Authenticated aggregate-only public page-view totals for today/week/month/year/all time, per-article totals, and coarse referring-source categories. Period boundaries use UTC. |
 
 **Public site (auth: `resolveTenant`, Host header)** — `routes/site-pages.ts`
@@ -84,16 +84,35 @@ called on every object/site mutation.
 
 ## Metadata resolution
 
-Book links without an ISBN are scraped for a title before searching Open
-Library. If an Apple Books page cannot be read, its readable title slug supplies the search term
-instead of the numeric Apple catalog ID. Plain text and ISBN lookups keep the
-same candidate response format.
+Apple Books links use Apple's ebook catalog lookup with the URL's storefront
+and catalog ID, retaining the exact title, author, portrait artwork, and store
+destination. Title/author searches prefer Apple ebook candidates; ISBN searches
+and unsuccessful Apple catalog searches fall back to Open Library. Other book
+links are scraped for a searchable title. If an Apple Books page cannot be
+read, its readable title slug supplies the search term instead of the numeric
+catalog ID. Book candidate `source` additionally accepts `apple_books`.
+
+Music's opt-in candidate lookup returns up to five ranked catalog results for
+text or matching source links, and one exact result for an Apple Music URL.
+The artist, release title, artwork, and destination remain together when a
+client selects a result. Unmatched source links retain an editable candidate
+without artwork. Requests without `includeCandidates` retain the legacy
+single-result response, and new clients can treat an older server's scalar
+response as a one-item list.
+
+Book creation and metadata updates copy resolved covers into owned local
+assets through `lib/book-cover.ts`, matching music's local artwork contract.
+The authenticated `coverUrl` is rebuilt from the owned `coverAssetId` rather
+than trusting a caller-supplied local URL. Hiding a cover retains the cached
+asset for editing; download failures omit the public image. Ownership checks
+and object deletion use the existing cover asset reference lifecycle.
 
 User-supplied page fetches validate the URL and every redirect through
 `lib/ssrf-guard.ts`. Its DNS callback validates all returned addresses and
 honors Node's single-address and `all: true` callback formats, so modern Node
 connection attempts retain the same private-network protection. Regression
-tests cover both callback formats, blocked addresses, and Apple Books fallback.
+tests cover both callback formats, blocked addresses, Apple Books artwork,
+music candidate selection, and cached book-cover ownership and lifecycle.
 
 ## Database (`db/schema.ts`, SQLite via Drizzle)
 
