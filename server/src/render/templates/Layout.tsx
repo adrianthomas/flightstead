@@ -7,6 +7,8 @@ import { cabinetScript } from "../themes/cabinet-script.js";
 import { aquaStyles } from "../themes/aqua.js";
 import { thinkStyles } from "../themes/think.js";
 import { streamStyles } from "../themes/stream.js";
+import { FrontRowShell, frontrowStyles } from "../themes/frontrow.js";
+import { frontrowHeadScript, frontrowScript } from "../themes/frontrow-script.js";
 import { copyButtonScript, CopyHandleButton } from "./CopyButton.js";
 import { absoluteSiteUrl, siteOrigin } from "../site-url.js";
 import type { ProfileLink } from "./types.js";
@@ -32,6 +34,7 @@ const THEME_CHROME_COLORS: Record<Site["theme"], { light: string; dark: string }
   ledger: { light: "#f8fafc", dark: "#0f1115" },
   cabinet: { light: "#f3f1ea", dark: "#11120f" },
   stream: { light: "#faf9f6", dark: "#171b18" },
+  frontrow: { light: "#000000", dark: "#000000" },
   aqua: { light: "#dfe3e8", dark: "#20252b" },
   think: { light: "#f0f0eb", dark: "#141517" },
 };
@@ -127,10 +130,13 @@ export function Layout({
   cardsDetail = false,
   availablePaths,
   metadata = {},
+  composed = false,
 }: {
   site: Site;
   title?: string;
   children: React.ReactNode;
+  /** Front Row only: the children already are a complete Front Row view (menu, list, or detail). */
+  composed?: boolean;
   /** The request path, used to highlight the active item in theme navigation. */
   currentPath?: string;
   /** True on a single-post detail page in an interactive theme — hides normal site chrome for the immersive detail surface. */
@@ -188,7 +194,7 @@ export function Layout({
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <meta name="color-scheme" content="light dark" />
+        <meta name="color-scheme" content={theme === "frontrow" ? "dark" : "light dark"} />
         <meta name="theme-color" content={chromeColors.light} media="(prefers-color-scheme: light)" />
         <meta name="theme-color" content={chromeColors.dark} media="(prefers-color-scheme: dark)" />
         <title>{pageTitle}</title>
@@ -699,6 +705,8 @@ export function Layout({
         {theme === "aqua" ? <style dangerouslySetInnerHTML={{ __html: aquaStyles }} /> : null}
         {theme === "think" ? <style dangerouslySetInnerHTML={{ __html: thinkStyles }} /> : null}
         {theme === "stream" ? <style dangerouslySetInnerHTML={{ __html: streamStyles }} /> : null}
+        {theme === "frontrow" ? <style dangerouslySetInnerHTML={{ __html: frontrowStyles }} /> : null}
+        {theme === "frontrow" ? <script dangerouslySetInnerHTML={{ __html: frontrowHeadScript }} /> : null}
         {theme === "washi" ? (
           // Washi keeps the classic templates but gives list pages their own
           // feed wrapper in render.ts, so it can be more composed than classic
@@ -2286,6 +2294,8 @@ export function Layout({
                       ? "theme-aqua"
                       : theme === "think"
                         ? "theme-think"
+                        : theme === "frontrow"
+                          ? "theme-frontrow"
                       : undefined
         }
         data-theme={theme}
@@ -2293,6 +2303,12 @@ export function Layout({
         data-cabinet-detail={usesCabinetInteraction && cardsDetail ? "true" : undefined}
         data-page={currentPath}
       >
+        {theme === "frontrow" ? (
+          <FrontRowShell site={site} title={title} currentPath={currentPath} composed={composed}>
+            {children}
+          </FrontRowShell>
+        ) : (
+        <>
         <a className="skip-link" href="#main-content">
           {t(site.locale, "skipToContent")}
         </a>
@@ -2365,6 +2381,9 @@ export function Layout({
             </div>
           </footer>
         ) : null}
+        </>
+        )}
+        {theme === "frontrow" ? <script dangerouslySetInnerHTML={{ __html: frontrowScript }} /> : null}
         {usesCardsInteraction ? <script dangerouslySetInnerHTML={{ __html: cardsScript }} /> : null}
         {usesCabinetInteraction ? <script dangerouslySetInnerHTML={{ __html: cabinetScript }} /> : null}
         <script dangerouslySetInnerHTML={{ __html: amazonRegionScript }} />

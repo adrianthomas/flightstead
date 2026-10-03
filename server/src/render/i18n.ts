@@ -47,7 +47,17 @@ export type MessageKey =
   | "exifAperture"
   | "exifShutterSpeed"
   | "exifIso"
-  | "exifFocalLength";
+  | "exifFocalLength"
+  | "menu"
+  | "all"
+  | "moreItems"
+  | "newerItems"
+  | "previousPost"
+  | "nextPost"
+  | "positionOf"
+  | "visitSite"
+  | "sections"
+  | "sectionsHint";
 
 type Messages = Record<MessageKey, string>;
 
@@ -102,6 +112,16 @@ const MESSAGES: Record<string, Messages> = {
     exifShutterSpeed: "Shutter speed",
     exifIso: "ISO",
     exifFocalLength: "Focal length",
+    menu: "Menu",
+    all: "All",
+    moreItems: "More…",
+    newerItems: "Newer",
+    previousPost: "Previous post",
+    nextPost: "Next post",
+    positionOf: "{position} of {total}",
+    visitSite: "Visit {site}",
+    sections: "Sections",
+    sectionsHint: "Use the arrow keys to browse",
   },
   de: {
     home: "Start",
@@ -153,6 +173,16 @@ const MESSAGES: Record<string, Messages> = {
     exifShutterSpeed: "Belichtungszeit",
     exifIso: "ISO",
     exifFocalLength: "Brennweite",
+    menu: "Menü",
+    all: "Alle",
+    moreItems: "Mehr …",
+    newerItems: "Neuer",
+    previousPost: "Vorheriger Beitrag",
+    nextPost: "Nächster Beitrag",
+    positionOf: "{position} von {total}",
+    visitSite: "{site} besuchen",
+    sections: "Bereiche",
+    sectionsHint: "Mit den Pfeiltasten blättern",
   },
   fr: {
     home: "Accueil",
@@ -204,6 +234,16 @@ const MESSAGES: Record<string, Messages> = {
     exifShutterSpeed: "Vitesse d'obturation",
     exifIso: "ISO",
     exifFocalLength: "Focale",
+    menu: "Menu",
+    all: "Tout",
+    moreItems: "Plus…",
+    newerItems: "Plus récents",
+    previousPost: "Publication précédente",
+    nextPost: "Publication suivante",
+    positionOf: "{position} sur {total}",
+    visitSite: "Visiter {site}",
+    sections: "Rubriques",
+    sectionsHint: "Naviguez avec les flèches",
   },
   es: {
     home: "Inicio",
@@ -255,6 +295,16 @@ const MESSAGES: Record<string, Messages> = {
     exifShutterSpeed: "Velocidad de obturación",
     exifIso: "ISO",
     exifFocalLength: "Distancia focal",
+    menu: "Menú",
+    all: "Todo",
+    moreItems: "Más…",
+    newerItems: "Más recientes",
+    previousPost: "Entrada anterior",
+    nextPost: "Entrada siguiente",
+    positionOf: "{position} de {total}",
+    visitSite: "Visitar {site}",
+    sections: "Secciones",
+    sectionsHint: "Usa las flechas para navegar",
   },
   ja: {
     home: "ホーム",
@@ -306,6 +356,16 @@ const MESSAGES: Record<string, Messages> = {
     exifShutterSpeed: "シャッタースピード",
     exifIso: "ISO",
     exifFocalLength: "焦点距離",
+    menu: "メニュー",
+    all: "すべて",
+    moreItems: "もっと見る…",
+    newerItems: "新しい投稿",
+    previousPost: "前の投稿",
+    nextPost: "次の投稿",
+    positionOf: "{position} / {total}",
+    visitSite: "{site}を開く",
+    sections: "セクション",
+    sectionsHint: "矢印キーで移動できます",
   },
 };
 

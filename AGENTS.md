@@ -147,8 +147,8 @@ surfaces. It defines the design principles, interaction requirements, and
 visual review process for every theme. Preserve each theme's character while
 meeting the shared usability baseline.
 
-All eight selectable themes (`classic`, `cards`, `washi`, `prism`, `ledger`,
-`cabinet`, `stream`, `think`) share the accessibility baseline described in
+All nine selectable themes (`classic`, `cards`, `washi`, `prism`, `ledger`,
+`cabinet`, `stream`, `frontrow`, `think`) share the accessibility baseline described in
 `server/ARCHITECTURE.md`. A rendering change is not complete until the relevant
 classic, cards-derived, and Cabinet paths have been considered. Keep hit areas,
 keyboard focus, reduced motion, semantic links, dark mode, and responsive layout

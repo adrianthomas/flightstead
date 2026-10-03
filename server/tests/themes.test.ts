@@ -20,6 +20,7 @@ test("theme catalog exposes Basic and redesigned Think while keeping Aqua hidden
         { id: "ledger", name: "Ledger" },
         { id: "cabinet", name: "Cabinet" },
         { id: "stream", name: "Stream" },
+        { id: "frontrow", name: "Front Row" },
         { id: "think", name: "Think" },
       ],
     );

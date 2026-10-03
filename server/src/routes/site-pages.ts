@@ -16,6 +16,7 @@ import {
   renderAboutProductPage,
   renderReleaseHistoryPage,
   renderArchivePage,
+  renderFrontRowMenu,
   searchForm,
   siteOrigin,
   objectPath,
@@ -29,6 +30,8 @@ import { impressumPageEnabled } from "../lib/impressum-page.js";
 import { renderFavicon } from "../render/favicon.js";
 import { recordVisit } from "../analytics/visits.js";
 import { isPendingSiteHost, renderPendingPage } from "../render/pending-page.js";
+import { FR_KINDS, FR_SECTION_PATH, frontrowFromQuery, frontrowSectionLabel, type FrKind, type FrNav } from "../render/themes/frontrow.js";
+import type { ContentObject } from "../render/templates/types.js";
 
 declare module "fastify" {
   interface FastifyRequest {
@@ -142,6 +145,37 @@ const DETAIL_TYPES: Array<{ prefix: string; type: ContentType }> = [
   { prefix: "/quotes", type: "quote" },
 ];
 
+// Front Row pages a post through the list the visitor opened it from (?from=),
+// defaulting to the post's own section. Only ids, types, and slugs are read;
+// the rendered page is cached like every other detail page.
+async function frontrowNav(site: typeof sites.$inferSelect, object: ContentObject, from: unknown): Promise<FrNav> {
+  const requested = typeof from === "string" && (FR_KINDS as string[]).includes(from) ? (from as FrKind) : undefined;
+  const lookup = async (kind: FrKind) => {
+    const conditions = [eq(contentObjects.siteId, site.id), eq(contentObjects.status, "published")];
+    if (kind !== "all") conditions.push(eq(contentObjects.type, kind));
+    const rows = await db
+      .select({ id: contentObjects.id, type: contentObjects.type, slug: contentObjects.slug })
+      .from(contentObjects)
+      .where(and(...conditions))
+      .orderBy(desc(contentObjects.publishedAt));
+    return { kind, rows, index: rows.findIndex((row) => row.id === object.id) };
+  };
+  let found = await lookup(requested ?? object.type);
+  if (found.index < 0) found = await lookup(object.type);
+  const { kind, rows, index } = found;
+  const href = (row: (typeof rows)[number]) => `/${PATH_PREFIX[row.type]}/${row.slug}${frontrowFromQuery(kind, row.type)}`;
+  const page = Math.floor(Math.max(index, 0) / PAGE_SIZE) + 1;
+  return {
+    kind,
+    label: frontrowSectionLabel(site.locale, kind),
+    listHref: `${FR_SECTION_PATH[kind]}${page > 1 ? `?page=${page}` : ""}#r-${object.slug}`,
+    position: Math.max(index, 0) + 1,
+    total: Math.max(rows.length, 1),
+    prevHref: index > 0 ? href(rows[index - 1]) : undefined,
+    nextHref: index >= 0 && index < rows.length - 1 ? href(rows[index + 1]) : undefined,
+  };
+}
+
 export async function sitePageRoutes(app: FastifyInstance) {
   // Count successful public HTML responses after they have been sent. The
   // counter stores only daily aggregates, never a request or visitor record.
@@ -193,13 +227,28 @@ export async function sitePageRoutes(app: FastifyInstance) {
         publishedCount(site.id),
         publishedNavPaths(site.id),
       ]);
-      return renderList(site, site.title, objects, "/", availablePaths, {
+      return renderList(site, site.theme === "frontrow" ? t(site.locale, "all") : site.title, objects, "/", availablePaths, {
         page,
         totalPages: Math.max(1, Math.ceil(total / PAGE_SIZE)),
         metadata: { path: page > 1 ? `/?page=${page}` : "/", description: site.tagline ?? site.introduction ?? undefined, type: "profile" },
       });
     });
   });
+
+  // Front Row opens on the All list at "/"; its section menu lives here.
+  app.get("/menu", { preHandler: resolveTenant }, async (request, reply) => {
+    const site = request.site!;
+    if (site.theme !== "frontrow") return reply.redirect("/", 302);
+    return sendCachedHtml(request, reply, site.id, async () =>
+      renderFrontRowMenu(site, await publishedNavPaths(site.id), {
+        path: "/menu",
+        description: site.tagline ?? site.introduction ?? undefined,
+        type: "profile",
+      }));
+  });
+
+  // Earlier Front Row builds listed everything at /all.
+  app.get("/all", async (request, reply) => reply.redirect("/", 301));
 
   app.get("/robots.txt", { preHandler: resolveTenant }, async (request, reply) => {
     const site = request.site!;
@@ -221,6 +270,7 @@ export async function sitePageRoutes(app: FastifyInstance) {
     const [objects, paths] = await Promise.all([publishedObjects(site.id), publishedNavPaths(site.id)]);
     const staticPaths = [
       "/",
+      ...(site.theme === "frontrow" ? ["/menu"] : []),
       "/archive",
       ...(workPageEnabled() ? ["/my-work", "/contact"] : []),
       ...(impressumPageEnabled(site.legalPage) ? ["/impressum"] : []),
@@ -420,7 +470,8 @@ export async function sitePageRoutes(app: FastifyInstance) {
       }
       if (detail.type === "article") request.analyticsContentObjectId = object.id;
       const availablePaths = await publishedNavPaths(site.id);
-      const html = await renderObjectPage(site, object, `${detail.prefix}/${slug}`, availablePaths);
+      const nav = site.theme === "frontrow" ? await frontrowNav(site, object, (request.query as Record<string, unknown>).from) : undefined;
+      const html = await renderObjectPage(site, object, `${detail.prefix}/${slug}`, availablePaths, nav);
       setCachedPage(site.id, request.raw.url ?? request.url, html, "text/html; charset=utf-8");
       return sendHtml(reply, html);
     });

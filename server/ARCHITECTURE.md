@@ -48,7 +48,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 |---|---|---|
 | `routes/auth.ts` | `POST /auth/request-code`, `POST /auth/verify-code`, `POST /auth/claim-owner`, `GET /auth/magic/:token`, `POST /auth/logout`, `DELETE /account`, `GET /me` | Magic-code email auth (mobile gets a bearer token, web gets a session cookie), plus `claim-owner` — redeems a short-lived pairing code minted by an interactive `npm run bootstrap-owner` run (`db/bootstrap-owner.ts` + `auth/owner-claim.ts`), the QR/manual-code alternative to email for first sign-in (see the `ownerClaims` table below). A dedicated test server may opt into a durable, reusable App Review credential with all four `APP_REVIEW_*` environment values; only its SHA-256 hash is stored, it provisions an isolated non-federating review site, and `DISABLE_EMAIL_AUTH=true` can close the unused email path. Logout and `app-review:revoke-sessions` revoke every token for the account. Account deletion removes the user, owned site, content, media, statistics, tokens, and federation records, but deliberately does not uninstall the self-hosted server or touch operator-managed DNS, backups, or hosting. |
 | `routes/sites.ts` | site CRUD (create; update identity/domain/theme/about/federation) | One site per user today (`sites.ownerUserId` is `.unique()`). New identity fields are additive for older clients. |
-| `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of eight selectable site themes (`id`/`name`/`description`) used by iOS Settings, including the redesigned Think theme. The stable `classic` id is presented as Basic. Aqua remains a valid renderable value for existing sites but is intentionally omitted from this catalog. |
+| `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of nine selectable site themes (`id`/`name`/`description`) used by iOS Settings, including the redesigned Think theme. The stable `classic` id is presented as Basic. Aqua remains a valid renderable value for existing sites but is intentionally omitted from this catalog. |
 | `routes/objects.ts` | `POST/GET/PATCH/DELETE /objects`, `GET /objects/:id` | Owns slug generation (`uniqueSlug`, `slugSourceText`), asset-ownership checks and deletion (including URL-only inline Article/Thought images and cached music artwork), cache invalidation, and ActivityPub Create/Delete delivery on publish, unpublish, and deletion. It also normalizes legacy iOS article posts that arrived as `thought` with a leading Markdown H1 into real `article` rows. `GET /objects` hides `link` rows unless the client sends `X-Shareblog-Features: link-content-type`, because old iOS apps decode `ContentType` as a closed enum. |
 | `routes/assets.ts` | asset upload | Feeds `image/worker.ts` for variants + EXIF extraction. |
 | `routes/resolve.ts` | book/music/article metadata lookup | Thin wrapper over `resolvers/*.ts`; used by the iOS compose screens before publish, not stored server-side until the object is created. Books accept titles, author/title text, ISBNs, or links and return candidates with matching cover artwork. Music accepts title/artist text or any source URL; `includeCandidates: true` adds a selectable candidate list alongside the legacy scalar fields. Unmatched music links retain editable title/artist only. |
@@ -202,6 +202,27 @@ WebKit checks the mixed feed at 320, 390,
 Aqua (currently hidden from the selectable catalog) keeps the Basic semantic templates and adds a responsive two-column feed,
 pinstriped desktop chrome, translucent blue controls, and polished content
 panels with no additional script or third-party runtime assets.
+Front Row (`frontrow`) is a dark-only "media centre" stage and the one theme
+with its own information architecture: `/` opens the All list, `/menu` is the
+glossy section menu (hero tile, one row per section that has posts), every
+section is its usual `/articles`-style list, and `/all` permanently redirects
+to `/` (other themes redirect `/menu` to `/`). `themes/frontrow.tsx` renders
+the menu, lists, three detail layouts (media, photo, quote), shell, and footer;
+`frontrow-styles.ts` and `frontrow-script.ts` hold the scoped CSS (the
+handoff's design tokens) and the optional enhancement. `Layout.tsx` swaps its
+whole header/footer for `FrontRowShell` when `theme === "frontrow"`, and
+`render.ts` passes `composed` for views that already supply their own page.
+List rows are real links carrying `?from=<section>`; detail pages read it to
+build the pager ("3 of 20", prev/next) and a back pill that returns to the right
+list page with `#r-<slug>`, defaulting to the post's own section; canonical
+URLs stay bare. Heroes keep image proportions, resting on the floor with a
+mirrored reflection; book/music images keep the usual visibility helpers. Page
+scroll is native (no inner scrollers; the hero is sticky). Script is optional:
+hover/focus moves the highlight and swaps the hero, arrows/Enter/Esc follow
+the remote model, and `@view-transition` gives slide/fade page changes (back
+direction chosen via `pagereveal`). Apple Music links keep the official badge
+and trademark line. Tests: `tests/frontrow.test.ts` and a WebKit flow in
+`cards-close-scroll.spec.ts`.
 Think is a selectable retro studio journal inspired by early personal
 computing: Helvetica display type, a narrow spectrum signature, silver category
 tabs, cobalt lead entries, and a neutral light/dark reading canvas. It keeps the

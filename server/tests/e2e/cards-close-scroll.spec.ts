@@ -1444,3 +1444,62 @@ test("Think supports keyboard navigation, browser Back, and 200% text at 320px",
     await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards", customDomain: "" }, "PATCH");
   }
 });
+
+test("Front Row opens on All, follows the remote-style keyboard model, and works without script", async ({ browser }) => {
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "frontrow" }, "PATCH");
+  try {
+    const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+    const page = await context.newPage();
+    await page.goto(`${siteBaseURL}/`);
+    await expect(page.locator("h1")).toHaveText("All");
+    await expect(page.locator(".fr-row[data-hl='true']")).toHaveCount(1);
+
+    // Esc/Back-pill → menu; ↓×N then Enter opens a section.
+    await page.getByRole("link", { name: /Back to Menu/ }).click();
+    await expect(page).toHaveURL(/\/menu$/);
+    await expect(page.locator("h1")).toContainText("E2E Cards Site");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(page).toHaveURL(/\/articles$|\/posts$|\/links$/);
+
+    // On a list: ↓ moves the highlight, → opens the post carrying list context.
+    await page.goto(`${siteBaseURL}/posts`);
+    const rows = page.locator(".fr-row--post");
+    expect(await rows.count()).toBeGreaterThan(2);
+    await page.keyboard.press("ArrowDown");
+    await expect(rows.nth(1)).toHaveAttribute("data-hl", "true");
+    await page.keyboard.press("ArrowRight");
+    await expect(page).toHaveURL(/\/posts\/[^/?]+$/);
+    await expect(page.locator(".fr-pager-count")).toContainText("2 of");
+
+    // → is the next post, Esc returns to the list with that post highlighted.
+    await page.keyboard.press("ArrowRight");
+    await expect(page.locator(".fr-pager-count")).toContainText("3 of");
+    const slug = new URL(page.url()).pathname.split("/").pop()!;
+    await page.keyboard.press("Escape");
+    await expect(page).toHaveURL(new RegExp(`/posts#r-${slug}$`));
+    await expect(page.locator(`#r-${slug}`)).toHaveAttribute("data-hl", "true");
+
+    // No horizontal scroll at 320px.
+    await page.setViewportSize({ width: 320, height: 700 });
+    for (const path of ["/", "/menu", "/music", "/photos"]) {
+      await page.goto(`${siteBaseURL}${path}`);
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+    }
+    await context.close();
+
+    // Without JavaScript every view is still reachable by links.
+    const plain = await browser.newContext({ javaScriptEnabled: false });
+    const bare = await plain.newPage();
+    await bare.goto(`${siteBaseURL}/menu`);
+    await bare.getByRole("link", { name: "Music" }).first().click();
+    // Cross-document view transitions briefly overlay the page; let one finish first.
+    await bare.waitForTimeout(1500);
+    await bare.locator(".fr-row--post").first().click();
+    await expect(bare.locator("h1")).toBeVisible();
+    await plain.close();
+  } finally {
+    await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
+  }
+});

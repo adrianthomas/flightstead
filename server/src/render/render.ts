@@ -1,6 +1,6 @@
 import React from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { assets, type AssetExif } from "../db/schema.js";
 import { storage } from "../storage/index.js";
@@ -37,12 +37,24 @@ import { bookRetailerLinksFor } from "../lib/book-links.js";
 import { musicLinksFor } from "../lib/music-links.js";
 import { StreamItem } from "./themes/stream.js";
 import { BackLink } from "./templates/BackLink.js";
+import {
+  FR_SECTION_PATH,
+  FrontRowDetail,
+  FrontRowList,
+  FrontRowMenu,
+  frontrowSectionLabel,
+  frontrowSections,
+  type FrItem,
+  type FrKind,
+  type FrNav,
+  type FrThumb,
+} from "./themes/frontrow.js";
 
 function wrap(
   site: Site,
   title: string | undefined,
   node: React.ReactNode,
-  opts: { currentPath?: string; cardsDetail?: boolean; availablePaths?: string[]; metadata?: PageMetadata } = {},
+  opts: { currentPath?: string; cardsDetail?: boolean; availablePaths?: string[]; metadata?: PageMetadata; composed?: boolean } = {},
 ): string {
   return (
     "<!doctype html>" +
@@ -55,6 +67,7 @@ function wrap(
         cardsDetail: opts.cardsDetail,
         availablePaths: opts.availablePaths,
         metadata: opts.metadata,
+        composed: opts.composed,
       }),
     )
   );
@@ -105,6 +118,83 @@ export const PATH_PREFIX: Record<ContentObject["type"], string> = {
   link: "links",
   quote: "quotes",
 };
+
+// Front Row lists and heroes need one image per post. Assets are fetched in a
+// single query; books, music, and link previews keep using their stored URLs
+// through the same visibility helpers as every other theme.
+function assetThumb(asset: typeof assets.$inferSelect, alt?: string): FrThumb {
+  const variants = (asset.variants ?? {}) as Record<string, string>;
+  const medium = variants.medium ?? variants.original;
+  const src = storage.getUrl(medium ?? asset.storageKey);
+  const thumb = variants.thumb ? storage.getUrl(variants.thumb) : undefined;
+  return { src, srcset: thumb && medium ? `${thumb} 400w, ${src} 1200w` : undefined, alt };
+}
+
+async function frontrowItems(objects: ContentObject[]): Promise<FrItem[]> {
+  const assetIds = new Set<string>();
+  for (const object of objects) {
+    if (object.type === "photo") assetIds.add((object.metadata as PhotoMetadata).assetId);
+    else if (object.type === "article") {
+      const id = (object.metadata as ArticleMetadata).coverAssetId;
+      if (id) assetIds.add(id);
+    } else if (object.type === "link") {
+      const id = (object.metadata as LinkMetadata).previewAssetId;
+      if (id) assetIds.add(id);
+    }
+  }
+  const rows = assetIds.size ? await db.select().from(assets).where(inArray(assets.id, [...assetIds])) : [];
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  return objects.map((object) => {
+    let thumb: FrThumb | undefined;
+    switch (object.type) {
+      case "photo": {
+        const metadata = object.metadata as PhotoMetadata;
+        const asset = byId.get(metadata.assetId);
+        if (asset) thumb = assetThumb(asset, metadata.altText);
+        break;
+      }
+      case "article": {
+        const metadata = object.metadata as ArticleMetadata;
+        const asset = metadata.coverAssetId ? byId.get(metadata.coverAssetId) : undefined;
+        if (asset) thumb = assetThumb(asset, metadata.coverAltText);
+        break;
+      }
+      case "link": {
+        const metadata = object.metadata as LinkMetadata;
+        const asset = metadata.previewAssetId ? byId.get(metadata.previewAssetId) : undefined;
+        const external = publicLinkPreviewImageUrl(metadata);
+        if (asset && metadata.showPreview !== false) thumb = assetThumb(asset);
+        else if (external) thumb = { src: external };
+        break;
+      }
+      case "book": {
+        const src = publicBookCoverUrl(object.metadata as BookMetadata);
+        if (src) thumb = { src };
+        break;
+      }
+      case "music": {
+        const src = publicMusicArtworkUrl(object.metadata as MusicMetadata);
+        if (src) thumb = { src };
+        break;
+      }
+    }
+    return { object, href: `/${PATH_PREFIX[object.type]}/${object.slug}`, thumb };
+  });
+}
+
+function frontrowKindForPath(path: string): FrKind | undefined {
+  return (Object.entries(FR_SECTION_PATH) as Array<[FrKind, string]>).find(([, sectionPath]) => sectionPath === path)?.[0];
+}
+
+export function renderFrontRowMenu(site: Site, availablePaths: string[] | undefined, metadata?: PageMetadata): string {
+  const sections = frontrowSections(site, availablePaths);
+  return wrap(site, undefined, React.createElement(FrontRowMenu, { site, sections }), {
+    currentPath: "/menu",
+    availablePaths,
+    metadata,
+    composed: true,
+  });
+}
 
 async function renderStreamItem(object: ContentObject, locale: string, detail = false, eager = false): Promise<React.ReactNode> {
   const assetId = object.type === "photo"
@@ -227,6 +317,27 @@ export async function renderList(
     metadata?: PageMetadata;
   } = {},
 ): Promise<string> {
+  if (site.theme === "frontrow") {
+    const kind = frontrowKindForPath(currentPath);
+    const href = (target: number) => {
+      const params = new URLSearchParams(options.query);
+      if (target > 1) params.set("page", String(target));
+      const suffix = params.toString();
+      return suffix ? `${currentPath}?${suffix}` : currentPath;
+    };
+    const page = options.page ?? 1;
+    const totalPages = options.totalPages ?? 1;
+    const node = React.createElement(FrontRowList, {
+      site,
+      title,
+      kind,
+      items: await frontrowItems(objects),
+      emptyKind: kind ?? "all",
+      pageHrefs: { prev: page > 1 ? href(page - 1) : undefined, next: page < totalPages ? href(page + 1) : undefined },
+      prefix: options.prefix,
+    });
+    return wrap(site, title, node, { currentPath, availablePaths, metadata: options.metadata, composed: true });
+  }
   const cards = await Promise.all(objects.map((object, index) => site.theme === "stream"
     ? renderStreamItem(object, site.locale, false, index === 0)
     : renderCard(object, site.locale, site.theme, site.theme === "think" && index === 0)));
@@ -309,13 +420,42 @@ function paginationNode(
   );
 }
 
+async function renderFrontRowDetail(site: Site, object: ContentObject, nav?: FrNav): Promise<React.ReactNode> {
+  const [item] = await frontrowItems([object]);
+  const context: FrNav = nav ?? {
+    kind: object.type,
+    label: frontrowSectionLabel(site.locale, object.type),
+    listHref: FR_SECTION_PATH[object.type],
+    position: 1,
+    total: 1,
+  };
+  let exif: AssetExif | undefined;
+  let imageWidth: number | undefined;
+  let imageHeight: number | undefined;
+  let originalSrc: string | undefined;
+  if (object.type === "photo") {
+    const [asset] = await db.select().from(assets).where(eq(assets.id, (object.metadata as PhotoMetadata).assetId)).limit(1);
+    if (asset) {
+      exif = (asset.exif as AssetExif | null) ?? undefined;
+      imageWidth = asset.width ?? undefined;
+      imageHeight = asset.height ?? undefined;
+      const variants = (asset.variants ?? {}) as Record<string, string>;
+      originalSrc = variants.original ? storage.getUrl(variants.original) : undefined;
+    }
+  }
+  return React.createElement(FrontRowDetail, { site, item, nav: context, exif, imageWidth, imageHeight, originalSrc });
+}
+
 export async function renderObjectPage(
   site: Site,
   object: ContentObject,
   currentPath?: string,
   availablePaths?: string[],
+  frontrowNav?: FrNav,
 ): Promise<string> {
-  const detail = await renderDetail(object, site.locale, site.theme);
+  const detail = site.theme === "frontrow"
+    ? await renderFrontRowDetail(site, object, frontrowNav)
+    : await renderDetail(object, site.locale, site.theme);
   const detailTitle = object.title ?? (feedContentSummary(object) || undefined);
   const metadataRecord = object.metadata as Record<string, unknown>;
   const description =
@@ -345,6 +485,7 @@ export async function renderObjectPage(
     cardsDetail:
       site.theme === "cards" || site.theme === "prism" || site.theme === "ledger" || site.theme === "cabinet",
     availablePaths,
+    composed: site.theme === "frontrow",
     metadata: {
       path: `/${PATH_PREFIX[object.type]}/${object.slug}`,
       description,
