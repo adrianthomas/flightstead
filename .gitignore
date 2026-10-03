@@ -24,3 +24,7 @@ server/data/*.db*
 
 # The private companion iOS app lives in the separate shareblog-ios checkout.
 /ios/
+
+# Local agent review captures and generated documents.
+.codex-build/
+output/
