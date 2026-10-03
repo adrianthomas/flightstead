@@ -12,13 +12,13 @@ import { CopyHandleButton, CopyLinkButton } from "../templates/CopyButton.js";
 import { musicLinkLabel } from "../templates/MusicCard.js";
 import { formatExif } from "../templates/PhotoPost.js";
 import type { ArticleMetadata, BookMetadata, ContentObject, LinkMetadata, MusicMetadata, PhotoMetadata, QuoteMetadata, Site } from "../templates/types.js";
-import { frontrowStyles } from "./frontrow-styles.js";
+import { marqueeStyles } from "./marquee-styles.js";
 
-export { frontrowStyles };
+export { marqueeStyles };
 
-// Front Row: a dark "stage" with one glossy tile or cover and a remote-control
+// Marquee: a dark "stage" with one glossy tile or cover and a remote-control
 // menu. The server renders every view as ordinary links; the optional script in
-// frontrow-script.ts only moves the highlight, swaps the hero, and maps keys.
+// marquee-script.ts only moves the highlight, swaps the hero, and maps keys.
 
 export type FrKind = "all" | ContentObject["type"];
 
@@ -99,18 +99,18 @@ const ICONS: Record<FrKind, string> = {
   quote: '<path d="M14 40c0-10 4-16 12-20"/><path d="M14 40a6 6 0 1 0 6-6"/><path d="M36 40c0-10 4-16 12-20"/><path d="M36 40a6 6 0 1 0 6-6"/>',
 };
 
-export function frontrowSections(site: Site, availablePaths?: string[]): FrSection[] {
+export function marqueeSections(site: Site, availablePaths?: string[]): FrSection[] {
   return SECTION_ORDER
     .filter((kind) => kind === "all" || !availablePaths || availablePaths.includes(FR_SECTION_PATH[kind]))
     .map((kind) => ({ kind, href: FR_SECTION_PATH[kind], label: t(site.locale, SECTION_LABEL[kind]) }));
 }
 
-export function frontrowSectionLabel(locale: string, kind: FrKind): string {
+export function marqueeSectionLabel(locale: string, kind: FrKind): string {
   return t(locale, SECTION_LABEL[kind]);
 }
 
 /** `?from=` keeps a post's pager on the list the visitor opened it from. */
-export function frontrowFromQuery(kind: FrKind | undefined, type: ContentObject["type"]): string {
+export function marqueeFromQuery(kind: FrKind | undefined, type: ContentObject["type"]): string {
   return kind && kind !== type ? `?from=${kind}` : "";
 }
 
@@ -141,7 +141,7 @@ function authorName(site: Site): string {
   return site.profileName?.trim() || site.title;
 }
 
-export function frontrowTitle(object: ContentObject, locale: string): string {
+export function marqueeTitle(object: ContentObject, locale: string): string {
   switch (object.type) {
     case "article":
       return object.title || clip(stripBasicFormatting(object.body ?? ""), 90) || t(locale, "typeArticle");
@@ -162,7 +162,7 @@ export function frontrowTitle(object: ContentObject, locale: string): string {
   }
 }
 
-function frontrowByline(object: ContentObject, site: Site): string {
+function marqueeByline(object: ContentObject, site: Site): string {
   switch (object.type) {
     case "link":
       return (object.metadata as LinkMetadata).siteName || hostOf(object.sourceUrl) || "";
@@ -306,7 +306,7 @@ function Pager({ nav, locale, className }: { nav: FrNav; locale: string; classNa
 // Shell, menu, list
 // ---------------------------------------------------------------------------
 
-export function FrontRowShell({
+export function MarqueeShell({
   site,
   title,
   currentPath,
@@ -316,7 +316,7 @@ export function FrontRowShell({
   site: Site;
   title?: string;
   currentPath: string;
-  /** True when the children already provide their own Front Row view. */
+  /** True when the children already provide their own Marquee view. */
   composed: boolean;
   children: React.ReactNode;
 }) {
@@ -361,7 +361,7 @@ export function FrontRowShell({
   );
 }
 
-export function FrontRowMenu({ site, sections }: { site: Site; sections: FrSection[] }) {
+export function MarqueeMenu({ site, sections }: { site: Site; sections: FrSection[] }) {
   const first = sections[0];
   return (
     <div className="fr-layout fr-layout--menu" data-fr-view="menu">
@@ -387,7 +387,7 @@ export function FrontRowMenu({ site, sections }: { site: Site; sections: FrSecti
   );
 }
 
-export function FrontRowList({
+export function MarqueeList({
   site,
   title,
   kind,
@@ -424,15 +424,15 @@ export function FrontRowList({
             {items.map((item, index) => {
               const { object } = item;
               const label = t(site.locale, TYPE_LABEL[object.type]);
-              const byline = frontrowByline(object, site);
+              const byline = marqueeByline(object, site);
               const date = frDate(object.publishedAt, site.locale);
-              const heading = frontrowTitle(object, site.locale);
+              const heading = marqueeTitle(object, site.locale);
               return (
                 <li key={object.id}>
                   <a
                     className="fr-row fr-row--post"
                     id={`r-${object.slug}`}
-                    href={`${item.href}${frontrowFromQuery(kind, object.type)}`}
+                    href={`${item.href}${marqueeFromQuery(kind, object.type)}`}
                     data-kind={object.type}
                     data-hl={index === 0 ? "true" : undefined}
                     data-thumb={item.thumb?.src}
@@ -559,10 +559,10 @@ function BookActions({ object }: { object: ContentObject }) {
 function MediaDetail({ site, item, nav }: { site: Site; item: FrItem; nav: FrNav }) {
   const { object } = item;
   const locale = site.locale;
-  const title = frontrowTitle(object, locale);
+  const title = marqueeTitle(object, locale);
   const date = frDate(object.publishedAt, locale);
   const typeLabel = t(locale, TYPE_LABEL[object.type]);
-  let name = frontrowByline(object, site);
+  let name = marqueeByline(object, site);
   let rating: number | undefined;
   let lead = "";
   let bodyHtml = "";
@@ -650,7 +650,7 @@ function PhotoDetail({ site, item, nav, exif, width, height, original }: { site:
   const { object } = item;
   const locale = site.locale;
   const metadata = object.metadata as PhotoMetadata;
-  const heading = frontrowTitle(object, locale);
+  const heading = marqueeTitle(object, locale);
   const rows = formatExif(exif, locale);
   const thumb = item.thumb;
   const ratio = width && height ? { aspectRatio: `${width} / ${height}` } : undefined;
@@ -721,7 +721,7 @@ function QuoteDetail({ site, item, nav }: { site: Site; item: FrItem; nav: FrNav
   );
 }
 
-export function FrontRowDetail({
+export function MarqueeDetail({
   site,
   item,
   nav,

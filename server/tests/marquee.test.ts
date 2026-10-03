@@ -1,10 +1,10 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { renderFrontRowMenu, renderList, renderObjectPage } from "../src/render/render.js";
+import { renderMarqueeMenu, renderList, renderObjectPage } from "../src/render/render.js";
 import type { ContentObject, Site } from "../src/render/templates/types.js";
 
 const site = {
-  id: "fr-site", title: "Front Row Notes", subdomain: "fr", locale: "en", theme: "frontrow",
+  id: "fr-site", title: "Marquee Notes", subdomain: "fr", locale: "en", theme: "marquee",
   tagline: "A stage for notes", federationEnabled: false,
 } as Site;
 const date = new Date("2026-09-24T10:00:00Z");
@@ -25,17 +25,17 @@ const objects = [
   post("thought", { body: "Short thought." }),
 ];
 
-test("Front Row menu is a dark, scoped stage with section links", () => {
-  const html = renderFrontRowMenu(site, ["/music", "/books"]);
+test("Marquee menu is a dark, scoped stage with section links", () => {
+  const html = renderMarqueeMenu(site, ["/music", "/books"]);
   assert.match(html, /<meta name="color-scheme" content="dark"\/>/);
-  assert.match(html, /<h1 class="fr-display">Front Row Notes<\/h1>/);
+  assert.match(html, /<h1 class="fr-display">Marquee Notes<\/h1>/);
   assert.match(html, /<link rel="canonical" href="[^"]*\/menu"\/>/);
   assert.match(html, /<a class="fr-row fr-row--menu" href="\/music"/);
   assert.doesNotMatch(html, /href="\/photos"/);
-  assert.match(html, /theme-frontrow/);
+  assert.match(html, /theme-marquee/);
 });
 
-test("Front Row lists carry list context, dates, and a More row", async () => {
+test("Marquee lists carry list context, dates, and a More row", async () => {
   const html = await renderList(site, "All", objects, "/", undefined, { page: 1, totalPages: 2 });
   assert.match(html, /<h1 class="fr-display">All<\/h1>/);
   assert.match(html, /href="\/music\/music\?from=all"/);
@@ -46,7 +46,7 @@ test("Front Row lists carry list context, dates, and a More row", async () => {
   assert.doesNotMatch(music, /from=/);
 });
 
-test("Front Row detail pages use the three layouts and the pager", async () => {
+test("Marquee detail pages use the three layouts and the pager", async () => {
   const nav = { kind: "all" as const, label: "All", listHref: "/#r-music", position: 2, total: 5, prevHref: "/books/book?from=all", nextHref: "/quotes/quote?from=all" };
   const music = await renderObjectPage(site, objects[0], "/music/music", undefined, nav);
   assert.match(music, /<h1 class="fr-detail-title">A Quiet Record<\/h1>/);
@@ -66,7 +66,7 @@ test("Front Row detail pages use the three layouts and the pager", async () => {
   assert.doesNotMatch(article, /class="fr-pager/);
 });
 
-test("Front Row honors hidden artwork and unsafe links", async () => {
+test("Marquee honors hidden artwork and unsafe links", async () => {
   const hidden = [
     post("book", { title: "Hidden", metadata: { author: "W", coverUrl: "https://example.com/private-cover.jpg", showCover: false } }),
     post("music", { metadata: { artist: "M", releaseTitle: "H", artworkUrl: "https://example.com/private-art.jpg", showArtwork: false } }),
@@ -78,7 +78,7 @@ test("Front Row honors hidden artwork and unsafe links", async () => {
   }
 });
 
-test("Front Row localizes empty lists", async () => {
+test("Marquee localizes empty lists", async () => {
   const html = await renderList({ ...site, locale: "de" }, "Alle", [], "/");
   assert.match(html, /Hier gibt es noch nichts\./);
   assert.match(html, /href="\/menu"[^>]*>.*Menü/);

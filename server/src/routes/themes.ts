@@ -44,8 +44,8 @@ const themeOptions = [
     description: "A finely typeset reading stream with complete posts, quiet details, and naturally proportioned images.",
   },
   {
-    id: "frontrow",
-    name: "Front Row",
+    id: "marquee",
+    name: "Marquee",
     description: "A dark stage with a glossy menu: pick a section with the arrow keys, browse covers and photos, and read one post at a time.",
   },
   {
@@ -67,7 +67,7 @@ if (missingThemeMetadata.length > 0) {
 
 // Aqua remains a valid persisted value for existing sites, but is held
 // back from new selection. The redesigned Think theme is selectable.
-const selectableThemeIds = new Set<Theme>(["classic", "cards", "washi", "prism", "ledger", "cabinet", "stream", "frontrow", "think"]);
+const selectableThemeIds = new Set<Theme>(["classic", "cards", "washi", "prism", "ledger", "cabinet", "stream", "marquee", "think"]);
 const selectableThemeOptions = themeOptions.filter((option) => selectableThemeIds.has(option.id));
 
 export async function themeRoutes(app: FastifyInstance) {

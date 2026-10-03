@@ -29,10 +29,10 @@ live.
   user agents, session identifiers, full referrer URLs, or individual request
   logs for analytics.
 - **Nine selectable themes.** Choose from Basic, Cards, Washi, Prism, Ledger,
-  Cabinet, Stream, Front Row, and Think, with light/dark and responsive layouts. Stream
+  Cabinet, Stream, Marquee, and Think, with light/dark and responsive layouts. Stream
   displays complete posts in a finely typeset chronological reading flow;
   Think pairs retro studio typography with silver navigation and cobalt lead stories;
-  Front Row is a dark, remote-style stage with a glossy menu, covers, and reflections.
+  Marquee is a dark, remote-style stage with a glossy menu, covers, and reflections.
 - **Useful publishing features out of the box.** Search, archives, RSS,
   sitemaps, social metadata, custom domains, and optional Fediverse publishing
   are included.

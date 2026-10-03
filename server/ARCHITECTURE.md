@@ -202,15 +202,15 @@ WebKit checks the mixed feed at 320, 390,
 Aqua (currently hidden from the selectable catalog) keeps the Basic semantic templates and adds a responsive two-column feed,
 pinstriped desktop chrome, translucent blue controls, and polished content
 panels with no additional script or third-party runtime assets.
-Front Row (`frontrow`) is a dark-only "media centre" stage and the one theme
+Marquee (`marquee`) is a dark-only "media centre" stage and the one theme
 with its own information architecture: `/` opens the All list, `/menu` is the
 glossy section menu (hero tile, one row per section that has posts), every
 section is its usual `/articles`-style list, and `/all` permanently redirects
-to `/` (other themes redirect `/menu` to `/`). `themes/frontrow.tsx` renders
+to `/` (other themes redirect `/menu` to `/`). `themes/marquee.tsx` renders
 the menu, lists, three detail layouts (media, photo, quote), shell, and footer;
-`frontrow-styles.ts` and `frontrow-script.ts` hold the scoped CSS (the
+`marquee-styles.ts` and `marquee-script.ts` hold the scoped CSS (the
 handoff's design tokens) and the optional enhancement. `Layout.tsx` swaps its
-whole header/footer for `FrontRowShell` when `theme === "frontrow"`, and
+whole header/footer for `MarqueeShell` when `theme === "marquee"`, and
 `render.ts` passes `composed` for views that already supply their own page.
 List rows are real links carrying `?from=<section>`; detail pages read it to
 build the pager ("3 of 20", prev/next) and a back pill that returns to the right
@@ -221,7 +221,7 @@ scroll is native (no inner scrollers; the hero is sticky). Script is optional:
 hover/focus moves the highlight and swaps the hero, arrows/Enter/Esc follow
 the remote model, and `@view-transition` gives slide/fade page changes (back
 direction chosen via `pagereveal`). Apple Music links keep the official badge
-and trademark line. Tests: `tests/frontrow.test.ts` and a WebKit flow in
+and trademark line. Tests: `tests/marquee.test.ts` and a WebKit flow in
 `cards-close-scroll.spec.ts`.
 Think is a selectable retro studio journal inspired by early personal
 computing: Helvetica display type, a narrow spectrum signature, silver category

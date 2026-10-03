@@ -1,11 +1,11 @@
-// Progressive enhancement for Front Row. Every view is already a set of real
+// Progressive enhancement for Marquee. Every view is already a set of real
 // links, so this only adds: the highlight following hover/focus, the hero
 // swapping to match it, the remote-style keyboard model, and the slide
 // direction for cross-document view transitions. Nothing here navigates by
 // script except by clicking the same links a visitor could click.
 
 /** Runs in <head>: `pagereveal` can fire before the end of <body> is parsed. */
-export const frontrowHeadScript = `
+export const marqueeHeadScript = `
 window.addEventListener('pagereveal', function (e) {
   if (!e.viewTransition) return;
   var dir = null;
@@ -18,7 +18,7 @@ window.addEventListener('pagereveal', function (e) {
 });
 `;
 
-export const frontrowScript = `
+export const marqueeScript = `
 (function () {
   var root = document.documentElement;
   function read(key) { try { return sessionStorage.getItem(key); } catch (e) { return null; } }

@@ -1,9 +1,9 @@
-// Front Row stylesheet. Tokens mirror the handoff's design/tokens.css; the
+// Marquee stylesheet. Tokens mirror the handoff's design/tokens.css; the
 // stage is dark-only by design, so the shared --fg/--bg/--muted/--border/--focus
 // contract is pinned to dark values and the base templates (About, Archive,
 // search) inherit them.
-export const frontrowStyles = `
-  html[data-theme="frontrow"] {
+export const marqueeStyles = `
+  html[data-theme="marquee"] {
     color-scheme: dark;
     --fg: #ffffff; --bg: #000000; --muted: #a8a8a8; --border: rgba(255, 255, 255, 0.22); --focus: #9cc4ff;
 
@@ -54,28 +54,28 @@ export const frontrowStyles = `
     --fr-dur-view: 380ms;
   }
   @media (prefers-reduced-motion: reduce) {
-    html[data-theme="frontrow"] { --fr-dur-highlight: 0ms; --fr-dur-hero: 0ms; --fr-dur-view: 0ms; }
+    html[data-theme="marquee"] { --fr-dur-highlight: 0ms; --fr-dur-hero: 0ms; --fr-dur-view: 0ms; }
   }
   @media (max-width: 900px) {
-    html[data-theme="frontrow"] { --fr-hero: 120px; }
+    html[data-theme="marquee"] { --fr-hero: 120px; }
   }
 
   /* ---------- Stage ---------- */
-  body.theme-frontrow {
+  body.theme-marquee {
     max-width: none; margin: 0; padding: 0; min-height: 100vh; min-height: 100svh;
     display: flex; flex-direction: column; position: relative; isolation: isolate;
     background: var(--fr-stage); color: var(--fr-text);
     font-family: var(--fr-font); font-size: 1rem; line-height: 1.4; letter-spacing: 0;
   }
-  body.theme-frontrow::before {
+  body.theme-marquee::before {
     content: ""; position: fixed; inset: 0; z-index: -1; pointer-events: none; background: var(--fr-stage-bg);
   }
-  body.theme-frontrow a { color: inherit; }
-  body.theme-frontrow a:focus-visible,
-  body.theme-frontrow button:focus-visible,
-  body.theme-frontrow input:focus-visible,
-  body.theme-frontrow summary:focus-visible { outline: 2px solid var(--fr-focus); outline-offset: 2px; }
-  body.theme-frontrow .skip-link { background: #000; color: #fff; }
+  body.theme-marquee a { color: inherit; }
+  body.theme-marquee a:focus-visible,
+  body.theme-marquee button:focus-visible,
+  body.theme-marquee input:focus-visible,
+  body.theme-marquee summary:focus-visible { outline: 2px solid var(--fr-focus); outline-offset: 2px; }
+  body.theme-marquee .skip-link { background: #000; color: #fff; }
   .fr-sr { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
   .fr-top {
@@ -215,8 +215,8 @@ export const frontrowStyles = `
   .fr-byline-name { font-size: 22px; line-height: 1.3; color: var(--fr-text-secondary); overflow-wrap: anywhere; }
   .fr-stars { font-size: 20px; letter-spacing: 3px; color: var(--fr-star); }
   .fr-date { font-size: 15px; color: var(--fr-text-muted); display: inline-flex; align-items: center; flex-wrap: wrap; gap: 0 4px; }
-  body.theme-frontrow .copy-btn { min-width: 44px; min-height: 44px; justify-content: center; margin: 0; color: var(--fr-text-muted); opacity: 1; }
-  body.theme-frontrow .copy-btn:hover, body.theme-frontrow .copy-btn:focus-visible { color: #fff; }
+  body.theme-marquee .copy-btn { min-width: 44px; min-height: 44px; justify-content: center; margin: 0; color: var(--fr-text-muted); opacity: 1; }
+  body.theme-marquee .copy-btn:hover, body.theme-marquee .copy-btn:focus-visible { color: #fff; }
   .fr-body {
     padding: 18px 22px; border-radius: 14px; background: var(--fr-panel-bg); border: 1px solid var(--fr-panel-border);
     font-size: 17px; line-height: 1.6; color: var(--fr-text-body);

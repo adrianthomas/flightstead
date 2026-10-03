@@ -39,16 +39,16 @@ import { StreamItem } from "./themes/stream.js";
 import { BackLink } from "./templates/BackLink.js";
 import {
   FR_SECTION_PATH,
-  FrontRowDetail,
-  FrontRowList,
-  FrontRowMenu,
-  frontrowSectionLabel,
-  frontrowSections,
+  MarqueeDetail,
+  MarqueeList,
+  MarqueeMenu,
+  marqueeSectionLabel,
+  marqueeSections,
   type FrItem,
   type FrKind,
   type FrNav,
   type FrThumb,
-} from "./themes/frontrow.js";
+} from "./themes/marquee.js";
 
 function wrap(
   site: Site,
@@ -119,7 +119,7 @@ export const PATH_PREFIX: Record<ContentObject["type"], string> = {
   quote: "quotes",
 };
 
-// Front Row lists and heroes need one image per post. Assets are fetched in a
+// Marquee lists and heroes need one image per post. Assets are fetched in a
 // single query; books, music, and link previews keep using their stored URLs
 // through the same visibility helpers as every other theme.
 function assetThumb(asset: typeof assets.$inferSelect, alt?: string): FrThumb {
@@ -130,7 +130,7 @@ function assetThumb(asset: typeof assets.$inferSelect, alt?: string): FrThumb {
   return { src, srcset: thumb && medium ? `${thumb} 400w, ${src} 1200w` : undefined, alt };
 }
 
-async function frontrowItems(objects: ContentObject[]): Promise<FrItem[]> {
+async function marqueeItems(objects: ContentObject[]): Promise<FrItem[]> {
   const assetIds = new Set<string>();
   for (const object of objects) {
     if (object.type === "photo") assetIds.add((object.metadata as PhotoMetadata).assetId);
@@ -182,13 +182,13 @@ async function frontrowItems(objects: ContentObject[]): Promise<FrItem[]> {
   });
 }
 
-function frontrowKindForPath(path: string): FrKind | undefined {
+function marqueeKindForPath(path: string): FrKind | undefined {
   return (Object.entries(FR_SECTION_PATH) as Array<[FrKind, string]>).find(([, sectionPath]) => sectionPath === path)?.[0];
 }
 
-export function renderFrontRowMenu(site: Site, availablePaths: string[] | undefined, metadata?: PageMetadata): string {
-  const sections = frontrowSections(site, availablePaths);
-  return wrap(site, undefined, React.createElement(FrontRowMenu, { site, sections }), {
+export function renderMarqueeMenu(site: Site, availablePaths: string[] | undefined, metadata?: PageMetadata): string {
+  const sections = marqueeSections(site, availablePaths);
+  return wrap(site, undefined, React.createElement(MarqueeMenu, { site, sections }), {
     currentPath: "/menu",
     availablePaths,
     metadata,
@@ -317,8 +317,8 @@ export async function renderList(
     metadata?: PageMetadata;
   } = {},
 ): Promise<string> {
-  if (site.theme === "frontrow") {
-    const kind = frontrowKindForPath(currentPath);
+  if (site.theme === "marquee") {
+    const kind = marqueeKindForPath(currentPath);
     const href = (target: number) => {
       const params = new URLSearchParams(options.query);
       if (target > 1) params.set("page", String(target));
@@ -327,11 +327,11 @@ export async function renderList(
     };
     const page = options.page ?? 1;
     const totalPages = options.totalPages ?? 1;
-    const node = React.createElement(FrontRowList, {
+    const node = React.createElement(MarqueeList, {
       site,
       title,
       kind,
-      items: await frontrowItems(objects),
+      items: await marqueeItems(objects),
       emptyKind: kind ?? "all",
       pageHrefs: { prev: page > 1 ? href(page - 1) : undefined, next: page < totalPages ? href(page + 1) : undefined },
       prefix: options.prefix,
@@ -420,11 +420,11 @@ function paginationNode(
   );
 }
 
-async function renderFrontRowDetail(site: Site, object: ContentObject, nav?: FrNav): Promise<React.ReactNode> {
-  const [item] = await frontrowItems([object]);
+async function renderMarqueeDetail(site: Site, object: ContentObject, nav?: FrNav): Promise<React.ReactNode> {
+  const [item] = await marqueeItems([object]);
   const context: FrNav = nav ?? {
     kind: object.type,
-    label: frontrowSectionLabel(site.locale, object.type),
+    label: marqueeSectionLabel(site.locale, object.type),
     listHref: FR_SECTION_PATH[object.type],
     position: 1,
     total: 1,
@@ -443,7 +443,7 @@ async function renderFrontRowDetail(site: Site, object: ContentObject, nav?: FrN
       originalSrc = variants.original ? storage.getUrl(variants.original) : undefined;
     }
   }
-  return React.createElement(FrontRowDetail, { site, item, nav: context, exif, imageWidth, imageHeight, originalSrc });
+  return React.createElement(MarqueeDetail, { site, item, nav: context, exif, imageWidth, imageHeight, originalSrc });
 }
 
 export async function renderObjectPage(
@@ -451,10 +451,10 @@ export async function renderObjectPage(
   object: ContentObject,
   currentPath?: string,
   availablePaths?: string[],
-  frontrowNav?: FrNav,
+  marqueeNav?: FrNav,
 ): Promise<string> {
-  const detail = site.theme === "frontrow"
-    ? await renderFrontRowDetail(site, object, frontrowNav)
+  const detail = site.theme === "marquee"
+    ? await renderMarqueeDetail(site, object, marqueeNav)
     : await renderDetail(object, site.locale, site.theme);
   const detailTitle = object.title ?? (feedContentSummary(object) || undefined);
   const metadataRecord = object.metadata as Record<string, unknown>;
@@ -485,7 +485,7 @@ export async function renderObjectPage(
     cardsDetail:
       site.theme === "cards" || site.theme === "prism" || site.theme === "ledger" || site.theme === "cabinet",
     availablePaths,
-    composed: site.theme === "frontrow",
+    composed: site.theme === "marquee",
     metadata: {
       path: `/${PATH_PREFIX[object.type]}/${object.slug}`,
       description,

@@ -1445,8 +1445,8 @@ test("Think supports keyboard navigation, browser Back, and 200% text at 320px",
   }
 });
 
-test("Front Row opens on All, follows the remote-style keyboard model, and works without script", async ({ browser }) => {
-  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "frontrow" }, "PATCH");
+test("Marquee opens on All, follows the remote-style keyboard model, and works without script", async ({ browser }) => {
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "marquee" }, "PATCH");
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await context.newPage();
