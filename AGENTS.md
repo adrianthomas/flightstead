@@ -4,6 +4,44 @@ This repository is the public, self-hosted Flightstead server and public-site
 renderer. The application lives in `server/`; repository-root files cover
 deployment, importing, and project-wide guidance.
 
+## Agent roles and delegation
+
+This guide applies equally to Codex and Claude Code. Both tools use the same
+three roles; only the runtime wiring differs:
+
+| Role | Codex | Claude Code |
+|---|---|---|
+| Lead / orchestrator | Sol (`gpt-6.1-sol`), `.codex/config.toml` | main session on Opus, `.claude/settings.json` |
+| `explorer` (read-only) | Luna (`gpt-6-luna`), `.codex/agents/explorer.toml` | `.claude/agents/explorer.md` (Sonnet) |
+| `worker` (bounded edits) | Luna (`gpt-6-luna`), `.codex/agents/worker.toml` | `.claude/agents/worker.md` (Sonnet) |
+
+Keep the Codex and Claude Code role definitions in sync when changing either.
+
+- The lead owns task scoping, architectural decisions, delegation,
+  integration, final review, validation, and communication with the user.
+- Delegate focused repository investigation to the `explorer` role.
+  Explorers are read-only and report relevant paths, existing contracts,
+  test coverage, and concrete recommendations.
+- Delegate bounded implementation tasks to the `worker` role. Give each
+  worker an explicit goal, owned files or area, acceptance criteria, and
+  required checks. Workers may edit only their assigned scope and must
+  preserve concurrent work.
+- Use parallel agents when independent tasks justify the coordination cost.
+  Keep small, tightly coupled changes with the lead. Never assign overlapping
+  file ownership to concurrent workers; all agents share the checkout.
+- Workers and explorers report back to the lead and do not delegate further.
+  Escalate unclear requirements, cross-repository API decisions, or scope
+  changes to the lead instead of guessing or expanding the task.
+- The lead reviews every delegated change, resolves integration issues, and
+  runs the relevant repository validation before handing the result to the
+  user. A worker's report is evidence, not a substitute for review.
+
+Explicit user model choices and runtime restrictions take precedence. If a
+client does not expose named roles, pass the helper model explicitly when
+spawning an exploration or implementation agent and include the corresponding
+role instructions. Project configuration applies to trusted projects; an
+existing chat or an explicit client model selection may retain its model.
+
 ## Start here
 
 Before changing code:
@@ -16,6 +54,8 @@ Before changing code:
    - `README.md` — product overview and common commands.
    - `SELF_HOSTING.md` / `UBERSPACE.md` — production operation and deploys.
    - `WORDPRESS_IMPORT.md` — Markdown and WordPress archive imports.
+   - `server/THEME_GUIDELINES.md` — required for theme, public layout,
+     typography, navigation, animation, or other web design work.
    - `POTENTIAL_ROADMAP.md` — exploratory ideas only, not committed work.
 
 Do not treat exploratory roadmap items as approved requirements. Do not put
@@ -102,6 +142,11 @@ with `npm run db:generate`, inspect the generated SQL, and exercise it with
 
 ## Public rendering and feature flags
 
+Read and apply `server/THEME_GUIDELINES.md` before designing or changing public
+surfaces. It defines the design principles, interaction requirements, and
+visual review process for every theme. Preserve each theme's character while
+meeting the shared usability baseline.
+
 All eight selectable themes (`classic`, `cards`, `washi`, `prism`, `ledger`,
 `cabinet`, `stream`, `think`) share the accessibility baseline described in
 `server/ARCHITECTURE.md`. A rendering change is not complete until the relevant
@@ -115,6 +160,28 @@ its separate title setting controls the heading and footer label. Clearing the
 content returns the route to 404 and omits it from the footer and sitemap.
 `ENABLE_WORK_PAGE` remains a server-level, deployment-wide flag. `/about` is
 always routable but may have no long-form body.
+
+## Commit, push, and release
+
+This applies to every coding agent (Codex, Claude Code, or otherwise).
+
+- After completing and verifying a task, commit and push without asking,
+  unless the user explicitly opts out. Use small logical commits with brief
+  imperative messages.
+- Stage only the files or hunks you changed for the task; the checkout may hold
+  unrelated or concurrent work. Inspect the staged diff before committing, and
+  keep secrets and machine-specific values out of commits.
+- Check the branch and upstream before pushing, then push the current branch.
+  Never force-push, reset, or merge into the release branch just to trigger a
+  release. Stop and report authentication, protected-branch, or conflict
+  failures instead of bypassing them.
+- If verification cannot run or fails because of an unrelated existing issue,
+  say so before committing.
+- Finish by reporting commit, push, and (for iOS apps) TestFlight status. Never
+  describe an upload as processed or available without checking that state.
+
+Remote: `origin`. Deploying (`deploy.sh`) is separate and still needs the
+user to ask.
 
 ## Companion iOS repository
 
