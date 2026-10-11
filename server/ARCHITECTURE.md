@@ -184,9 +184,22 @@ reuse the classic markup. The rest of Washi lives in a gated `<style>` block in
 `Layout.tsx`: shared color tokens, self-hosted display type
 (`server/public/fonts/shippori-mincho-*`, same latin/latin-ext-only pattern as
 the cards theme's Special Elite), textured backgrounds, sticky translucent
-header, refined nav pills, paper cards, and media/quote treatments. Prism is a
-proper cards-derived theme: it uses the cards animation/overlay script, tab
-bar, detail headers, and feed link semantics, then restyles the `.cards-*`
+header, refined nav pills, paper cards, and media/quote treatments.
+
+Cards and Prism feed cards align at the top at their natural heights, so a long
+neighbor cannot enlarge a media tile. Music artwork retains a square footprint
+beside its metadata, while books retain portrait covers. Link posts with more
+than 240 characters of plain authored commentary span two grid columns at desktop
+widths (1000px and up); visible previews sit beside the title and excerpt, with
+full-width commentary below.
+Short links and narrow layouts retain one column, and commentary remains complete.
+Ledger keeps its single-column index; classic-style and Cabinet layouts are
+unchanged. WebKit covers long link/media neighbors in both color
+schemes across the five review widths and the 1000px breakpoint, plus enlarged
+text and the unchanged sibling render paths.
+
+Prism is a proper cards-derived theme: it uses the cards animation/overlay script,
+tab bar, detail headers, and feed link semantics, then restyles the `.cards-*`
 surfaces in its own gated CSS block with rounded system typography,
 high-contrast surfaces, and saturated blue/pink accents. Ledger is also
 cards-derived, but presents the feed as a single-column professional index with

@@ -788,6 +788,81 @@ async function expectBookCardKeepsDetailAnimation(page: Page) {
   await page.waitForSelector(".cards-panel", { state: "detached" });
 }
 
+test("Cards and Prism keep media compact beside full long link commentary", async ({ page }) => {
+  test.setTimeout(90_000);
+  // Theme changes invalidate server caches; route interception also disables
+  // WebKit's 30-second HTTP cache while this test switches themes rapidly.
+  await page.route("**/*", (route) => route.continue());
+  const preview = await uploadCoverAsset(apiBaseURL, ownerToken);
+  const artwork = await uploadAsset(apiBaseURL, ownerToken);
+  const commentary = Array.from({ length: 5 }, (_, index) =>
+    `Paragraph ${index + 1}: This saved link deserves a longer note about the people, ideas, and small details that made it worth sharing. The complete commentary should remain readable alongside compact music and book cards.`,
+  ).join("\n\n") + "\n\n[An authored reference](https://example.com/reference).";
+  const { object: link } = await api(apiBaseURL, ownerToken, "/api/v1/objects", {
+    type: "link", status: "published", title: "A longer link note", body: commentary,
+    sourceUrl: "https://example.com/long-note",
+    metadata: { previewAssetId: preview.id, previewImageUrl: preview.url, excerpt: "A landscape preview with full commentary." },
+  });
+  const { object: music } = await api(apiBaseURL, ownerToken, "/api/v1/objects", {
+    type: "music", status: "published", title: "A compact music card",
+    metadata: { artist: "Test Artist", releaseTitle: "A compact music card", artworkAssetId: artwork.id, artworkUrl: artwork.url, links: {} },
+  });
+  const reviewDir = "/tmp/flightstead-card-height-review";
+  mkdirSync(reviewDir, { recursive: true });
+  try {
+    for (const theme of ["cards", "prism"] as const) {
+      await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme }, "PATCH");
+      for (const width of [320, 390, 560, 768, 999, 1000, 1280]) {
+        for (const colorScheme of ["light", "dark"] as const) {
+          await page.setViewportSize({ width, height: 900 });
+          await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
+          await page.goto(siteBaseURL + "/");
+          const linkCard = page.locator(".cards-link-card").filter({ hasText: "A longer link note" });
+          const musicCard = page.locator(`[data-cards-card][href="/music/${music.slug}"]`);
+          await expect(linkCard).toContainText("Paragraph 5");
+          await expect(linkCard.locator('a[href="https://example.com/reference"]')).toHaveCount(1);
+          const artBox = await musicCard.locator(".cards-hero img").boundingBox();
+          expect(artBox).not.toBeNull();
+          expect(Math.abs(artBox!.width - artBox!.height)).toBeLessThan(2);
+          const linkBox = await linkCard.boundingBox();
+          const musicBox = await musicCard.boundingBox();
+          expect(musicBox!.height).toBeLessThan(linkBox!.height);
+          expect(linkBox!.width / musicBox!.width).toBeGreaterThan(width >= 1000 ? 1.9 : 0.95);
+          expect(linkBox!.width / musicBox!.width).toBeLessThan(width >= 1000 ? 2.2 : 1.05);
+          if (width >= 1000) {
+            const previewBox = await linkCard.locator(".cards-link-preview-image").boundingBox();
+            const contentBox = await linkCard.locator(".cards-link-summary").boundingBox();
+            expect(contentBox!.x).toBeGreaterThanOrEqual(previewBox!.x + previewBox!.width - 1);
+            if (width === 1280) expect(Math.abs(musicBox!.y - linkBox!.y)).toBeLessThan(2);
+          }
+          expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
+          if ([320, 390, 560, 768, 1280].includes(width)) {
+            await page.screenshot({ path: path.join(reviewDir, `${theme}-${width}-${colorScheme}.png`), fullPage: true });
+          }
+        }
+      }
+      await page.setViewportSize({ width: 320, height: 900 });
+      await page.goto(siteBaseURL + "/");
+      await page.addStyleTag({ content: "html { font-size: 200%; }" });
+      expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+      await expect(page.locator(".cards-link-comment").filter({ hasText: "Paragraph 5" })).toBeVisible();
+      await page.goto(siteBaseURL + `/links/${link.slug}`);
+      await expect(page.locator(".cards-link-card--full")).toContainText("Paragraph 5");
+      await expect(page.locator(".cards-link-card--wide")).toHaveCount(0);
+    }
+    for (const theme of ["classic", "ledger", "cabinet"]) {
+      await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme }, "PATCH");
+      await page.goto(siteBaseURL + "/");
+      await expect(page.locator("main")).toContainText("Paragraph 5");
+      await expect(page.locator(".cards-link-card--wide")).toHaveCount(0);
+    }
+  } finally {
+    await api(apiBaseURL, ownerToken, `/api/v1/objects/${link.id}`, {}, "DELETE");
+    await api(apiBaseURL, ownerToken, `/api/v1/objects/${music.id}`, {}, "DELETE");
+    await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
+  }
+});
+
 test("Cards music feed cards keep the music detail animation path", async ({ page }) => {
   await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
   await expectMusicCardKeepsDetailAnimation(page);

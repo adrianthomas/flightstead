@@ -566,15 +566,10 @@ export const cardsStyles = `
   body.theme-cards[data-cards-detail="true"] header.site-header,
   body.theme-cards[data-cards-detail="true"] .cards-category-filter { display: none; }
 
-  /* align-items: stretch (the grid default) so every card in a row shares
-     the row's full height — a mismatched row of card heights read as
-     ragged rather than a grid. A short text card doesn't get visibly
-     stretched by this: .cards-item centers it instead of growing it (see
-     below), so the extra row height becomes even padding around content
-     that's still sized to itself, not a near-empty card. A photo/hero
-     card opts back into actually growing (.cards-hero's flex: 1 1 auto)
-     since it can absorb the extra height as a deeper crop instead. */
-  .cards-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.3rem; align-items: stretch; }
+  /* Keep each card at its own content height. Grid rows still share a
+     track, so top alignment prevents a long neighboring post from making
+     short media cards look like empty panels. */
+  .cards-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.3rem; align-items: start; }
 
   .cards-item {
     position: relative; display: flex; flex-direction: column; justify-content: center;
@@ -605,10 +600,6 @@ export const cardsStyles = `
 
   .cards-hero {
     position: relative; aspect-ratio: 4 / 3; background-size: cover; background-position: center;
-    /* Lets a hero absorb a taller row (see .cards-feed's align-items note
-       above) by growing past its 4:3 basis instead of leaving blank card
-       background below it — object-fit: cover on the img just crops
-       deeper, which reads as a taller photo, not a stretched one. */
     flex: 1 1 auto;
   }
   .cards-hero img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
@@ -649,10 +640,11 @@ export const cardsStyles = `
   .cards-item[data-cards-type="music"] .cards-hero img {
     position: static;
     width: 100%;
-    height: 100%;
-    min-height: 9.25rem;
+    height: auto;
+    min-height: 0;
     aspect-ratio: 1 / 1;
-    object-fit: cover;
+    object-fit: contain;
+    align-self: center;
     border-right: 1px solid color-mix(in srgb, #7c3aed 22%, var(--border));
     box-shadow: 8px 0 22px color-mix(in srgb, #7c3aed 14%, transparent);
   }
@@ -942,6 +934,42 @@ export const cardsStyles = `
   .cards-link-comment p:last-child { margin-bottom: 0; }
   .cards-link-date { margin: 0.75rem 0 0; font-size: 0.8rem; color: var(--muted); }
   .cards-link-actions { display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap; margin-top: 0.9rem; }
+
+  /* Give long link commentary room to read beside its preview on wider
+     screens. Cards and Prism use the same feed; Ledger remains an index. */
+  @media (min-width: 1000px) {
+    body.theme-cards .cards-feed > .cards-link-card--wide,
+    body.theme-prism .cards-feed > .cards-link-card--wide { grid-column: span 2; }
+    body.theme-cards .cards-link-card--wide.cards-link-card--with-preview,
+    body.theme-prism .cards-link-card--wide.cards-link-card--with-preview {
+      display: grid;
+      grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+      align-items: start;
+      column-gap: 1.25rem;
+    }
+    body.theme-cards .cards-link-card--wide.cards-link-card--with-preview > .cards-link-preview-image,
+    body.theme-prism .cards-link-card--wide.cards-link-card--with-preview > .cards-link-preview-image {
+      width: 100%;
+      height: auto;
+      max-height: none;
+      object-fit: contain;
+      margin: 0;
+      align-self: start;
+      grid-column: 1;
+      grid-row: 1;
+      border-radius: 8px;
+    }
+    body.theme-cards .cards-link-card--wide.cards-link-card--with-preview .cards-link-content,
+    body.theme-prism .cards-link-card--wide.cards-link-card--with-preview .cards-link-content { display: contents; }
+    body.theme-cards .cards-link-card--wide .cards-link-summary,
+    body.theme-prism .cards-link-card--wide .cards-link-summary { min-width: 0; grid-column: 2; grid-row: 1; }
+    body.theme-cards .cards-link-card--wide .cards-link-comment,
+    body.theme-prism .cards-link-card--wide .cards-link-comment,
+    body.theme-cards .cards-link-card--wide .cards-link-date,
+    body.theme-prism .cards-link-card--wide .cards-link-date,
+    body.theme-cards .cards-link-card--wide .cards-link-actions,
+    body.theme-prism .cards-link-card--wide .cards-link-actions { grid-column: 1 / -1; }
+  }
 
   /* Book detail header: a cover has its own fixed portrait shape, unlike
      a photo — forcing it into the generic hero's 4:3 landscape crop (the
@@ -1398,7 +1426,7 @@ export const cardsStyles = `
       min-height: 7rem;
     }
     .cards-item[data-cards-type="music"] .cards-hero img {
-      min-height: 7rem;
+      min-height: 0;
     }
     .cards-item[data-cards-type="music"] .cards-title {
       font-size: 1.16rem;

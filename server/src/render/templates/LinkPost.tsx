@@ -3,7 +3,7 @@ import { publicLinkPreviewImageUrl, type ContentObject, type LinkMetadata } from
 import type { Theme } from "../../db/schema.js";
 import { formatDate } from "./ThoughtPost.js";
 import { t } from "../i18n.js";
-import { formatBasicText, isSafeLinkUrl } from "../format.js";
+import { formatBasicText, isSafeLinkUrl, stripBasicFormatting } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
 import { CloseButton } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetLinkFeedItem } from "../themes/cabinet.js";
@@ -114,24 +114,31 @@ export function LinkPost({
   }
 
   if (theme === "cards" || theme === "prism" || theme === "ledger") {
+    // Give authored commentary a reading column without widening short links.
+    const wide = linked && (theme === "cards" || theme === "prism")
+      && stripBasicFormatting(object.body ?? "").length > 240;
     return (
       <>
         {!linked ? <CloseButton backHref={backHref!} backLabel={backLabel!} /> : null}
-        <article className={`cards-link-card${linked ? "" : " cards-link-card--full"}`}>
+        <article className={`cards-link-card${linked ? "" : " cards-link-card--full"}${wide ? " cards-link-card--wide" : ""}${previewImageUrl ? " cards-link-card--with-preview" : ""}`}>
           {previewImageUrl ? <img className="cards-link-preview-image" src={previewImageUrl} alt="" loading="lazy" /> : null}
-          <div className="cards-link-topline">
-            <p className="cards-link-eyebrow">{t(locale, "links")}</p>
-            {host ? <p className="cards-link-host">{host}</p> : null}
-          </div>
-          <h2 className="cards-link-title">
-            <ExternalTitle object={object} />
-          </h2>
-          {metadata.excerpt ? <p className="cards-link-excerpt">{metadata.excerpt}</p> : null}
-          {bodyHtml ? <div className="cards-link-comment body-content" dangerouslySetInnerHTML={{ __html: bodyHtml }} /> : null}
-          <p className="cards-link-date">{formatDate(object.publishedAt, locale)}</p>
-          <div className="cards-link-actions">
-            <OpenLinkButton object={object} locale={locale} />
-            {!linked ? <CopyLinkButton locale={locale} /> : null}
+          <div className="cards-link-content">
+            <div className="cards-link-summary">
+              <div className="cards-link-topline">
+                <p className="cards-link-eyebrow">{t(locale, "links")}</p>
+                {host ? <p className="cards-link-host">{host}</p> : null}
+              </div>
+              <h2 className="cards-link-title">
+                <ExternalTitle object={object} />
+              </h2>
+              {metadata.excerpt ? <p className="cards-link-excerpt">{metadata.excerpt}</p> : null}
+            </div>
+            {bodyHtml ? <div className="cards-link-comment body-content" dangerouslySetInnerHTML={{ __html: bodyHtml }} /> : null}
+            <p className="cards-link-date">{formatDate(object.publishedAt, locale)}</p>
+            <div className="cards-link-actions">
+              <OpenLinkButton object={object} locale={locale} />
+              {!linked ? <CopyLinkButton locale={locale} /> : null}
+            </div>
           </div>
         </article>
       </>

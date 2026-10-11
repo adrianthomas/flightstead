@@ -1295,10 +1295,11 @@ export function Layout({
                 body.theme-prism .cards-item[data-cards-type="music"] .cards-hero img {
                   position: static;
                   width: 100%;
-                  height: 100%;
-                  min-height: 9.25rem;
+                  height: auto;
+                  min-height: 0;
                   aspect-ratio: 1 / 1;
-                  object-fit: cover;
+                  object-fit: contain;
+                  align-self: center;
                   border-right: 1px solid color-mix(in srgb, var(--prism-pink) 22%, var(--border));
                   box-shadow: 8px 0 24px rgba(230, 0, 103, 0.1);
                 }
@@ -1617,13 +1618,14 @@ export function Layout({
                   }
                   body.theme-prism .cards-feed {
                     grid-template-columns: 1fr;
+                    align-items: start;
                   }
                   body.theme-prism .cards-item[data-cards-type="music"] .cards-hero {
                     grid-template-columns: 7rem minmax(0, 1fr);
                     min-height: 7rem;
                   }
                   body.theme-prism .cards-item[data-cards-type="music"] .cards-hero img {
-                    min-height: 7rem;
+                    min-height: 0;
                   }
                   body.theme-prism .cards-item[data-cards-type="music"] .cards-title {
                     font-size: 1.18rem;
