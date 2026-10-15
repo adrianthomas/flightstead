@@ -788,8 +788,8 @@ async function expectBookCardKeepsDetailAnimation(page: Page) {
   await page.waitForSelector(".cards-panel", { state: "detached" });
 }
 
-test("Cards and Prism keep media compact beside full long link commentary", async ({ page }) => {
-  test.setTimeout(90_000);
+test("Cards and Prism pack masonry gaps while keeping full commentary and navigation", async ({ page, browser }) => {
+  test.setTimeout(120_000);
   // Theme changes invalidate server caches; route interception also disables
   // WebKit's 30-second HTTP cache while this test switches themes rapidly.
   await page.route("**/*", (route) => route.continue());
@@ -807,19 +807,46 @@ test("Cards and Prism keep media compact beside full long link commentary", asyn
     type: "music", status: "published", title: "A compact music card",
     metadata: { artist: "Test Artist", releaseTitle: "A compact music card", artworkAssetId: artwork.id, artworkUrl: artwork.url, links: {} },
   });
-  const reviewDir = "/tmp/flightstead-card-height-review";
+  const reviewDir = "/tmp/flightstead-masonry-review";
+  const feed = page.locator(".cards-feed");
+  const expectNoOverlap = async () => {
+    await expect.poll(async () => feed.evaluate((element) => {
+      const boxes = Array.from(element.children, (card) => card.getBoundingClientRect());
+      const collisions: string[] = [];
+      for (let a = 0; a < boxes.length; a++) {
+        for (let b = a + 1; b < boxes.length; b++) {
+          if (Math.min(boxes[a].right, boxes[b].right) - Math.max(boxes[a].left, boxes[b].left) > 1
+            && Math.min(boxes[a].bottom, boxes[b].bottom) - Math.max(boxes[a].top, boxes[b].top) > 1) {
+            collisions.push(`${a}/${b}`);
+          }
+        }
+      }
+      return collisions;
+    })).toEqual([]);
+  };
   mkdirSync(reviewDir, { recursive: true });
   try {
     for (const theme of ["cards", "prism"] as const) {
       await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme }, "PATCH");
-      for (const width of [320, 390, 560, 768, 999, 1000, 1280]) {
+      await page.goto(siteBaseURL + "/");
+      const originalOrder = await feed.evaluate((element) => Array.from(element.children, (card) => card.textContent));
+      for (const width of [320, 390, 560, 768, 999, 1000, 1280, 390, 1280]) {
         for (const colorScheme of ["light", "dark"] as const) {
           await page.setViewportSize({ width, height: 900 });
           await page.emulateMedia({ colorScheme, reducedMotion: "reduce" });
-          await page.goto(siteBaseURL + "/");
+          const columns = await feed.evaluate((element) => getComputedStyle(element).gridTemplateColumns.split(" ").length);
+          await expect.poll(() => feed.getAttribute("data-cards-masonry")).toBe(columns > 1 ? "" : null);
+          await expectNoOverlap();
           const linkCard = page.locator(".cards-link-card").filter({ hasText: "A longer link note" });
           const musicCard = page.locator(`[data-cards-card][href="/music/${music.slug}"]`);
           await expect(linkCard).toContainText("Paragraph 5");
+          // Inherited colors must update when the same page crosses the
+          // wide-card breakpoint and switches between light/dark modes.
+          await expect.poll(() => linkCard.evaluate((element) => {
+            const text = getComputedStyle(element.querySelector(".cards-link-comment")!).color;
+            return getComputedStyle(element.querySelector(".cards-link-title a")!).color === text
+              && getComputedStyle(element.querySelector(".cards-link-eyebrow")!).color === text;
+          })).toBe(true);
           await expect(linkCard.locator('a[href="https://example.com/reference"]')).toHaveCount(1);
           const artBox = await musicCard.locator(".cards-hero img").boundingBox();
           expect(artBox).not.toBeNull();
@@ -833,13 +860,69 @@ test("Cards and Prism keep media compact beside full long link commentary", asyn
             const previewBox = await linkCard.locator(".cards-link-preview-image").boundingBox();
             const contentBox = await linkCard.locator(".cards-link-summary").boundingBox();
             expect(contentBox!.x).toBeGreaterThanOrEqual(previewBox!.x + previewBox!.width - 1);
-            if (width === 1280) expect(Math.abs(musicBox!.y - linkBox!.y)).toBeLessThan(2);
+            if (width === 1280) {
+              expect(Math.abs(musicBox!.y - linkBox!.y)).toBeLessThan(2);
+              const photoBox = await page.locator('.cards-feed [data-cards-type="photo"]').first().boundingBox();
+              // The later photo fills the space under music instead of waiting
+              // for the long link's bottom, as a conventional grid would.
+              expect(photoBox!.y).toBeLessThan(linkBox!.y + linkBox!.height - 40);
+              expect(photoBox!.y).toBeGreaterThanOrEqual(musicBox!.y + musicBox!.height);
+            }
           }
           expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(width);
           if ([320, 390, 560, 768, 1280].includes(width)) {
             await page.screenshot({ path: path.join(reviewDir, `${theme}-${width}-${colorScheme}.png`), fullPage: true });
           }
         }
+      }
+      expect(await feed.evaluate((element) => Array.from(element.children, (card) => card.textContent))).toEqual(originalOrder);
+      const musicCard = page.locator(`[data-cards-card][href="/music/${music.slug}"]`);
+      await musicCard.focus();
+      // macOS WebKit uses Option-Tab to include links in sequential focus.
+      await page.keyboard.press("Alt+Tab");
+      await expect(page.locator('.cards-link-title a[href="https://example.com/long-note"]')).toBeFocused();
+
+      // Late media/content changes remeasure rows without moving DOM nodes.
+      const previewImage = page.locator(".cards-link-card--wide .cards-link-preview-image");
+      const spanBefore = await page.locator(".cards-link-card--wide").evaluate((element) => (element as HTMLElement).style.gridRowEnd);
+      await previewImage.evaluate((element) => { (element as HTMLElement).style.height = "360px"; });
+      await expect.poll(() => page.locator(".cards-link-card--wide").evaluate((element) => (element as HTMLElement).style.gridRowEnd)).not.toBe(spanBefore);
+      await expectNoOverlap();
+      await previewImage.evaluate((element) => { (element as HTMLElement).style.height = ""; });
+      await expect.poll(() => page.locator(".cards-link-card--wide").evaluate((element) => (element as HTMLElement).style.gridRowEnd)).toBe(spanBefore);
+
+      // An opened detail panel must return to the same masonry geometry.
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await musicCard.hover();
+      await musicCard.focus();
+      // Settle WebKit's scroll-into-view before recording the baseline;
+      // Playwright performs this step again as part of its real click.
+      await musicCard.scrollIntoViewIfNeeded();
+      const beforeOpen = await feed.evaluate((element) => ({
+        scroll: window.scrollY,
+        tops: Array.from(element.children, (card) => (card as HTMLElement).offsetTop),
+      }));
+      await musicCard.click();
+      await expect(page.locator(".cards-panel .cards-music-artwork")).toBeVisible();
+      expect(Math.abs(await page.evaluate(() => -parseFloat(document.body.style.top)) - beforeOpen.scroll)).toBeLessThan(1);
+      await page.evaluate(() => window.dispatchEvent(new Event("resize")));
+      await page.locator(".cards-close").first().click();
+      await expect(page.locator(".cards-panel")).toHaveCount(0);
+      await expect(musicCard).toBeFocused();
+      expect(Math.abs(await page.evaluate(() => window.scrollY) - beforeOpen.scroll)).toBeLessThan(2);
+      expect(await feed.evaluate((element) => Array.from(element.children, (card) => (card as HTMLElement).offsetTop))).toEqual(beforeOpen.tops);
+
+      // The server-rendered chronological grid still works without JS.
+      const plainContext = await browser.newContext({ javaScriptEnabled: false, viewport: { width: 1280, height: 900 } });
+      try {
+        const bare = await plainContext.newPage();
+        await bare.goto(siteBaseURL + "/");
+        await expect(bare.locator(".cards-feed")).not.toHaveAttribute("data-cards-masonry");
+        await expect(bare.locator(".cards-link-comment").filter({ hasText: "Paragraph 5" })).toBeVisible();
+        await bare.locator(`[href="/music/${music.slug}"]`).click();
+        await expect(bare.locator(".cards-music-title")).toHaveText("A compact music card");
+      } finally {
+        await plainContext.close();
       }
       await page.setViewportSize({ width: 320, height: 900 });
       await page.goto(siteBaseURL + "/");

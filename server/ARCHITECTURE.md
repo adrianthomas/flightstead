@@ -186,17 +186,25 @@ reuse the classic markup. The rest of Washi lives in a gated `<style>` block in
 the cards theme's Special Elite), textured backgrounds, sticky translucent
 header, refined nav pills, paper cards, and media/quote treatments.
 
-Cards and Prism feed cards align at the top at their natural heights, so a long
-neighbor cannot enlarge a media tile. Music artwork retains a square footprint
-beside its metadata, while books retain portrait covers. Link posts with more
-than 240 characters of plain authored commentary span two grid columns at desktop
-widths (1000px and up); visible previews sit beside the title and excerpt, with
-full-width commentary below.
-Short links and narrow layouts retain one column, and commentary remains complete.
-Ledger keeps its single-column index; classic-style and Cabinet layouts are
-unchanged. WebKit covers long link/media neighbors in both color
-schemes across the five review widths and the 1000px breakpoint, plus enlarged
-text and the unchanged sibling render paths.
+Cards and Prism progressively enhance multi-column feeds into a masonry grid.
+`themes/cards-masonry.ts` measures each card's natural border-box height and
+assigns small grid row spans; dense placement fills earlier gaps, including
+beside two-column link cards. Visual placement favors fit over strict chronology;
+DOM, keyboard, and screen-reader order remain newest-first. `ResizeObserver`
+recalculates spans for image/font/content changes and responsive widths, batching
+writes in animation frames and pausing while an overlay locks page scrolling.
+Closing the panel resumes measurement. Single-column feeds and pages without
+JavaScript or `ResizeObserver` retain the ordinary chronological grid. No layout
+animation, external library, or absolute positioning is involved.
+Music artwork retains a square footprint beside its metadata, while books retain
+portrait covers. Link posts with more than 240 characters of plain authored
+commentary span two columns at desktop widths (1000px and up); visible previews
+sit beside the title and excerpt, with full-width commentary below. Commentary
+remains complete. Ledger keeps its single-column index; classic-style and
+Cabinet layouts are unchanged. WebKit checks gap filling and non-overlap through
+responsive changes, late media sizing, DOM/keyboard order, overlay scroll/focus
+restoration, and the JavaScript-disabled fallback, alongside light/dark and
+enlarged-text review.
 
 Prism is a proper cards-derived theme: it uses the cards animation/overlay script,
 tab bar, detail headers, and feed link semantics, then restyles the `.cards-*`

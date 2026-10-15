@@ -1,4 +1,5 @@
 import React from "react";
+import { cardsMasonryScript, cardsMasonryStyles } from "./cards-masonry.js";
 import { t, type MessageKey } from "../i18n.js";
 import type { ContentType } from "../../db/schema.js";
 
@@ -549,6 +550,8 @@ export function CardsCategoryFilter({
 }
 
 export const cardsStyles = `
+  ${cardsMasonryStyles}
+
   body.theme-cards { max-width: none; padding: 0; background-color: var(--bg); }
   body.theme-cards main { max-width: 1120px; margin: 0 auto; padding: 1.5rem 1.25rem 2rem; }
   body.theme-cards header.site-header { max-width: 1120px; margin: 0 auto; padding: max(1.25rem, env(safe-area-inset-top)) 1.25rem 0; }
@@ -566,9 +569,8 @@ export const cardsStyles = `
   body.theme-cards[data-cards-detail="true"] header.site-header,
   body.theme-cards[data-cards-detail="true"] .cards-category-filter { display: none; }
 
-  /* Keep each card at its own content height. Grid rows still share a
-     track, so top alignment prevents a long neighboring post from making
-     short media cards look like empty panels. */
+  /* Natural card heights also keep the no-JS grid usable. The optional
+     masonry enhancement replaces shared rows with measured compact spans. */
   .cards-feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.3rem; align-items: start; }
 
   .cards-item {
@@ -913,13 +915,13 @@ export const cardsStyles = `
   }
   .cards-link-eyebrow {
     margin: 0; font-size: 0.7rem; font-weight: 780; letter-spacing: 0.06em;
-    color: var(--cards-accent); text-transform: uppercase;
+    color: var(--cards-accent, var(--fg)); text-transform: uppercase;
   }
   .cards-link-host {
     margin: 0; min-width: 0; color: var(--muted); font-size: 0.78rem;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .cards-link-title { margin: 0; font-size: 1.2rem; line-height: 1.28; letter-spacing: 0; }
+  .cards-link-title { margin: 0; color: var(--fg); font-size: 1.2rem; line-height: 1.28; letter-spacing: 0; }
   .cards-link-title a { color: var(--fg); text-decoration: none; }
   .cards-link-title a:hover, .cards-link-title a:focus-visible { color: var(--focus); text-decoration: underline; }
   .cards-link-title .external-arrow { font-size: 0.82em; color: var(--cards-accent); }
@@ -1475,7 +1477,7 @@ export const cardsStyles = `
 // Everything here is progressive enhancement over plain <a href> — with JS
 // disabled or on failure, every interaction still works as a normal page
 // navigation (see the `catch` in openCard and the real href on .cards-close).
-export const cardsScript = `
+export const cardsScript = cardsMasonryScript + `
 (function () {
   if (!('animate' in Element.prototype) || !window.fetch || !window.history.pushState) return;
   // Opening a card pushes a history entry (see history.pushState below)
@@ -1607,6 +1609,7 @@ export const cardsScript = `
       // resize ever fires — don't leave the listener attached forever.
       setTimeout(function () { window.visualViewport.removeEventListener('resize', resettle); }, 800);
     }
+    window.dispatchEvent(new Event('cards:unlocked'));
   }
 
   // A full-screen, non-uniform FLIP (translate + independent X/Y scale)
