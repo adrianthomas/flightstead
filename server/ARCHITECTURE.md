@@ -82,6 +82,22 @@ mapping a `ContentType` to its URL segment (`photo` → `/photos`) — reused by
 `siteId` + full URL) before rendering, and `invalidateSitePages(siteId)` is
 called on every object/site mutation.
 
+## Authenticated feed ordering
+
+`GET /api/v1/objects?sort=feed` returns posts newest first by the same date
+shown in the iOS feed: `updatedAt` for drafts, otherwise
+`publishedAt ?? createdAt`. Descending object ID breaks timestamp ties. The
+feed cursor is an opaque versioned value containing that date and ID; pagination
+uses both fields so equally dated posts are not skipped between pages. Site,
+content-type, publication-status, and link feature filters still apply.
+Omitting `sort` retains creation-date ordering and the legacy ISO timestamp
+cursor for installed clients. No schema migration is required.
+
+The iOS feed also sorts loaded rows by the same date and ID after saves,
+refreshes, and pagination. Older servers ignore the additive query, so loaded
+rows are still chronological; upgrading the server additionally puts recently
+published old drafts in the correct page.
+
 ## Metadata resolution
 
 Apple Books links use Apple's ebook catalog lookup with the URL's storefront

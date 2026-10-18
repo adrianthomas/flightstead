@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
-import { and, eq, inArray, lt, desc, ne } from "drizzle-orm";
+import { and, eq, inArray, lt, desc, ne, or, sql } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { assets, contentObjects, contentTypeValues } from "../db/schema.js";
 import { authGuard } from "../middleware/auth-guard.js";
@@ -94,6 +94,46 @@ function clientSupportsLinkContentType(header: string | string[] | undefined): b
   return value?.split(",").map((feature) => feature.trim()).includes("link-content-type") ?? false;
 }
 
+const FEED_CURSOR_PREFIX = "feed:v1:";
+const feedEffectiveAt = sql<number>`case
+  when ${contentObjects.status} = 'draft' then ${contentObjects.updatedAt}
+  else coalesce(${contentObjects.publishedAt}, ${contentObjects.createdAt})
+end`;
+
+type FeedCursor = { effectiveAt: Date; id: string };
+
+function parseFeedCursor(value: string): FeedCursor | null {
+  if (value.startsWith(FEED_CURSOR_PREFIX)) {
+    try {
+      const decoded: unknown = JSON.parse(Buffer.from(value.slice(FEED_CURSOR_PREFIX.length), "base64url").toString("utf8"));
+      if (!decoded || typeof decoded !== "object") return null;
+      const record = decoded as Record<string, unknown>;
+      if (record.v !== 1 || typeof record.effectiveAt !== "string" || typeof record.id !== "string" || !record.id || record.id.length > 128) return null;
+      const effectiveAt = parseISOTimestamp(record.effectiveAt);
+      return effectiveAt ? { effectiveAt, id: record.id } : null;
+    } catch {
+      return null;
+    }
+  }
+
+  // Older servers returned the creation timestamp directly. Accept that shape
+  // during upgrade so a client holding an in-flight cursor can continue.
+  const legacyTimestamp = parseISOTimestamp(value);
+  return legacyTimestamp ? { effectiveAt: legacyTimestamp, id: "\uffff" } : null;
+}
+
+function parseISOTimestamp(value: string): Date | null {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?Z$/.test(value)) return null;
+  const date = new Date(value);
+  if (!Number.isFinite(date.getTime())) return null;
+  const canonical = value.includes(".") ? value.replace(/\.(\d{1,3})Z$/, (_, digits: string) => `.${digits.padEnd(3, "0")}Z`) : value.replace("Z", ".000Z");
+  return date.toISOString() === canonical ? date : null;
+}
+
+function encodeFeedCursor(effectiveAt: Date, id: string): string {
+  return FEED_CURSOR_PREFIX + Buffer.from(JSON.stringify({ v: 1, effectiveAt: effectiveAt.toISOString(), id }), "utf8").toString("base64url");
+}
+
 async function uniqueSlug(siteId: string, base: string): Promise<string> {
   let slug = base;
   let suffix = 1;
@@ -181,27 +221,51 @@ export async function objectRoutes(app: FastifyInstance) {
       .object({
         type: z.enum(contentTypeValues).optional(),
         status: z.enum(["draft", "published"]).optional(),
-        cursor: z.string().optional(),
+        cursor: z.string().max(2048).optional(),
         limit: z.coerce.number().min(1).max(100).default(20),
+        sort: z.enum(["feed"]).optional(),
       })
       .parse(request.query);
+
+    const feedCursor = query.sort === "feed" && query.cursor ? parseFeedCursor(query.cursor) : null;
+    if (query.sort === "feed" && query.cursor && !feedCursor) {
+      return reply.code(400).send({ error: { code: "invalid_cursor", message: "The feed cursor is invalid." } });
+    }
 
     const conditions = [eq(contentObjects.siteId, site.id)];
     if (query.type) conditions.push(eq(contentObjects.type, query.type));
     if (query.status) conditions.push(eq(contentObjects.status, query.status));
-    if (query.cursor) conditions.push(lt(contentObjects.createdAt, new Date(query.cursor)));
+    if (query.sort === "feed" && feedCursor) {
+      conditions.push(or(
+        lt(feedEffectiveAt, feedCursor.effectiveAt.getTime()),
+        and(eq(feedEffectiveAt, feedCursor.effectiveAt.getTime()), lt(contentObjects.id, feedCursor.id)),
+      )!);
+    } else if (query.cursor) {
+      // Keep the legacy creation-time cursor behavior byte-for-byte for clients
+      // that do not opt into feed ordering.
+      conditions.push(lt(contentObjects.createdAt, new Date(query.cursor)));
+    }
     if (!query.type && !clientSupportsLinkContentType(request.headers["x-shareblog-features"])) {
       conditions.push(ne(contentObjects.type, "link"));
     }
 
-    const rows = await db
+    const queryBuilder = db
       .select()
       .from(contentObjects)
-      .where(and(...conditions))
-      .orderBy(desc(contentObjects.createdAt))
-      .limit(query.limit);
+      .where(and(...conditions));
+    const rows = await (query.sort === "feed"
+      ? queryBuilder.orderBy(desc(feedEffectiveAt), desc(contentObjects.id)).limit(query.limit)
+      : queryBuilder.orderBy(desc(contentObjects.createdAt)).limit(query.limit));
 
-    const nextCursor = rows.length === query.limit ? rows[rows.length - 1].createdAt.toISOString() : null;
+    const lastRow = rows[rows.length - 1];
+    const nextCursor = rows.length === query.limit
+      ? query.sort === "feed"
+        ? encodeFeedCursor(
+          lastRow.status === "draft" ? lastRow.updatedAt : lastRow.publishedAt ?? lastRow.createdAt,
+          lastRow.id,
+        )
+        : lastRow.createdAt.toISOString()
+      : null;
     return reply.send({ objects: rows, nextCursor });
   });
 
