@@ -198,6 +198,14 @@ changing the public renderer does not require an iOS change.
 
 Use command-line tooling for App Store Connect operations; do not use Safari
 to manage App Store Connect.
+Before iOS release work, read the companion repository's `RELEASING.md` and
+`AGENTS.md`. They define the existing authorization, cloud-signing pipeline,
+stage-specific troubleshooting, and read-only
+`fastlane ios testflight_status build:NUMBER` processing check. A missing local
+distribution private key alone does not block team API-key cloud signing.
+Reuse existing session authorization and the configured release tools instead
+of repeating confirmation requests or inventing credential-recovery steps;
+actual tool-enforced approval requirements still apply.
 
 ## Keep the handoff current
 
