@@ -6,6 +6,7 @@ import { t } from "../i18n.js";
 import { CardsFeedItem, CardsDetailHeader, type CardsExifRow } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
 import { CopyLinkButton } from "./CopyButton.js";
+import { formatInlineText, stripBasicFormatting } from "../format.js";
 import { BackLink } from "./BackLink.js";
 
 // Fractional shutter speeds are the camera-standard notation for anything
@@ -75,7 +76,10 @@ export function PhotoPost({
   const imageAlt = metadata.altText ?? "";
 
   if (theme === "cabinet") {
-    const title = metadata.caption || formatDate(object.publishedAt, locale);
+    const title = (metadata.caption && stripBasicFormatting(metadata.caption)) || formatDate(object.publishedAt, locale);
+    const detailTitle = metadata.caption
+      ? <span dangerouslySetInnerHTML={{ __html: formatInlineText(metadata.caption) }} />
+      : title;
     const image = { url: imageUrl, alt: imageAlt };
     if (linked) {
       return (
@@ -93,7 +97,7 @@ export function PhotoPost({
       <CabinetDetailHeader
         type={object.type}
         eyebrow={t(locale, "photos")}
-        title={title}
+        title={detailTitle}
         dateLabel={
           <>
             {formatDate(object.publishedAt, locale)}
@@ -109,7 +113,10 @@ export function PhotoPost({
   }
 
   if (theme === "cards" || theme === "prism" || theme === "ledger") {
-    const title = metadata.caption || formatDate(object.publishedAt, locale);
+    const title = (metadata.caption && stripBasicFormatting(metadata.caption)) || formatDate(object.publishedAt, locale);
+    const detailTitle = metadata.caption
+      ? <span dangerouslySetInnerHTML={{ __html: formatInlineText(metadata.caption) }} />
+      : title;
     const hero = { imageUrl, imageAlt, gradientSeed: object.slug };
     if (linked) {
       return (
@@ -127,7 +134,7 @@ export function PhotoPost({
       <CardsDetailHeader
         href={`/photos/${object.slug}`}
         eyebrow={t(locale, "photos")}
-        title={title}
+        title={detailTitle}
         dateLabel={
           <>
             {formatDate(object.publishedAt, locale)}
@@ -154,7 +161,7 @@ export function PhotoPost({
       ) : null}
       <article className="card">
         {linked ? <a href={`/photos/${object.slug}`}>{image}</a> : image}
-        {metadata.caption ? <p>{metadata.caption}</p> : null}
+        {metadata.caption ? <p dangerouslySetInnerHTML={{ __html: formatInlineText(metadata.caption) }} /> : null}
         <div className="meta">
           {formatDate(object.publishedAt, locale)}
           {!linked ? <CopyLinkButton locale={locale} /> : null}

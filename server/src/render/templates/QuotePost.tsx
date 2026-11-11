@@ -6,7 +6,7 @@ import { t } from "../i18n.js";
 import { CardsFeedItem, CardsDetailHeader } from "../themes/cards.js";
 import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
 import { CopyLinkButton, CopyQuoteButton } from "./CopyButton.js";
-import { formatBasicText } from "../format.js";
+import { formatBasicText, formatInlineText, stripBasicFormatting } from "../format.js";
 import { BackLink } from "./BackLink.js";
 
 function Comment({ text }: { text: string | undefined }) {
@@ -34,11 +34,13 @@ export function QuotePost({
   // RSS description (see feedItemContent in render.ts) doesn't apply the
   // browser's lang-based UA quoting, so the marks need to be real characters
   // to look right everywhere the post appears, not just on this page.
-  const quoted = <>“{object.body}”</>;
+  const quoteText = object.body ?? "";
+  const quoted = <>“{stripBasicFormatting(quoteText)}”</>;
+  const formattedQuote = <>“<span dangerouslySetInnerHTML={{ __html: formatInlineText(quoteText) }} />”</>;
   // What actually gets copied to the clipboard — the quote and its
   // attribution, not the poster's own comment underneath it, since that's
   // a personal reflection rather than part of the quote being shared.
-  const quoteCopyText = `“${object.body ?? ""}” — ${metadata.author}`;
+  const quoteCopyText = `“${stripBasicFormatting(quoteText)}” — ${metadata.author}`;
 
   if (theme === "cabinet") {
     if (linked) {
@@ -58,7 +60,7 @@ export function QuotePost({
         <CabinetDetailHeader
           type={object.type}
           eyebrow={t(locale, "quotes")}
-          title={quoted}
+          title={formattedQuote}
           subtitle={metadata.author}
           dateLabel={
             <>
@@ -99,7 +101,7 @@ export function QuotePost({
         <CardsDetailHeader
           href={`/quotes/${object.slug}`}
           eyebrow={t(locale, "quotes")}
-          title={quoted}
+          title={formattedQuote}
           subtitle={metadata.author}
           dateLabel={
             <>
@@ -130,7 +132,7 @@ export function QuotePost({
       ) : null}
       <article className="card quote">
         <blockquote className="quote-text">
-          <p>{quoted}</p>
+          <p>{formattedQuote}</p>
           <footer>
             — <cite>{metadata.author}</cite>
           </footer>

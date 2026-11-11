@@ -2,7 +2,7 @@ import React from "react";
 import type { AssetExif } from "../../db/schema.js";
 import { bookRetailerLinksFor } from "../../lib/book-links.js";
 import { musicLinksFor } from "../../lib/music-links.js";
-import { formatBasicText, formatRichText, isSafeLinkUrl } from "../format.js";
+import { formatBasicText, formatInlineText, formatRichText, isSafeLinkUrl } from "../format.js";
 import { t, type MessageKey } from "../i18n.js";
 import { formatDate } from "../templates/ThoughtPost.js";
 import { BookLinks } from "../templates/BookCard.js";
@@ -198,7 +198,7 @@ function StreamContent({ object, locale, imageUrl, imageWidth, imageHeight, exif
         <>
           <Heading className="stream-sr-only">{t(locale, "typePhoto")}</Heading>
           {imageUrl ? <StreamImage className="stream-feature-image stream-photo-image" src={imageUrl} alt={metadata.altText ?? ""} width={imageWidth} height={imageHeight} eager={eager} /> : null}
-          {metadata.caption ? <p className="stream-caption">{metadata.caption}</p> : null}
+          {metadata.caption ? <p className="stream-caption" dangerouslySetInnerHTML={{ __html: formatInlineText(metadata.caption) }} /> : null}
           {rows?.length ? <dl className="stream-exif">{rows.map((row) => <div key={row.label}><dt>{row.label}</dt><dd>{row.value}</dd></div>)}</dl> : null}
         </>
       );
@@ -208,7 +208,7 @@ function StreamContent({ object, locale, imageUrl, imageWidth, imageHeight, exif
       return (
         <>
           <Heading className="stream-sr-only">{t(locale, "typeQuote")}</Heading>
-          <blockquote className="stream-quote"><p>“{object.body}”</p><footer>— <cite>{metadata.author}</cite></footer></blockquote>
+          <blockquote className="stream-quote"><p>“<span dangerouslySetInnerHTML={{ __html: formatInlineText(object.body ?? "") }} />”</p><footer>— <cite>{metadata.author}</cite></footer></blockquote>
           <RichBody text={metadata.comment} />
         </>
       );

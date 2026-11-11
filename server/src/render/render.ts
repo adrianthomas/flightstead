@@ -31,7 +31,7 @@ import type {
 } from "./templates/types.js";
 import { publicBookCoverUrl, publicLinkPreviewImageUrl, publicMusicArtworkUrl } from "./templates/types.js";
 import { t, resolveLocale, type MessageKey } from "./i18n.js";
-import { formatBasicText, formatRichText, isSafeLinkUrl, stripBasicFormatting } from "./format.js";
+import { formatBasicText, formatInlineText, formatRichText, isSafeLinkUrl, stripBasicFormatting } from "./format.js";
 import { siteOrigin } from "./site-url.js";
 import { bookRetailerLinksFor } from "../lib/book-links.js";
 import { musicLinksFor } from "../lib/music-links.js";
@@ -460,7 +460,7 @@ export async function renderObjectPage(
   const metadataRecord = object.metadata as Record<string, unknown>;
   const description =
     (typeof metadataRecord.excerpt === "string" ? metadataRecord.excerpt : undefined) ??
-    (typeof metadataRecord.caption === "string" ? metadataRecord.caption : undefined) ??
+    (typeof metadataRecord.caption === "string" ? stripBasicFormatting(metadataRecord.caption) : undefined) ??
     (object.body ? truncateSummary(stripBasicFormatting(object.body), 200) : undefined);
   const imageUrl =
     object.type === "photo"
@@ -637,11 +637,11 @@ function feedContentSummary(object: ContentObject): string {
     }
     case "photo": {
       const { caption } = object.metadata as PhotoMetadata;
-      return caption ? truncateSummary(caption) : "";
+      return caption ? truncateSummary(stripBasicFormatting(caption)) : "";
     }
     case "quote": {
       const { author } = object.metadata as QuoteMetadata;
-      const text = truncateSummary(object.body ?? "");
+      const text = truncateSummary(stripBasicFormatting(object.body ?? ""));
       return author ? `“${text}” — ${author}` : `“${text}”`;
     }
   }
@@ -741,13 +741,13 @@ export async function feedItemContent(object: ContentObject, locale: string): Pr
       const url = await photoImageUrl(object);
       const alt = escapeXml(metadata.altText ?? "");
       const image = url ? `<p><img src="${escapeXml(url)}" alt="${alt}" /></p>` : "";
-      const caption = metadata.caption ? `<p>${escapeXml(metadata.caption)}</p>` : "";
+      const caption = metadata.caption ? `<p>${formatInlineText(metadata.caption)}</p>` : "";
       const exif = exifList(formatExif(await photoExif(object), locale));
       return image + caption + exif;
     }
     case "quote": {
       const metadata = object.metadata as QuoteMetadata;
-      const quote = `<p>“${escapeXml(object.body ?? "")}”</p>`;
+      const quote = `<p>“${formatInlineText(object.body ?? "")}”</p>`;
       const attribution = `<p>— ${escapeXml(metadata.author)}</p>`;
       const comment = metadata.comment ? formatBasicText(metadata.comment) : "";
       return quote + attribution + comment;

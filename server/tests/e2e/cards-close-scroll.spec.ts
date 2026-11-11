@@ -1661,3 +1661,50 @@ test("Marquee opens on All, follows the remote-style keyboard model, and works w
     await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
   }
 });
+
+test("photo captions and quote text support inline editing in every theme", async ({ page }) => {
+  test.setTimeout(120_000);
+  const image = await uploadAsset(apiBaseURL, ownerToken);
+  const markdown = '**Formatted** _words_ [reference](https://example.com/format-check)';
+  const { object: photo } = await api(apiBaseURL, ownerToken, "/api/v1/objects", {
+    type: "photo", status: "published", metadata: { assetId: image.id, caption: markdown, altText: "Test photo" },
+  });
+  const { object: quote } = await api(apiBaseURL, ownerToken, "/api/v1/objects", {
+    type: "quote", status: "published", body: markdown, metadata: { author: "Test Author" },
+  });
+  try {
+    for (const theme of ["classic", "washi", "aqua", "think", "stream", "cards", "prism", "ledger", "cabinet", "marquee"]) {
+      await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme }, "PATCH");
+      for (const width of [320, 390, 560, 768, 1280]) {
+        await test.step(`${theme} at ${width}px`, async () => {
+          await page.setViewportSize({ width, height: 900 });
+          await page.emulateMedia({ colorScheme: width <= 390 ? "dark" : "light", reducedMotion: "reduce" });
+          for (const path of [`/photos/${photo.slug}`, `/quotes/${quote.slug}`]) {
+            // Each API theme update invalidates the server cache, but a browser
+            // may still hold the previous theme's cacheable HTML for this URL.
+            await page.goto(`${siteBaseURL}${path}?format-check=${theme}-${width}`);
+            await expect(page.locator("body")).toHaveAttribute("data-theme", theme);
+            const main = page.locator("main");
+            // Some themes repeat the text in an accessible page heading;
+            // the final occurrence is the rendered caption or quote itself.
+            await expect(main.locator("strong", { hasText: "Formatted" }).last()).toBeVisible();
+            await expect(main.locator("em", { hasText: "words" }).last()).toBeVisible();
+            const reference = main.locator('a[href="https://example.com/format-check"]').last();
+            await expect(reference).toBeVisible();
+            await expect(reference).toHaveAttribute("rel", /noopener/);
+            await reference.focus();
+            await expect(reference).toBeFocused();
+            const overflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
+            expect(overflow).toBe(false);
+            if (width === 390 && ["classic", "cards", "cabinet"].includes(theme) && path.startsWith("/photos/")) {
+              await page.screenshot({ path: test.info().outputPath(`${theme}-formatted-caption.png`) });
+            }
+          }
+        });
+      }
+    }
+  } finally {
+    await api(apiBaseURL, ownerToken, `/api/v1/objects/${photo.id}`, {}, "DELETE");
+    await api(apiBaseURL, ownerToken, `/api/v1/objects/${quote.id}`, {}, "DELETE");
+  }
+});

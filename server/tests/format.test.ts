@@ -1,6 +1,18 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { formatBasicText, formatRichText, stripBasicFormatting } from "../src/render/format.js";
+import { formatBasicText, formatInlineText, formatRichText, stripBasicFormatting } from "../src/render/format.js";
+
+test("renders inline editor syntax safely inside existing caption and quote wrappers", () => {
+  assert.equal(
+    formatInlineText('A **bold** and _italic_ [link](https://example.com/?a=1&b=2) <script>alert(1)</script>'),
+    'A <strong>bold</strong> and <em>italic</em> <a href="https://example.com/?a=1&amp;b=2" target="_blank" rel="noopener noreferrer">link</a> &lt;script&gt;alert(1)&lt;/script&gt;',
+  );
+  assert.doesNotMatch(formatInlineText("[unsafe](javascript:alert(1))"), /href=/i);
+  assert.equal(
+    stripBasicFormatting("**bold** [a link](https://example.com)"),
+    "bold a link",
+  );
+});
 
 test("renders imported Markdown links with optional titles", () => {
   const markdown =

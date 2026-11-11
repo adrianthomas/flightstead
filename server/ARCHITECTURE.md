@@ -346,8 +346,10 @@ overlays for Cards, Prism, and Ledger; and the Cabinet overlay. Separate tests
 retain gesture-level pull-down coverage for Cards and Cabinet plus the
 specialized photo, book, and music animation paths.
 
-Body formatting (`render/format.ts`) — three tiers, a deliberate per-field
+Body formatting (`render/format.ts`) — a deliberate per-field
 choice, not a default:
+- `formatInlineText` — safe bold, italic, links, and line breaks inside existing
+  caption/quote paragraphs or headings, without adding paragraph wrappers.
 - `formatBasicText` — paragraphs, `**bold**`, `*italic*`, `[text](url)`,
   including Markdown links with optional quoted titles.
 - `formatRichText` — the above plus `#` through `######` headings,
@@ -358,6 +360,11 @@ choice, not a default:
 Photo metadata deliberately separates visible `caption` from image `altText`;
 renderers and RSS image markup use `altText` for the `<img alt>` value, not the
 caption.
+Photo captions and quote bodies accept inline Markdown in public pages and RSS
+(also used for ActivityPub content). Linked photo/quote feed titles use stripped
+plain text where a card already supplies the navigation link, avoiding nested
+anchors; detail pages retain authored inline links. Quote clipboard text and
+feed summaries strip formatting markers.
 
 Book and music destination links are render-time policy, not just stored
 metadata snapshots. `lib/book-links.ts` regenerates the current retailer set

@@ -67,6 +67,10 @@ function titleAttribute(doubleQuoted?: string, singleQuoted?: string, parenthesi
   return title === undefined ? "" : ` title="${title}"`;
 }
 
+export function formatInlineText(text: string): string {
+  return formatInline(text);
+}
+
 function formatInline(text: string, { images = false }: { images?: boolean } = {}): string {
   let html = escapeHtml(text);
   // Bold/italic run before links, and links run last: the <a ...> markup

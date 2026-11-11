@@ -4,7 +4,7 @@ import { musicLinksFor } from "../../lib/music-links.js";
 import { bookRetailerLinksFor } from "../../lib/book-links.js";
 import { impressumPageEnabled } from "../../lib/impressum-page.js";
 import { workPageEnabled } from "../../lib/work-page.js";
-import { formatBasicText, formatRichText, isSafeLinkUrl, stripBasicFormatting } from "../format.js";
+import { formatBasicText, formatInlineText, formatRichText, isSafeLinkUrl, stripBasicFormatting } from "../format.js";
 import { t, type MessageKey } from "../i18n.js";
 import { siteOrigin } from "../site-url.js";
 import { flattenLinks } from "../templates/BookCard.js";
@@ -154,7 +154,7 @@ export function marqueeTitle(object: ContentObject, locale: string): string {
       return metadata.releaseTitle || object.title || t(locale, "typeMusic");
     }
     case "photo":
-      return clip((object.metadata as PhotoMetadata).caption ?? "", 90) || t(locale, "typePhoto");
+      return clip(stripBasicFormatting((object.metadata as PhotoMetadata).caption ?? ""), 90) || t(locale, "typePhoto");
     case "quote":
       return clip(stripBasicFormatting(object.body ?? ""), 120) || t(locale, "typeQuote");
     case "thought":
@@ -650,7 +650,9 @@ function PhotoDetail({ site, item, nav, exif, width, height, original }: { site:
   const { object } = item;
   const locale = site.locale;
   const metadata = object.metadata as PhotoMetadata;
-  const heading = marqueeTitle(object, locale);
+  const heading = metadata.caption
+    ? <span dangerouslySetInnerHTML={{ __html: formatInlineText(metadata.caption) }} />
+    : marqueeTitle(object, locale);
   const rows = formatExif(exif, locale);
   const thumb = item.thumb;
   const ratio = width && height ? { aspectRatio: `${width} / ${height}` } : undefined;
@@ -706,7 +708,7 @@ function QuoteDetail({ site, item, nav }: { site: Site; item: FrItem; nav: FrNav
       <h1 className="fr-sr">{metadata.author ? `${t(locale, "typeQuote")}: ${metadata.author}` : t(locale, "typeQuote")}</h1>
       <Tile kind="quote" size="large" />
       <blockquote className={`fr-quote${long ? " fr-quote--long" : ""}`}>
-        <p>{text}</p>
+        <p dangerouslySetInnerHTML={{ __html: formatInlineText(text) }} />
       </blockquote>
       <p className="fr-quote-by">
         {metadata.author ? <span className="fr-byline-name">— {metadata.author}</span> : null}
