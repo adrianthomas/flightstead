@@ -1,0 +1,1 @@
+ALTER TABLE `magic_tokens` ADD `failed_attempts` integer DEFAULT 0 NOT NULL;

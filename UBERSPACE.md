@@ -79,6 +79,13 @@ Everyone else's request still returns success either way, so it can't be
 used to probe which addresses are allowlisted (see
 [server/src/auth/magic-code.ts](server/src/auth/magic-code.ts)).
 
+Emailed sign-in codes are limited per address: a code stops working after 5
+wrong guesses, a new code cancels the previous one, and an address gets at
+most 5 codes per 15 minutes and 10 per day. If someone uses up your codes to
+keep you out, devices that are already signed in keep working, and running
+`npm run bootstrap-owner` on the server prints a pairing code that signs a
+device in without email.
+
 `PORT` just needs to be free and in Uberspace's allowed range (1024–65535);
 the webserver in front of it is what's actually reachable from the
 internet. `SMTP_HOST` is your account's own Uberspace host name (e.g.

@@ -85,6 +85,13 @@ able to sign in at all (everyone else's request still returns success, so it
 can't be used to probe which addresses are allowlisted — see
 [server/src/auth/magic-code.ts](server/src/auth/magic-code.ts)).
 
+Emailed sign-in codes are limited per address: a code stops working after 5
+wrong guesses, a new code cancels the previous one, and an address gets at
+most 5 codes per 15 minutes and 10 per day. If someone uses up your codes to
+keep you out, devices that are already signed in keep working, and running
+`npm run bootstrap-owner` on the server prints a pairing code that signs a
+device in without email.
+
 `DATABASE_URL` is just a file path — SQLite creates it automatically on
 first migration, no server to provision. It's worth pointing it at the same
 `data/` directory as `LOCAL_STORAGE_DIR`: a full backup is then just

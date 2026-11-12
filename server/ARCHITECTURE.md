@@ -83,6 +83,23 @@ mapping a `ContentType` to its URL segment (`photo` → `/photos`) — reused by
 `siteId` + full URL) before rendering, and `invalidateSitePages(siteId)` is
 called on every object/site mutation.
 
+## Sign-in code limits
+
+The emailed mobile code is six digits, so `auth/magic-code.ts` bounds guessing
+per email rather than per client address (the route-level limits in
+`routes/auth.ts` are keyed by address and can be sidestepped by rotating it).
+A live code is retired after 5 wrong guesses, requesting a new code or link
+cancels the earlier one of that kind, and an email receives at most 5 codes
+or links per 15 minutes and 10 per day. Over-limit requests still return 202
+and are only logged, so the limit cannot be used to probe the allowlist;
+`verify-code` keeps returning `invalid_code`, so installed clients need no
+change. Short codes are hashed together with their email.
+
+Someone who knows an owner's email can therefore exhaust that day's codes.
+Paired devices keep their tokens, and `npm run bootstrap-owner` mints a
+pairing code through the separate `ownerClaims` table and `claim-owner` route,
+which these limits do not touch.
+
 ## Draft previews
 
 `POST /api/v1/objects/:id/preview` requires the owner's bearer token and an
@@ -162,7 +179,7 @@ music candidate selection, and cached book-cover ownership and lifecycle.
 | `siteActorKeys` | ActivityPub keypair, deliberately its own table (never returned in a site API response — see the comment in schema.ts). |
 | `apFollowers` | Remote Fediverse followers per site; backs both the followers collection and outbound delivery recipient list. |
 | `apiTokens` | Bearer tokens, hashed; `revokedAt` for logout. |
-| `magicTokens` | Email auth codes/links, hashed, purpose-tagged (`web_session`/`mobile_code`). |
+| `magicTokens` | Email auth codes/links, hashed, purpose-tagged (`web_session`/`mobile_code`). `failedAttempts` counts wrong guesses against a live short code; see Sign-in code limits below. Rows older than a day are cleared when the same email next requests a code. |
 | `ownerClaims` | Short-lived (20 min), single-use pairing codes minted by an interactive `bootstrap-owner` run; redeemed via `POST /auth/claim-owner`. Generated codes are uppercase, while redemption also trims whitespace and accepts lowercase manual entry. |
 | `contentObjects` | The core table — `type` (`contentTypeValues`), `slug` (unique per site), `title`/`body`/`status`/`sourceUrl`, freeform JSON `metadata` (shape varies by type, not modeled in SQL). |
 | `dailyVisitCounts` | Privacy-preserving UTC-day page-view aggregates keyed by site, article (empty for non-article pages), and coarse source category. It deliberately contains no IP, user agent, visitor/session id, full referrer, or individual request row. |

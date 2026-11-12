@@ -151,6 +151,10 @@ export const magicTokens = sqliteTable("magic_tokens", {
   purpose: text("purpose", { enum: ["web_session", "mobile_code"] }).notNull(),
   expiresAt: integer("expires_at", { mode: "timestamp_ms" }).notNull(),
   consumedAt: integer("consumed_at", { mode: "timestamp_ms" }),
+  // Wrong guesses made against this code while it was live. A short code is
+  // retired once it reaches the limit in auth/magic-code.ts, so guessing is
+  // bounded per email rather than per client address.
+  failedAttempts: integer("failed_attempts").notNull().default(0),
   createdAt: createdAt(),
 });
 
