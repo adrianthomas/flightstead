@@ -65,9 +65,9 @@ if (missingThemeMetadata.length > 0) {
   throw new Error(`Missing theme metadata for: ${missingThemeMetadata.join(", ")}`);
 }
 
-// Aqua remains a valid persisted value for existing sites, but is held
-// back from new selection. The redesigned Think theme is selectable.
-const selectableThemeIds = new Set<Theme>(["classic", "cards", "washi", "prism", "ledger", "cabinet", "stream", "marquee", "think"]);
+// Basic, Washi, Ledger, and Aqua remain valid persisted values for existing
+// sites, but are hidden from new selection.
+const selectableThemeIds = new Set<Theme>(["cards", "prism", "cabinet", "stream", "marquee", "think"]);
 const selectableThemeOptions = themeOptions.filter((option) => selectableThemeIds.has(option.id));
 
 export async function themeRoutes(app: FastifyInstance) {
