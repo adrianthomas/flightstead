@@ -491,7 +491,8 @@ export async function renderObjectPage(
       description,
       imageUrl,
       type: "article",
-      publishedAt: object.publishedAt,
+      publishedAt: object.status === "published" ? object.publishedAt : null,
+      noIndex: object.status === "draft",
     },
   });
 }

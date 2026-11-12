@@ -4,6 +4,8 @@ import { and, eq, inArray, lt, desc, ne, or, sql } from "drizzle-orm";
 import { db } from "../db/client.js";
 import { assets, contentObjects, contentTypeValues } from "../db/schema.js";
 import { authGuard } from "../middleware/auth-guard.js";
+import { createDraftPreviewToken } from "../auth/draft-preview.js";
+import { absoluteSiteUrl } from "../render/site-url.js";
 import { createObjectSchema, updateObjectSchema } from "../lib/schemas.js";
 import { slugify, slugFromBody } from "../lib/slugify.js";
 import { invalidateSitePages } from "../render/page-cache.js";
@@ -285,6 +287,22 @@ export async function objectRoutes(app: FastifyInstance) {
       return reply.code(404).send({ error: { code: "not_found", message: "Object not found." } });
     }
     return reply.send({ object });
+  });
+
+  app.post("/objects/:id/preview", { preHandler: authGuard }, async (request, reply) => {
+    reply.header("cache-control", "private, no-store");
+    const site = request.authSite;
+    const { id } = request.params as { id: string };
+    if (!site) return reply.code(404).send({ error: { code: "not_found", message: "Draft not found." } });
+    const [object] = await db.select({ id: contentObjects.id }).from(contentObjects)
+      .where(and(eq(contentObjects.id, id), eq(contentObjects.siteId, site.id), eq(contentObjects.status, "draft")))
+      .limit(1);
+    if (!object) return reply.code(404).send({ error: { code: "not_found", message: "Draft not found." } });
+
+    const { token, expiresAt } = createDraftPreviewToken(site.id, object.id);
+    const url = new URL(absoluteSiteUrl(site, `/preview/${encodeURIComponent(object.id)}`));
+    url.searchParams.set("token", token);
+    return reply.send({ url: url.href, expiresAt });
   });
 
   app.patch("/objects/:id", { preHandler: authGuard }, async (request, reply) => {

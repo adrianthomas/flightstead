@@ -5,6 +5,7 @@ import { db } from "../db/client.js";
 import { contentObjects, sites } from "../db/schema.js";
 import type { ContentType } from "../db/schema.js";
 import { resolveTenant } from "../middleware/tenant.js";
+import { verifyDraftPreviewToken } from "../auth/draft-preview.js";
 import {
   renderList,
   renderObjectPage,
@@ -36,6 +37,7 @@ import type { ContentObject } from "../render/templates/types.js";
 declare module "fastify" {
   interface FastifyRequest {
     analyticsContentObjectId?: string;
+    isDraftPreview?: boolean;
   }
 }
 
@@ -180,7 +182,7 @@ export async function sitePageRoutes(app: FastifyInstance) {
   // Count successful public HTML responses after they have been sent. The
   // counter stores only daily aggregates, never a request or visitor record.
   app.addHook("onResponse", async (request, reply) => {
-    if (!request.site?.statsEnabled || reply.statusCode < 200 || reply.statusCode >= 300) return;
+    if (request.isDraftPreview || !request.site?.statsEnabled || reply.statusCode < 200 || reply.statusCode >= 300) return;
     const contentType = String(reply.getHeader("content-type") ?? "");
     if (!contentType.startsWith("text/html")) return;
     try {
@@ -434,6 +436,29 @@ export async function sitePageRoutes(app: FastifyInstance) {
       });
     });
   }
+
+  app.get("/preview/:id", { preHandler: resolveTenant }, async (request, reply) => {
+    request.isDraftPreview = true;
+    reply.header("cache-control", "private, no-store")
+      .header("x-robots-tag", "noindex, nofollow, noarchive")
+      .header("referrer-policy", "no-referrer");
+    const site = request.site!;
+    const { id } = request.params as { id: string };
+    const { token } = request.query as { token?: unknown };
+    if (typeof token !== "string" || !verifyDraftPreviewToken(token, site.id, id)) {
+      return reply.code(404).send("Not found");
+    }
+    const [object] = await db.select().from(contentObjects)
+      .where(and(eq(contentObjects.id, id), eq(contentObjects.siteId, site.id), eq(contentObjects.status, "draft")))
+      .limit(1);
+    if (!object) return reply.code(404).send("Not found");
+
+    // Read the latest saved draft every time. Never populate the shared page
+    // cache or change publication state just to render an author's preview.
+    const availablePaths = await publishedNavPaths(site.id);
+    const html = await renderObjectPage(site, object, `/${PATH_PREFIX[object.type]}/${object.slug}`, availablePaths);
+    return reply.type("text/html; charset=utf-8").send(html);
+  });
 
   for (const detail of DETAIL_TYPES) {
     app.get(`${detail.prefix}/:slug`, { preHandler: resolveTenant }, async (request, reply) => {

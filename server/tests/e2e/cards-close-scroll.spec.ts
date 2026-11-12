@@ -1407,6 +1407,60 @@ test("public feeds paginate and remain retrievable through archive and search", 
   await expect(page.locator("main")).toContainText("Pagination post");
 });
 
+test("draft preview renders in every theme without publishing", async ({ page, browser }) => {
+  const draftTitle = "Private draft preview across themes";
+  const draftBody = "This draft appears on its preview page only.";
+  const created = await api(apiBaseURL, ownerToken, "/api/v1/objects", {
+    type: "article",
+    title: draftTitle,
+    status: "draft",
+    body: draftBody,
+    metadata: {},
+  });
+  const object = created.object as { id: string; slug: string };
+  const issued = await api(apiBaseURL, ownerToken, `/api/v1/objects/${object.id}/preview`, {}, "POST") as {
+    url: string;
+    expiresAt: string;
+  };
+  expect(new Date(issued.expiresAt).getTime()).toBeGreaterThan(Date.now());
+  try {
+    for (const theme of ["classic", "cards", "washi", "prism", "ledger", "cabinet", "stream", "marquee", "aqua", "think"] as const) {
+      await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme }, "PATCH");
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.emulateMedia({ colorScheme: "dark", reducedMotion: "reduce" });
+      const response = await page.goto(issued.url);
+      expect(response?.headers()["cache-control"]).toContain("no-store");
+      await expect(page.locator("body")).toHaveAttribute("data-theme", theme);
+      await expect(page.locator("main")).toContainText(draftTitle);
+      await expect(page.locator("main")).toContainText(draftBody);
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+      if (["classic", "cards", "cabinet"].includes(theme)) {
+        await page.screenshot({ path: test.info().outputPath(`${theme}-draft-preview.png`) });
+        const plain = await browser.newContext({ javaScriptEnabled: false });
+        try {
+          const bare = await plain.newPage();
+          await bare.goto(issued.url);
+          await expect(bare.locator("main")).toContainText(draftBody);
+        } finally {
+          await plain.close();
+        }
+      }
+      await page.setViewportSize({ width: 1280, height: 900 });
+      await page.emulateMedia({ colorScheme: "light" });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await expect(page.locator("main")).toContainText(draftBody);
+    }
+
+    const publicPage = await page.request.get(`${siteBaseURL}/articles/${object.slug}`);
+    expect(publicPage.status()).toBe(404);
+    const feed = await page.request.get(`${siteBaseURL}/feed.xml`);
+    expect(await feed.text()).not.toContain(draftTitle);
+  } finally {
+    await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "cards" }, "PATCH");
+    await api(apiBaseURL, ownerToken, `/api/v1/objects/${object.id}`, {}, "DELETE");
+  }
+});
+
 test("a configured apex domain resolves the site and becomes canonical", async ({ page }) => {
   await api(apiBaseURL, ownerToken, "/api/v1/sites", { customDomain: new URL(apiBaseURL).host }, "PATCH");
   const aliasResponse = await fetch(siteBaseURL + "/", { redirect: "manual" });

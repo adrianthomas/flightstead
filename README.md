@@ -33,6 +33,10 @@ live.
   displays complete posts in a finely typeset chronological reading flow;
   Think pairs retro studio typography with silver navigation and cobalt lead stories;
   Marquee is a dark, remote-style stage with a glossy menu, covers, and reflections.
+- **Preview before publishing.** Saved server drafts can be opened in your
+  current site design with a temporary preview link, without appearing on the
+  front page, in RSS, or in the Fediverse. Links last 24 hours or until the server
+  restarts; anyone with the link can view the saved draft.
 - **Useful publishing features out of the box.** Search, archives, RSS,
   sitemaps, social metadata, custom domains, and optional Fediverse publishing
   are included.

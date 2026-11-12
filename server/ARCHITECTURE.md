@@ -49,7 +49,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 | `routes/auth.ts` | `POST /auth/request-code`, `POST /auth/verify-code`, `POST /auth/claim-owner`, `GET /auth/magic/:token`, `POST /auth/logout`, `DELETE /account`, `GET /me` | Magic-code email auth (mobile gets a bearer token, web gets a session cookie), plus `claim-owner` — redeems a short-lived pairing code minted by an interactive `npm run bootstrap-owner` run (`db/bootstrap-owner.ts` + `auth/owner-claim.ts`), the QR/manual-code alternative to email for first sign-in (see the `ownerClaims` table below). A dedicated test server may opt into a durable, reusable App Review credential with all four `APP_REVIEW_*` environment values; only its SHA-256 hash is stored, it provisions an isolated non-federating review site, and `DISABLE_EMAIL_AUTH=true` can close the unused email path. Logout and `app-review:revoke-sessions` revoke every token for the account. Account deletion removes the user, owned site, content, media, statistics, tokens, and federation records, but deliberately does not uninstall the self-hosted server or touch operator-managed DNS, backups, or hosting. |
 | `routes/sites.ts` | site CRUD (create; update identity/domain/theme/about/federation) | One site per user today (`sites.ownerUserId` is `.unique()`). New identity fields are additive for older clients. |
 | `routes/themes.ts` | `GET /themes` (no auth) | Server-owned catalog of nine selectable site themes (`id`/`name`/`description`) used by iOS Settings, including the redesigned Think theme. The stable `classic` id is presented as Basic. Aqua remains a valid renderable value for existing sites but is intentionally omitted from this catalog. |
-| `routes/objects.ts` | `POST/GET/PATCH/DELETE /objects`, `GET /objects/:id` | Owns slug generation (`uniqueSlug`, `slugSourceText`), asset-ownership checks and deletion (including URL-only inline Article/Thought images and cached music artwork), cache invalidation, and ActivityPub Create/Delete delivery on publish, unpublish, and deletion. It also normalizes legacy iOS article posts that arrived as `thought` with a leading Markdown H1 into real `article` rows. `GET /objects` hides `link` rows unless the client sends `X-Shareblog-Features: link-content-type`, because old iOS apps decode `ContentType` as a closed enum. |
+| `routes/objects.ts` | `POST/GET/PATCH/DELETE /objects`, `GET /objects/:id`, `POST /objects/:id/preview` | Owns slug generation (`uniqueSlug`, `slugSourceText`), asset-ownership checks and deletion (including URL-only inline Article/Thought images and cached music artwork), cache invalidation, and ActivityPub Create/Delete delivery on publish, unpublish, and deletion. It also normalizes legacy iOS article posts that arrived as `thought` with a leading Markdown H1 into real `article` rows. `GET /objects` hides `link` rows unless the client sends `X-Shareblog-Features: link-content-type`, because old iOS apps decode `ContentType` as a closed enum. |
 | `routes/assets.ts` | asset upload | Feeds `image/worker.ts` for variants + EXIF extraction. |
 | `routes/resolve.ts` | book/music/article metadata lookup | Thin wrapper over `resolvers/*.ts`; used by the iOS compose screens before publish, not stored server-side until the object is created. Books accept titles, author/title text, ISBNs, or links and return candidates with matching cover artwork. Music accepts title/artist text or any source URL; `includeCandidates: true` adds a selectable candidate list alongside the legacy scalar fields. Unmatched music links retain editable title/artist only. |
 | `routes/stats.ts` | `GET /stats` | Authenticated aggregate-only public page-view totals for today/week/month/year/all time, per-article totals, and coarse referring-source categories. Period boundaries use UTC. |
@@ -62,6 +62,7 @@ token, not the Host header, and sets `request.authUser`/`request.authSite`.
 | `/posts`, `/articles`, `/links`, `/books`, `/music`, `/photos`, `/quotes` | Per-type listings (`LISTING_TYPES`), paginated 20 at a time |
 | `/<listing>/feed.xml`, `/feed.xml` | RSS (`renderFeed`) |
 | `/<prefix>/:slug` (`DETAIL_TYPES`) | Detail page (`renderObjectPage`) — 404s if not published |
+| `/preview/:id?token=…` | Temporary signed preview of a saved draft in its current theme; see Draft previews below. |
 | `/archive`, `/archive/:year/:month` | Chronological month index and paginated month views |
 | `/search?q=...` | Search titles, bodies, source URLs, and structured metadata; marked `noindex` |
 | `/favicon.svg` | Generated light/dark SVG favicon using the profile-name or site-title initial; a configured profile image replaces it in page metadata |
@@ -77,10 +78,32 @@ matching typed Flightstead detail route.
 `PATH_PREFIX` (exported from `render.ts`) is the single source of truth
 mapping a `ContentType` to its URL segment (`photo` → `/photos`) — reused by
 `LISTING_TYPES`/`DETAIL_TYPES` here and by `renderDetail`'s close-button
-`backHref`. Every page response goes through `sendCachedHtml`/
+`backHref`. Ordinary public page responses go through `sendCachedHtml`/
 `sendCachedFeed`, which check `page-cache.ts` (in-memory, keyed by
 `siteId` + full URL) before rendering, and `invalidateSitePages(siteId)` is
 called on every object/site mutation.
+
+## Draft previews
+
+`POST /api/v1/objects/:id/preview` requires the owner's bearer token and an
+owned draft. It returns `{ url, expiresAt }` with a canonical tenant/custom-domain
+URL. `auth/draft-preview.ts` signs the site ID, object ID, and expiry with a
+process-local random HMAC key. Links last 24 hours and are invalidated by a
+server restart; there is no new environment setting or migration. Anyone with
+the link can view it, so it is a temporary preview capability, not an API token.
+
+`GET /preview/:id?token=…` verifies that signature and requires a current draft
+belonging to the resolved tenant. Invalid links, published posts, and deleted
+drafts return 404. It reuses `renderObjectPage()` across all themes, reads the
+latest saved contents on each request, and never changes publication status.
+The response bypasses the public page cache, uses `private, no-store`, suppresses
+referrers, and carries both HTML `noindex` metadata and an `X-Robots-Tag` header.
+Previews are excluded from visitor counts. Ordinary detail URLs still require
+publication, and no preview is added to navigation, listings, archives, search,
+RSS, the sitemap, or the ActivityPub outbox; preview issuance/rendering does not
+send federation activities. Uploaded media retain the existing public-file URL
+policy. The companion app's saved-draft editor requests a fresh link when the
+author selects Preview on Site; unsaved local changes are not included.
 
 ## Authenticated feed ordering
 
