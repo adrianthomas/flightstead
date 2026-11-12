@@ -70,12 +70,6 @@
     },
     "@digitalbazaar/http-client": {
       "undici": "^6.29.1"
-    },
-    "node-gyp": {
-      "undici": "8.10.0"
-    },
-    "jsdom": {
-      "undici": "8.10.0"
     }
   }
 }
