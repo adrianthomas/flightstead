@@ -33,4 +33,4 @@ Check branch and upstream before pushing. Push the working branch; do not merge 
 
 Update architecture and operator documentation alongside changes to behavior, commands, prerequisites, routes, storage or release workflows. Keep speculative ideas separate.
 
-Finish with changed behavior, validation results, commit/push status, release status where applicable, and any concrete blocker. Never describe an upload as processed or available without checking that state.
+Finish with changed behavior, validation results, commit/push status, upload result where applicable, and any concrete blocker. After a successful TestFlight upload, do not monitor processing or tester availability unless the user asks. Report "uploaded" without claiming processing or availability has been verified.

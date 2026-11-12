@@ -9,3 +9,5 @@ When using XcodeGen, `project.yml` is the source of truth. Make source/configura
 For agent-authored commits on the configured release branch, finish by running `scripts/appstore/push_testflight.sh`. This pushes and uploads that exact revision from a clean source export. Skip upload only when the user explicitly opts out or prerequisites fail; report the reason. Branch work still gets built, committed and pushed; do not automatically merge it to release.
 
 Use command-line App Store Connect tooling. TestFlight upload is the default release action; App Store submission, external tester distribution and metadata publication need their own authorization.
+
+Routine internal TestFlight uploads have the user's explicit standing authorization; do not ask for separate upload approval. Wait for the upload command's result, then report success or failure and finish. Do not monitor processing or tester availability unless the user asks; read-only status checks may still be used to diagnose an interrupted release and avoid a duplicate upload.

@@ -177,8 +177,11 @@ This applies to every coding agent (Codex, Claude Code, or otherwise).
   failures instead of bypassing them.
 - If verification cannot run or fails because of an unrelated existing issue,
   say so before committing.
-- Finish by reporting commit, push, and (for iOS apps) TestFlight status. Never
-  describe an upload as processed or available without checking that state.
+- Routine internal TestFlight uploads have the user's explicit standing
+  authorization; do not ask for separate upload approval. Finish by reporting
+  commit, push, and upload result. After a successful upload, do not monitor
+  processing or tester availability unless the user asks. Report "uploaded"
+  without claiming processing or availability has been verified.
 
 Remote: `origin`. Deploying (`deploy.sh`) is separate and still needs the
 user to ask.
@@ -201,7 +204,8 @@ to manage App Store Connect.
 Before iOS release work, read the companion repository's `RELEASING.md` and
 `AGENTS.md`. They define the existing authorization, cloud-signing pipeline,
 stage-specific troubleshooting, and read-only
-`fastlane ios testflight_status build:NUMBER` processing check. A missing local
+`fastlane ios testflight_status build:NUMBER` processing check, used only when
+requested or needed to diagnose an interrupted release. A missing local
 distribution private key alone does not block team API-key cloud signing.
 Reuse existing session authorization and the configured release tools instead
 of repeating confirmation requests or inventing credential-recovery steps;
