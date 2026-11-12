@@ -13,8 +13,7 @@ iPhone into a personal website on your own domain.
 > connects directly to your server and provides the editor, settings, and share
 > extension.
 
-**App Store:** Coming soon. A download link will be added here when the app is
-live.
+**App Store:** [Download Flightstead for iOS](https://apps.apple.com/app/id6816751194).
 
 ## What you get
 
