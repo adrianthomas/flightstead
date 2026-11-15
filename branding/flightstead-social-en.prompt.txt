@@ -1,0 +1,11 @@
+Tool: built-in image_gen
+Source: branding/flightstead-social-de.png
+Output: flightstead-social-en.png
+
+Use case: text-localization.
+Edit this finished Flightstead German marketing graphic into its English counterpart. Preserve the existing 1536x1024 landscape composition, paper/coastal-blue background, brand icon, Flightstead wordmark, colors, fonts, sizing, yellow rule, phone and browser screenshots, shadows, proportions, and prominent flightstead.com URL. Change ONLY the German marketing copy on the left:
+"Dein iPhone." -> "Your iPhone."
+"Deine Website." -> "Your website."
+"Eigene Domain. Selbst gehostet." -> "Your domain. Self-hosted."
+"ARTIKEL · FOTOS · LINKS · BÜCHER · MUSIK" -> "ARTICLES · PHOTOS · LINKS · BOOKS · MUSIC"
+Keep the headline on two lines. Make only minimal typography adjustments if necessary to fit the English text with the same hierarchy, alignment, comfortable margins and readability. All product screenshot text is already English and must remain unchanged. The brand name must remain Flightstead. The URL must remain exactly flightstead.com, wholly visible, at its existing prominent size. No additional text, objects, redesign, new logos or watermark. Publication-ready final PNG.

@@ -23,3 +23,6 @@ header, hero, callout, and footer usage updates together.
   `flightstead.com` URL. Generated using the built-in image tool from the
   canonical icon and existing product screenshots; its prompt is retained in
   `flightstead-social-de.prompt.txt`.
+- `flightstead-social-en.png` — matching English 1536 × 1024 sharing graphic,
+  localized with the built-in image tool from the German version. Its prompt
+  is retained in `flightstead-social-en.prompt.txt`.
