@@ -15,3 +15,11 @@ exports live in the companion iOS repository under `ios/Branding/Source/` and
 The website maps these files to `assets/flightstead-icon.png` and
 `assets/airfield.webp`. Keep the existing filenames when publishing so every
 header, hero, callout, and footer usage updates together.
+
+## Sharing graphic
+
+- `flightstead-social-de.png` — German 1536 × 1024 marketing graphic for blog
+  posts, email, and social sharing, with the app, published site, and
+  `flightstead.com` URL. Generated using the built-in image tool from the
+  canonical icon and existing product screenshots; its prompt is retained in
+  `flightstead-social-de.prompt.txt`.

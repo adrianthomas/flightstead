@@ -1,0 +1,40 @@
+Tool: built-in image_gen
+Use case: ads-marketing
+Output: flightstead-social-de.png (1536 × 1024 PNG)
+
+Create one finished, publication-ready German marketing graphic for Flightstead,
+a native iPhone app and share extension publishing articles, photos, links,
+books and music to a self-hosted personal website on the user's own domain.
+Landscape 3:2 social/editorial image, polished and legible at feed size.
+
+References:
+1. branding/flightstead-icon.png: canonical yellow aircraft on pool blue;
+   use as a small brand mark and preserve identity.
+2. flightstead-marketing/dist/assets/screenshots/new-post.webp: use the real
+   New post UI region as a front-facing iPhone mockup; omit poster surroundings.
+3. flightstead-marketing/dist/assets/screenshots/published-site.webp: use the
+   real desktop website region as a browser window; omit poster surroundings.
+Preserve recognizable product UI, editorial typography, artwork and photography.
+
+Composition: left approximately 46% branding, large headline, compact explanation
+and prominent URL. Right approximately 54% a browser showing the published site,
+with an iPhone showing the New post screen in front. Communicate publishing from
+the phone to a site the owner controls. Restrained device shadows; generous safe
+margins; aligned major elements; no cropped devices or URL.
+
+Art direction: mature, optimistic, independent software. Warm paper #F7F8F5 and
+coastal tint #D9EEF5 background; ink #203D4B headline; pool blue #3FA6C4 accents;
+trainer yellow #F5C252 short rule. Rounded sans-serif typography and a small
+monospaced feature line. Aviation identity comes from the canonical icon.
+
+Exact visible marketing text:
+Flightstead
+Dein iPhone. Deine Website.
+Eigene Domain. Selbst gehostet.
+Artikel · Fotos · Links · Bücher · Musik
+flightstead.com
+
+Spell German text correctly. URL exactly flightstead.com, large and wholly
+visible, without https or www. Avoid extra promotional copy, App Store badges,
+prices, invented app features, endorsements, Uberspace logo, watermark, decorative
+planes, scenery, stamps, badges, clouds, arrows, or glossy 3D effects.
