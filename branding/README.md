@@ -26,3 +26,7 @@ header, hero, callout, and footer usage updates together.
 - `flightstead-social-en.png` — matching English 1536 × 1024 sharing graphic,
   localized with the built-in image tool from the German version. Its prompt
   is retained in `flightstead-social-en.prompt.txt`.
+- `flightstead-social-de-uberspace.png` — German 1536 × 1024 sharing graphic
+  with an explicit Uberspace mention and straighter sans-serif typography.
+  Edited with the built-in image tool; its prompt is retained in
+  `flightstead-social-de-uberspace.prompt.txt`.

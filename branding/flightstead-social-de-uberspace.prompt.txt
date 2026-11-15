@@ -1,0 +1,21 @@
+Tool: built-in image_gen
+Source: branding/flightstead-social-de.png
+Output: flightstead-social-de-uberspace.png
+
+Use case: text-localization and precise-object-edit.
+Create a German Uberspace edition of this finished Flightstead marketing graphic. Keep the 1536x1024 landscape layout, brand colors, background, original aircraft app icon, iPhone and browser product images, website content and imagery, restrained shadows, and prominent flightstead.com URL.
+
+Make two clear changes to the marketing typography on the LEFT:
+1. Replace all rounded marketing lettering with a professional, crisp neo-grotesque sans-serif similar to Helvetica Neue or Suisse International: straight terminals, clean geometry, neutral editorial character. Absolutely no soft rounded terminals, bubbly or playful letterforms. Apply this to the Flightstead wordmark, main headline, supporting copy and URL. Headline bold; supporting copy regular/medium. Keep the product screenshots' own native type unchanged.
+2. Add a readable dedicated line "Läuft auf Uberspace." underneath "Eigene Domain. Selbst gehostet." and above the small content list. Make this new Uberspace line visually prominent enough to notice immediately, in medium-weight petrol/ink type; no logo, seal or badge. Adjust the spacing of the small content list slightly lower if needed, preserving generous breathing room.
+
+Exact visible marketing copy:
+"Flightstead"
+"Dein iPhone."
+"Deine Website."
+"Eigene Domain. Selbst gehostet."
+"Läuft auf Uberspace."
+"ARTIKEL · FOTOS · LINKS · BÜCHER · MUSIK"
+"flightstead.com"
+
+Keep the two headline lines separate and large. Ensure every text block fits in the left column without touching the phone. URL must remain exactly flightstead.com, large and wholly visible. Keep the colored URL panel but reduce its corner radius substantially to complement the straighter typography. Retain the original app icon's rounded shape and native device shapes. Clean publication-ready final PNG, excellent typography and legibility. No additional marketing text, invented features, endorsement claims, Uberspace logo, watermark, or changes to product screenshots.
