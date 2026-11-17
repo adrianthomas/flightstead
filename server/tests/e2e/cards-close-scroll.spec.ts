@@ -1658,7 +1658,9 @@ test("Think supports keyboard navigation, browser Back, and 200% text at 320px",
 });
 
 test("Marquee opens on All, follows the remote-style keyboard model, and works without script", async ({ browser }) => {
-  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "marquee" }, "PATCH");
+  // Earlier identity tests change the shared site's title. Establish the
+  // title this navigation test asserts instead of depending on suite order.
+  await api(apiBaseURL, ownerToken, "/api/v1/sites", { theme: "marquee", title: "E2E Cards Site" }, "PATCH");
   try {
     const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
     const page = await context.newPage();

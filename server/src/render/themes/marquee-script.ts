@@ -150,6 +150,16 @@ export const marqueeScript = `
     return true;
   }
 
+  function openRow(row) {
+    // Quick Posts contain authored links, so their row is an article rather
+    // than a blanket anchor. Remote-style navigation opens its permalink.
+    var link = row.tagName === 'A' ? row : row.querySelector('[data-fr-row-link]');
+    if (!link) return false;
+    useKeyboard(true);
+    link.click();
+    return true;
+  }
+
   document.addEventListener('keydown', function (e) {
     if (e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey || typing(e.target)) return;
     var key = e.key;
@@ -162,8 +172,8 @@ export const marqueeScript = `
       useKeyboard(true);
       rows[next].focus();
       handled = true;
-    } else if (rows.length && (key === 'ArrowRight' || (key === 'Enter' && document.activeElement === document.body))) {
-      if (active) { useKeyboard(true); active.click(); handled = true; }
+    } else if (rows.length && (key === 'ArrowRight' || (key === 'Enter' && (document.activeElement === document.body || (document.activeElement === active && active && active.tagName !== 'A'))))) {
+      if (active) handled = openRow(active);
     } else if (!rows.length && view === 'detail' && key === 'ArrowRight') {
       useKeyboard(true);
       handled = press('[data-fr-next]');

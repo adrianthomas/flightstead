@@ -37,6 +37,7 @@ import { bookRetailerLinksFor } from "../lib/book-links.js";
 import { musicLinksFor } from "../lib/music-links.js";
 import { StreamItem } from "./themes/stream.js";
 import { BackLink } from "./templates/BackLink.js";
+import { isQuickPost, quickPostTitle } from "./quick-post.js";
 import {
   FR_SECTION_PATH,
   MarqueeDetail,
@@ -105,6 +106,7 @@ async function photoExif(object: ContentObject): Promise<AssetExif | undefined> 
 }
 
 async function articleImageUrl(object: ContentObject): Promise<string | undefined> {
+  if (isQuickPost(object)) return undefined;
   const metadata = object.metadata as ArticleMetadata;
   return assetImageUrl(metadata.coverAssetId);
 }
@@ -134,7 +136,7 @@ async function marqueeItems(objects: ContentObject[]): Promise<FrItem[]> {
   const assetIds = new Set<string>();
   for (const object of objects) {
     if (object.type === "photo") assetIds.add((object.metadata as PhotoMetadata).assetId);
-    else if (object.type === "article") {
+    else if (object.type === "article" && !isQuickPost(object)) {
       const id = (object.metadata as ArticleMetadata).coverAssetId;
       if (id) assetIds.add(id);
     } else if (object.type === "link") {
@@ -154,6 +156,7 @@ async function marqueeItems(objects: ContentObject[]): Promise<FrItem[]> {
         break;
       }
       case "article": {
+        if (isQuickPost(object)) break;
         const metadata = object.metadata as ArticleMetadata;
         const asset = metadata.coverAssetId ? byId.get(metadata.coverAssetId) : undefined;
         if (asset) thumb = assetThumb(asset, metadata.coverAltText);
@@ -199,7 +202,7 @@ export function renderMarqueeMenu(site: Site, availablePaths: string[] | undefin
 async function renderStreamItem(object: ContentObject, locale: string, detail = false, eager = false): Promise<React.ReactNode> {
   const assetId = object.type === "photo"
     ? (object.metadata as PhotoMetadata).assetId
-    : object.type === "article" ? (object.metadata as ArticleMetadata).coverAssetId
+    : object.type === "article" && !isQuickPost(object) ? (object.metadata as ArticleMetadata).coverAssetId
     : object.type === "link" ? (object.metadata as LinkMetadata).previewAssetId : undefined;
   const [asset] = assetId ? await db.select().from(assets).where(eq(assets.id, assetId)).limit(1) : [];
   const variants = asset?.variants as Record<string, string> | undefined;
@@ -238,7 +241,7 @@ async function renderCard(object: ContentObject, locale: string, theme: Site["th
     case "music":
       return React.createElement(MusicCard, { object, locale, theme });
     case "article": {
-      const image = await assetImage((object.metadata as ArticleMetadata).coverAssetId);
+      const image = isQuickPost(object) ? undefined : await assetImage((object.metadata as ArticleMetadata).coverAssetId);
       return React.createElement(ArticleCard, {
         object,
         locale,
@@ -365,6 +368,10 @@ export async function renderList(
           ? React.createElement("div", { className: "think-feed" }, ...cards.map((card, index) => {
               const object = objects[index];
               const href = `/${PATH_PREFIX[object.type]}/${object.slug}`;
+              if (isQuickPost(object)) return React.createElement("div", { className: "think-entry", "data-type": object.type, key: object.id },
+                React.createElement("p", { className: "think-entry-label" }, t(site.locale, "typeQuickPost")),
+                React.createElement("div", { className: "think-entry-content" }, card),
+              );
               return React.createElement("div", { className: "think-entry", "data-type": object.type, key: object.id },
                 React.createElement("p", { className: "think-entry-label" }, t(site.locale, PATH_PREFIX[object.type] as MessageKey)),
                 React.createElement("div", { className: "think-entry-content" }, card),
@@ -382,7 +389,7 @@ export async function renderList(
                 React.createElement(
                   "div",
                   { className: "washi-feed-item", key: objects[index].id },
-                  React.createElement("a", {
+                  isQuickPost(objects[index]) ? null : React.createElement("a", {
                     className: "washi-card-permalink",
                     href: `/${PATH_PREFIX[objects[index].type]}/${objects[index].slug}`,
                     "aria-label": `${t(site.locale, "readMore")}: ${objects[index].title ?? feedContentSummary(objects[index])}`,
@@ -456,10 +463,10 @@ export async function renderObjectPage(
   const detail = site.theme === "marquee"
     ? await renderMarqueeDetail(site, object, marqueeNav)
     : await renderDetail(object, site.locale, site.theme);
-  const detailTitle = object.title ?? (feedContentSummary(object) || undefined);
+  const detailTitle = isQuickPost(object) ? quickPostTitle(object.body) || t(site.locale, "typeQuickPost") : object.title ?? (feedContentSummary(object) || undefined);
   const metadataRecord = object.metadata as Record<string, unknown>;
   const description =
-    (typeof metadataRecord.excerpt === "string" ? metadataRecord.excerpt : undefined) ??
+    (isQuickPost(object) ? undefined : typeof metadataRecord.excerpt === "string" ? metadataRecord.excerpt : undefined) ??
     (typeof metadataRecord.caption === "string" ? stripBasicFormatting(metadataRecord.caption) : undefined) ??
     (object.body ? truncateSummary(stripBasicFormatting(object.body), 200) : undefined);
   const imageUrl =
@@ -627,7 +634,7 @@ function feedContentSummary(object: ContentObject): string {
     case "thought":
       return truncateSummary(stripBasicFormatting(object.body ?? ""));
     case "article":
-      return object.title ?? truncateSummary(stripBasicFormatting(object.body ?? ""));
+      return isQuickPost(object) ? quickPostTitle(object.body) : object.title ?? truncateSummary(stripBasicFormatting(object.body ?? ""));
     case "link":
       return object.title ?? truncateSummary(stripBasicFormatting(object.body ?? ""));
     case "book":
@@ -653,7 +660,7 @@ function feedContentSummary(object: ContentObject): string {
 // natural title lives in metadata, not object.title) can always tell what
 // kind of post it is and what it's about from the title alone.
 export function feedTitle(object: ContentObject, locale: string): string {
-  const typeLabel = t(locale, TYPE_LABEL_KEY[object.type]);
+  const typeLabel = t(locale, isQuickPost(object) ? "typeQuickPost" : TYPE_LABEL_KEY[object.type]);
   const summary = feedContentSummary(object);
   return summary ? `${typeLabel}: ${summary}` : typeLabel;
 }
@@ -696,6 +703,7 @@ export async function feedItemContent(object: ContentObject, locale: string): Pr
       return formatRichText(object.body ?? "");
     case "article": {
       const metadata = object.metadata as ArticleMetadata;
+      if (isQuickPost(object)) return formatRichText(object.body ?? "");
       const cover = await articleImageUrl(object);
       const image = cover ? `<p><img src="${escapeXml(cover)}" alt="${escapeXml(metadata.coverAltText ?? "")}" /></p>` : "";
       const excerpt = metadata.excerpt ? `<p><em>${escapeXml(metadata.excerpt)}</em></p>` : "";

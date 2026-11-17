@@ -96,9 +96,9 @@ export function CabinetFeedItem(props: CabinetFeedItemProps) {
   );
 }
 
-export function CabinetThoughtFeedItem(props: CabinetFeedItemProps & { detailLabel: string }) {
+export function CabinetThoughtFeedItem(props: CabinetFeedItemProps & { detailLabel: string; quickPost?: boolean; truncated?: boolean }) {
   return (
-    <div className="cabinet-item cabinet-item--thought" data-cabinet-type="thought">
+    <div className={`cabinet-item cabinet-item--thought${props.quickPost ? " quick-post-card" : ""}`} data-cabinet-type={props.quickPost ? "article" : "thought"} data-quick-post={props.quickPost || undefined} data-quick-post-truncated={props.quickPost && props.truncated || undefined}>
       <CabinetRail dateLabel={props.dateLabel} />
       <CabinetArtifact
         {...props}
@@ -591,13 +591,18 @@ export const cabinetStyles = `
   .cabinet-artifact--thought .cabinet-artifact-copy { padding-left: 0; padding-right: clamp(1rem, 4vw, 4rem); }
   .cabinet-artifact--thought .cabinet-kind { margin-bottom: 1.6rem; }
   .cabinet-thought-permalink { position: absolute; inset: 0; z-index: 3; }
+  .cabinet-item--thought[data-quick-post="true"] .cabinet-artifact-copy { z-index: 4; }
   .cabinet-thought-body a { position: relative; z-index: 4; }
+  .cabinet-item--thought .quick-post-read-more { position: relative; z-index: 4; }
   .cabinet-artifact--thought .cabinet-title,
   .cabinet-thought-body {
     max-width: 28ch; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     font-size: clamp(1.5rem, 3.15vw, 3.1rem); font-weight: 650; line-height: 1.1; letter-spacing: -0.042em;
   }
   .cabinet-thought-body { max-width: 32ch; }
+  .cabinet-item--thought[data-quick-post="true"] .cabinet-thought-body {
+    max-width: 65ch; font-size: 1.05rem; font-weight: 400; line-height: 1.6; letter-spacing: normal;
+  }
   .cabinet-thought-body p { margin: 0 0 0.7em; }
   .cabinet-thought-body p:last-child { margin-bottom: 0; }
   .cabinet-artifact--thought::after {

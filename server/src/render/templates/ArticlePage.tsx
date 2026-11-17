@@ -8,6 +8,8 @@ import { CabinetDetailHeader, CabinetFeedItem } from "../themes/cabinet.js";
 import { formatRichText, stripBasicFormatting } from "../format.js";
 import { CopyLinkButton } from "./CopyButton.js";
 import { BackLink } from "./BackLink.js";
+import { QuickPostCard, QuickPostPage } from "./QuickPost.js";
+import { isQuickPost } from "../quick-post.js";
 
 function articleExcerpt(object: ContentObject, metadata: ArticleMetadata): string | undefined {
   const excerpt = metadata.excerpt?.trim();
@@ -35,6 +37,7 @@ export function ArticleCard({
   imageHeight?: number;
 }) {
   const metadata = object.metadata as ArticleMetadata;
+  if (isQuickPost(object)) return <QuickPostCard object={object} locale={locale} theme={theme} />;
   const excerpt = articleExcerpt(object, metadata);
   const coverAltText = metadata.coverAltText ?? "";
 
@@ -139,6 +142,9 @@ export function ArticlePage({
   backLabel?: string;
 }) {
   const metadata = object.metadata as ArticleMetadata;
+  if (isQuickPost(object)) {
+    return <QuickPostPage object={object} locale={locale} theme={theme} backHref={backHref} backLabel={backLabel} />;
+  }
   const bodyHtml = formatRichText(object.body ?? "");
   const metadataExcerpt = metadata.excerpt?.trim();
   const coverAltText = metadata.coverAltText ?? "";

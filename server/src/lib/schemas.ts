@@ -52,6 +52,7 @@ export const bookMetadataSchema = z.object({
 });
 
 export const articleMetadataSchema = z.object({
+  quickPost: z.boolean().optional(),
   coverAssetId: z.string().uuid().optional(),
   coverAltText: z.string().optional(),
   excerpt: z.string().optional(),
@@ -120,5 +121,8 @@ export const updateObjectSchema = z.object({
   title: z.string().max(300).optional(),
   body: z.string().optional(),
   status: z.enum(["draft", "published"]).optional(),
-  metadata: z.record(z.string(), z.unknown()).optional(),
+  metadata: z.record(z.string(), z.unknown()).refine(
+    (metadata) => metadata.quickPost === undefined || typeof metadata.quickPost === "boolean",
+    { message: "quickPost must be a boolean.", path: ["quickPost"] },
+  ).optional(),
 });

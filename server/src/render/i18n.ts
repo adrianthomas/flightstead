@@ -28,6 +28,7 @@ export type MessageKey =
   | "quoteCopied"
   | "typeThought"
   | "typeArticle"
+  | "typeQuickPost"
   | "typeLink"
   | "typeBook"
   | "typeMusic"
@@ -92,6 +93,7 @@ const MESSAGES: Record<string, Messages> = {
     quoteCopied: "Quote copied",
     typeThought: "Post",
     typeArticle: "Article",
+    typeQuickPost: "Quick Post",
     typeLink: "Link",
     typeBook: "Book",
     typeMusic: "Music",
@@ -153,6 +155,7 @@ const MESSAGES: Record<string, Messages> = {
     quoteCopied: "Zitat kopiert",
     typeThought: "Beitrag",
     typeArticle: "Artikel",
+    typeQuickPost: "Kurzbeitrag",
     typeLink: "Link",
     typeBook: "Buch",
     typeMusic: "Musik",
@@ -214,6 +217,7 @@ const MESSAGES: Record<string, Messages> = {
     quoteCopied: "Citation copiée",
     typeThought: "Billet",
     typeArticle: "Article",
+    typeQuickPost: "Note",
     typeLink: "Lien",
     typeBook: "Livre",
     typeMusic: "Musique",
@@ -275,6 +279,7 @@ const MESSAGES: Record<string, Messages> = {
     quoteCopied: "Cita copiada",
     typeThought: "Publicación",
     typeArticle: "Artículo",
+    typeQuickPost: "Publicación breve",
     typeLink: "Enlace",
     typeBook: "Libro",
     typeMusic: "Música",
@@ -336,6 +341,7 @@ const MESSAGES: Record<string, Messages> = {
     quoteCopied: "引用をコピーしました",
     typeThought: "投稿",
     typeArticle: "記事",
+    typeQuickPost: "ひとこと投稿",
     typeLink: "リンク",
     typeBook: "本",
     typeMusic: "音楽",

@@ -20,6 +20,7 @@ import {
   type QuoteMetadata,
 } from "../templates/types.js";
 import { formatExif } from "../templates/PhotoPost.js";
+import { isQuickPost, quickPostPreview, quickPostTitle } from "../quick-post.js";
 
 const TYPE_LABEL: Record<ContentObject["type"], MessageKey> = {
   thought: "typeThought",
@@ -125,6 +126,15 @@ function StreamContent({ object, locale, imageUrl, imageWidth, imageHeight, exif
       return <RichBody text={object.body} rich className="stream-thought" />;
     case "article": {
       const metadata = object.metadata as ArticleMetadata;
+      if (isQuickPost(object)) {
+        const preview = quickPostPreview(object.body ?? "");
+        return (
+          <>
+            <div className="stream-body body-content stream-quick-post-body" dangerouslySetInnerHTML={{ __html: detail ? formatRichText(object.body ?? "") : preview.html }} />
+            {!detail && preview.truncated ? <a className="stream-action quick-post-read-more" href={`/articles/${object.slug}`}>{t(locale, "readMore")} <span aria-hidden="true">→</span></a> : null}
+          </>
+        );
+      }
       return (
         <>
           <Heading className="stream-entry-title">{object.title || t(locale, "typeArticle")}</Heading>
@@ -218,21 +228,23 @@ function StreamContent({ object, locale, imageUrl, imageWidth, imageHeight, exif
 
 export function StreamItem(props: StreamItemProps) {
   const { object, locale, href, detail = false } = props;
-  const label = t(locale, TYPE_LABEL[object.type]);
+  const quickPreview = object.type === "article" && isQuickPost(object) ? quickPostPreview(object.body ?? "") : undefined;
+  const label = t(locale, object.type === "article" && isQuickPost(object) ? "typeQuickPost" : TYPE_LABEL[object.type]);
   const date = formatDate(object.publishedAt, locale);
-  const title = label;
+  const title = object.type === "article" && isQuickPost(object) ? quickPostTitle(object.body ?? "") || label : label;
+  const permalinkTitle = isQuickPost(object) ? title : object.title || label;
   return (
-    <article className={`stream-item stream-item--${object.type}${detail ? " stream-item--detail" : ""}`}>
+    <article className={`stream-item stream-item--${object.type}${detail ? " stream-item--detail" : ""}`} data-quick-post={quickPreview ? true : undefined} data-quick-post-truncated={!detail && quickPreview?.truncated || undefined}>
       <aside className="stream-rail" aria-label={`${label}${date ? ` · ${date}` : ""}`}>
         <span className="stream-type">{label}</span>
         {date ? <time className="stream-date" dateTime={object.publishedAt?.toISOString()}>{date}</time> : null}
-        <a className="stream-permalink" href={href} aria-label={`${t(locale, "permalink")}: ${object.title || label}${date ? ` · ${date}` : ""}`}>
+        <a className="stream-permalink" href={href} aria-label={`${t(locale, "permalink")}: ${permalinkTitle}${date ? ` · ${date}` : ""}`}>
           <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 0 0 7 .1l3-3a5 5 0 0 0-7-7l-1.7 1.7M14 11a5 5 0 0 0-7-.1l-3 3a5 5 0 0 0 7 7l1.7-1.7" /></svg>
           <span className="stream-permalink-label">{t(locale, "permalink")}</span>
         </a>
       </aside>
       <div className="stream-entry">
-        {object.type === "thought" ? (detail ? <h1 className="stream-sr-only">{title}</h1> : <h2 className="stream-sr-only">{title}</h2>) : null}
+        {object.type === "thought" ? (detail ? <h1 className="stream-sr-only">{title}</h1> : <h2 className="stream-sr-only">{title}</h2>) : object.type === "article" && isQuickPost(object) ? (detail ? <h1 className="stream-sr-only">{quickPostTitle(object.body ?? "") || t(locale, "typeQuickPost")}</h1> : <h2 className="stream-sr-only">{quickPostTitle(object.body ?? "") || t(locale, "typeQuickPost")}</h2>) : null}
         <StreamContent {...props} />
       </div>
     </article>

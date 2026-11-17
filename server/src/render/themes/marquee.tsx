@@ -13,6 +13,7 @@ import { musicLinkLabel } from "../templates/MusicCard.js";
 import { formatExif } from "../templates/PhotoPost.js";
 import type { ArticleMetadata, BookMetadata, ContentObject, LinkMetadata, MusicMetadata, PhotoMetadata, QuoteMetadata, Site } from "../templates/types.js";
 import { marqueeStyles } from "./marquee-styles.js";
+import { isQuickPost, quickPostPreview, quickPostTitle } from "../quick-post.js";
 
 export { marqueeStyles };
 
@@ -427,6 +428,23 @@ export function MarqueeList({
               const byline = marqueeByline(object, site);
               const date = frDate(object.publishedAt, site.locale);
               const heading = marqueeTitle(object, site.locale);
+              if (object.type === "article" && isQuickPost(object)) {
+                const preview = quickPostPreview(object.body ?? "");
+                const href = `${item.href}${marqueeFromQuery(kind, object.type)}`;
+                return (
+                  <li key={object.id}>
+                    <article className="fr-row fr-row--quick-post" id={`r-${object.slug}`} tabIndex={-1} data-kind={object.type} data-hl={index === 0 ? "true" : undefined} data-quick-post data-quick-post-truncated={preview.truncated || undefined}>
+                      <h2 className="fr-sr">{t(site.locale, "typeQuickPost")}</h2>
+                      <span hidden><Tile kind={object.type} /></span>
+                      <div className="fr-quick-post-body body-content" dangerouslySetInnerHTML={{ __html: preview.html }} />
+                      <div className="fr-quick-post-meta">
+                        <span className="fr-row-meta"><a className="quick-post-permalink" data-fr-row-link href={href} aria-label={`${t(site.locale, "permalink")}: ${t(site.locale, "typeQuickPost")} · ${date}`}><time className="fr-row-meta-date" dateTime={isoDate(object.publishedAt)}>{date}</time></a></span>
+                        {preview.truncated ? <a className="fr-btn fr-quick-post-more quick-post-read-more" href={href}>{t(site.locale, "readMore")} <Chevron direction="right" /></a> : null}
+                      </div>
+                    </article>
+                  </li>
+                );
+              }
               return (
                 <li key={object.id}>
                   <a
@@ -573,6 +591,13 @@ function MediaDetail({ site, item, nav }: { site: Site; item: FrItem; nav: FrNav
   switch (object.type) {
     case "article": {
       const metadata = object.metadata as ArticleMetadata;
+      if (isQuickPost(object)) {
+        heading = quickPostTitle(object.body ?? "") || t(locale, "typeQuickPost");
+        lead = "";
+        bodyHtml = formatRichText(object.body ?? "");
+        alt = "";
+        break;
+      }
       lead = metadata.excerpt ?? "";
       bodyHtml = formatRichText(object.body ?? "");
       alt = metadata.coverAltText ?? "";
@@ -617,17 +642,18 @@ function MediaDetail({ site, item, nav }: { site: Site; item: FrItem; nav: FrNav
     }
   }
 
+  const quick = object.type === "article" && isQuickPost(object);
   return (
     <div className="fr-layout fr-layout--detail" data-fr-view="detail" data-kind={object.type}>
-      <div className="fr-hero-col"><Hero kind={object.type} thumb={item.thumb} alt={alt} eager /></div>
+      {quick ? null : <div className="fr-hero-col"><Hero kind={object.type} thumb={item.thumb} alt={alt} eager /></div>}
       <div className="fr-main">
         <div className="fr-detail-nav">
           <BackPill href={nav.listHref} label={nav.label} locale={locale} />
           <Pager nav={nav} locale={locale} />
         </div>
-        <article className="fr-article">
-          <p className="fr-eyebrow"><span className="fr-swatch" data-kind={object.type} aria-hidden="true" />{typeLabel}</p>
-          <h1 className="fr-detail-title">{heading}</h1>
+        <article className="fr-article" data-quick-post={quick || undefined}>
+          {quick ? null : <p className="fr-eyebrow"><span className="fr-swatch" data-kind={object.type} aria-hidden="true" />{typeLabel}</p>}
+          {quick ? <h1 className="fr-sr">{heading}</h1> : <h1 className="fr-detail-title">{heading}</h1>}
           <div className="fr-byline">
             {name ? <span className="fr-byline-name">{name}</span> : null}
             {rating ? <Stars rating={rating} locale={locale} /> : null}

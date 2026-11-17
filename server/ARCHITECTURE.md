@@ -206,6 +206,34 @@ the switch is enabled again. Deleted history is intentionally unrecoverable.
 
 ## Render pipeline
 
+### Article and Quick Post modes
+
+Quick Posts are ordinary `article` rows with additive `metadata.quickPost: true`;
+absence or explicit `false` keeps the existing Article presentation. There is
+no new content enum, migration, listing, or permalink prefix. The companion
+app's Article/Quick Post selector retains the headline and header image for
+switching back. These retained fields, including the excerpt, are omitted from
+public Quick Post rendering, page/social metadata, RSS, and ActivityPub content.
+RSS and federation include the complete rich body, with a body-derived title.
+Existing article URLs remain stable; newly created Quick Post slugs derive
+from the body. Older clients can still decode these rows as articles; a PATCH
+that omits `quickPost` preserves a stored `true`, while explicit `false`
+switches back. Older servers can store the metadata but need this renderer
+update before they display the Quick Post presentation.
+
+`render/quick-post.ts` owns the shared 500-character rule. It counts visible
+Unicode grapheme clusters after the safe rich-text formatter, collapses
+whitespace, and excludes formatting, link destinations, and images. Listings
+show the full body through 500 characters, then a balanced rich-text preview
+ending at a nearby word boundary and a localized Read more permalink. The
+detail page always shows the full body. Date permalinks and authored links
+remain usable without JavaScript. This rule applies across Classic, Washi,
+Cards, Prism, Ledger, Cabinet, Stream, Marquee, Think, and Aqua; Stream's
+ordinary Articles continue to display in full. The implementation and review
+matrix are recorded in [QUICK_POST_THEME_PLAN.md](QUICK_POST_THEME_PLAN.md).
+
+### Shared rendering
+
 For theme and public web design work, read [THEME_GUIDELINES.md](THEME_GUIDELINES.md)
 alongside this implementation map. It defines the shared design and review
 baseline; the theme-specific behavior below remains the implementation reference.
@@ -528,7 +556,9 @@ The browser suite lives in `tests/e2e/` (Playwright, WebKit — matching the
 cards theme's real target browser, not Chromium), run via
 `npm run test:e2e` (`playwright.config.ts` spins up its own throwaway
 SQLite DB and dev server on port 3100, seeded through `bootstrap-owner.ts`
-+ the live API — see the spec file for the pattern). The run never reuses an
++ the live API — see the spec file for the pattern). Specs run with one worker
+because they share a throwaway owner/site and mutate its selected theme.
+The run never reuses an
 existing server on that port, and its ignored throwaway owner-token file lets
 a replacement Playwright worker continue against the same test database after
 a failed test. Stream has unit coverage for complete mixed-content listings,

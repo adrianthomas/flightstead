@@ -53,6 +53,8 @@ export interface PhotoMetadata {
 }
 
 export interface ArticleMetadata {
+  /** Presentation mode only; retained headline/cover are private in this mode. */
+  quickPost?: boolean;
   coverAssetId?: string;
   coverAltText?: string;
   excerpt?: string;

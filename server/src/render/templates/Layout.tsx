@@ -551,6 +551,15 @@ export function Layout({
               .article-detail > h1 { margin: 0 0 0.7rem; font-size: clamp(2.1rem, 7vw, 3.2rem); line-height: 1.03; }
               .article-detail > .meta { margin-bottom: 1.75rem; }
               .body-content { max-width: 65ch; }
+              .quick-post-body { min-width: 0; font-size: 1rem; line-height: 1.65; }
+              .quick-post-body p { margin: 0 0 0.8em; }
+              .quick-post-body p:last-child { margin-bottom: 0; }
+              .quick-post-body img { max-width: 100%; height: auto; }
+              .quick-post-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.25rem 1rem; }
+              .quick-post-permalink { display: inline-flex; align-items: center; min-height: 44px; padding: 0.25rem 0; color: inherit; text-decoration: none; }
+              .quick-post-permalink:hover, .quick-post-permalink:focus-visible { text-decoration: underline; text-underline-offset: 0.16em; }
+              .quick-post-read-more { display: inline-flex; align-items: center; justify-content: center; gap: 0.35rem; min-height: 44px; padding: 0.25rem; color: var(--focus); text-decoration: underline; text-underline-offset: 0.16em; }
+              .quick-post-sr-heading { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
               .about-page { max-width: 65ch; }
               .about-page > h1 { margin: 0 0 2rem; font-size: clamp(2rem, 6vw, 3rem); line-height: 1.05; }
               .body-content p, .about-content p { margin: 0 0 1.15rem; }

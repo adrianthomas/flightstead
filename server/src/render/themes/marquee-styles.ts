@@ -180,6 +180,14 @@ export const marqueeStyles = `
   .fr-rows:has(.fr-row:focus-visible) .fr-row[data-hl="true"]:not(:focus-visible) .fr-chevron { visibility: hidden; }
 
   .fr-row--post { min-height: 62px; padding: 8px 14px 8px 24px; gap: 18px; }
+  .fr-row--quick-post { display: block; padding: 18px 24px; }
+  .fr-row--quick-post:focus-within::before { opacity: 1; }
+  .fr-row--quick-post .fr-row-title { display: block; width: fit-content; max-width: 100%; margin-bottom: 8px; white-space: normal; }
+  .fr-quick-post-body { margin: 0; color: var(--fr-text-secondary); font-size: 17px; line-height: 1.55; }
+  .fr-quick-post-body p { margin: 0 0 .65em; }
+  .fr-quick-post-body p:last-child { margin-bottom: 0; }
+  .fr-quick-post-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px 16px; margin-top: 12px; }
+  .fr-row--quick-post .fr-row-meta-date { display: inline; }
   .fr-row-text { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
   .fr-row-title { font-size: 22px; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .fr-row-meta { font-size: 14px; line-height: 1.3; color: var(--fr-text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

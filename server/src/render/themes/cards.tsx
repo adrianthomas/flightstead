@@ -600,6 +600,8 @@ export const cardsStyles = `
      source-order specificity ties. */
   .cards-item.cards-item--suppress-focus-ring:focus-visible { outline: none; }
 
+  .cards-item.quick-post-card { display: block; padding: 1.25rem; overflow: visible; }
+
   .cards-hero {
     position: relative; aspect-ratio: 4 / 3; background-size: cover; background-position: center;
     flex: 1 1 auto;

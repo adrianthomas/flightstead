@@ -25,6 +25,9 @@ const serverEnv = {
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
+  // Specs share the throwaway owner/site and change its selected theme.
+  // Serial files keep those mutations from racing across browser workers.
+  workers: 1,
   reporter: [["list"]],
   use: {
     baseURL: `http://${BASE_DOMAIN}`,

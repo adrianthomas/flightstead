@@ -14,6 +14,7 @@ import { deliverCreateActivity, deliverDeleteActivity } from "../activitypub/fed
 import { materializeAppleMusicMetadata } from "../lib/apple-music.js";
 import { materializeBookCoverMetadata, mergeBookCoverMetadata } from "../lib/book-cover.js";
 import { materializeLinkPreviewMetadata } from "../lib/link-preview.js";
+import { isQuickPost, quickPostTitle } from "../render/quick-post.js";
 
 // Structured image references live in metadata, while inline Article and
 // Thought images are stored only as rendered /files/... URLs in the body.
@@ -160,6 +161,7 @@ async function uniqueSlug(siteId: string, base: string): Promise<string> {
 // giving every photo post on a site the same meaningless "/photos/photo-7"
 // permalink shape instead of one reflecting what the photo actually is.
 function slugSourceText(body: z.infer<typeof createObjectSchema>): string {
+  if (isQuickPost(body)) return quickPostTitle(body.body) || body.type;
   if (body.title) return body.title;
   if (body.type === "photo") {
     const caption = (body.metadata as Record<string, unknown>).caption;
@@ -190,7 +192,7 @@ export async function objectRoutes(app: FastifyInstance) {
     }
     await assertOwnedAssets(site.id, body.metadata);
     const slugSource = slugSourceText(body);
-    const baseSlug = body.title ? slugify(slugSource) : slugFromBody(slugSource);
+    const baseSlug = body.title && !isQuickPost(body) ? slugify(slugSource) : slugFromBody(slugSource);
     const slug = await uniqueSlug(site.id, baseSlug || body.type);
 
     const [object] = await db
@@ -317,6 +319,13 @@ export async function objectRoutes(app: FastifyInstance) {
       .where(and(eq(contentObjects.id, id), eq(contentObjects.siteId, site.id)))
       .limit(1);
     if (!existing) return reply.code(404).send({ error: { code: "not_found", message: "Object not found." } });
+
+    // Older editors replace article metadata without knowing this additive
+    // field. Only an explicit false switches a Quick Post back to Article.
+    if (existing.type === "article" && body.metadata !== undefined &&
+        body.metadata.quickPost === undefined && isQuickPost(existing)) {
+      body = { ...body, metadata: { ...body.metadata, quickPost: true } };
+    }
 
     if (existing.type === "book" && body.metadata !== undefined) {
       const merged = mergeBookCoverMetadata(existing.metadata, body.metadata);
